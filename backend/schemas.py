@@ -4,3 +4,6 @@ class InputSchema(BaseModel):
     file_name:str
     content_type:Optional[str]="pdf"
 
+class ExtractSchema(BaseModel):
+    file_type:Optional[str]="pdf"
+    file_key:str

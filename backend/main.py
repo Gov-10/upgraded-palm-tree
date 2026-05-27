@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import os, boto3
 from dotenv import load_dotenv
-from schemas import InputSchema
+from schemas import InputSchema,ExtractSchema
 load_dotenv()
 from utils.extractor import extract, extract_ocr, extract_csv, hash_text
 import uuid

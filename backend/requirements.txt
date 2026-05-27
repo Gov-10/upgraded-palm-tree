@@ -4,3 +4,6 @@ langchain-groq
 langgraph
 boto3
 python-dotenv
+pymupdf
+pillow
+pytesseract

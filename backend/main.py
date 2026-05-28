@@ -3,6 +3,7 @@ import os, boto3
 from dotenv import load_dotenv
 from schemas import InputSchema,ExtractSchema
 load_dotenv()
+
 from utils.extractor import extract, extract_ocr, extract_csv, hash_text
 import uuid
 s3= boto3.client('s3', region_name=os.getenv("S3_REGION"), aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
@@ -22,7 +23,8 @@ def upl(payload: InputSchema):
         }, 
         ExpiresIn = 600
     )
-    return {"upload_url": pres, "file_key": key}
+    status="uploaded"
+    return {"upload_url": pres, "file_key": key, "status": status}
 
 @app.post("/extract")
 def extr(payload: ExtractSchema):

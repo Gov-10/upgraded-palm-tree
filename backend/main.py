@@ -3,7 +3,7 @@ import os, boto3
 from dotenv import load_dotenv
 from schemas import InputSchema,ExtractSchema
 load_dotenv()
-
+from utils.agent import lang_app
 from utils.extractor import extract, extract_ocr, extract_csv, hash_text
 import uuid
 s3= boto3.client('s3', region_name=os.getenv("S3_REGION"), aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
@@ -29,11 +29,17 @@ def upl(payload: InputSchema):
 @app.post("/extract")
 def extr(payload: ExtractSchema):
     file_key= payload.file_key
-    response= s3.get_object(Bucket=bucket, key=file_key)
+    response= s3.get_object(Bucket=bucket, Key=file_key)
     file_bytes=response["Body"].read()
-    text= extract(response)
+    text= extract(file_bytes)
     if len(text.strip())< 100:
-        text = extract_ocr(text)
+        text = extract_ocr(file_bytes)
+    result = lang_app.invoke(
+        {
+            "content": text
+        }
+    )
+
     #TODO: CSV Parsing code
     text_hash=hash_text(text)
-    return {"hashed_text": text_hash}
+    return {"csv_file": result["fin"], "normal":result["normal"], "key": key}

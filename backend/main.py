@@ -17,7 +17,7 @@ def upl(payload: InputSchema):
     pres=s3.generate_presigned_url(
         ClientMethod = 'put_object', 
         Params = {
-            'Bucket': bucket_name, 
+            'Bucket': bucket, 
             "Key" : key, 
             "ContentType": payload.content_type
         }, 
@@ -28,18 +28,20 @@ def upl(payload: InputSchema):
 
 @app.post("/extract")
 def extr(payload: ExtractSchema):
-    file_key= payload.file_key
-    response= s3.get_object(Bucket=bucket, Key=file_key)
-    file_bytes=response["Body"].read()
-    text= extract(file_bytes)
-    if len(text.strip())< 100:
-        text = extract_ocr(file_bytes)
-    result = lang_app.invoke(
-        {
-            "content": text
-        }
-    )
+    combined_text= ""
+    for file_key in payload.file_keys:
+        response = s3.get_object(
+            Bucket=bucket,
+            Key=file_key
+        )
+        file_bytes = response["Body"].read()
+        text = extract(file_bytes)
+        if len(text.strip()) < 100:
+            text = extract_ocr(file_bytes)
+        combined_text += "\n\n" + text
+    result = lang_app.invoke({"content": combined_text})
+    text_hash = hash_text(combined_text) #isko caching mein use karenge
+    return {"csv_file": result["fin"], "normal": result["normal"]}
 
-    #TODO: CSV Parsing code
-    text_hash=hash_text(text)
-    return {"csv_file": result["fin"], "normal":result["normal"], "key": key}
+
+

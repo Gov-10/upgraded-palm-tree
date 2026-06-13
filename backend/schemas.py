@@ -1,9 +1,9 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 class InputSchema(BaseModel):
-    file_name:str
-    content_type:Optional[str]="pdf"
+    file_name:List[str]
+    content_type:List[Optional[str]]="pdf"
 
 class ExtractSchema(BaseModel):
-    file_type:Optional[str]="pdf"
-    file_key:str
+    file_type:List[Optional[str]]="pdf"
+    file_keys:List[str]

@@ -8,3 +8,5 @@ pandas
 pymupdf
 pillow
 pytesseract
+redis
+argon2-cffi

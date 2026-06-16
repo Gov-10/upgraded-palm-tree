@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from utils.otp_gen import otp_generator
 from utils.send_email import email_send
 from dotenv import load_dotenv
-from schemas import InputSchema,ExtractSchema
+from schemas import InputSchema,ExtractSchema, CreateSchema, EmailSchema, LoginSchema
 from database import Users, sessionLocal, SessionTokens
 load_dotenv()
 from utils.agent import lang_app

@@ -7,3 +7,17 @@ class InputSchema(BaseModel):
 class ExtractSchema(BaseModel):
     file_type:List[Optional[str]]="pdf"
     file_keys:List[str]
+
+class CreateSchema(BaseModel):
+    email:str
+    username:str
+    password:str
+
+class EmailSchema(BaseModel):
+    otp:str
+    email: str
+
+class LoginSchema(BaseModel):
+    username:str
+    password: str
+

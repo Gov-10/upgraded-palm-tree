@@ -118,6 +118,7 @@ async function login() {
             console.log('Login successful:', data);
             alert('Login successful!');
             loginForm.reset();
+            window.location.href = "../index.html"
         } else {
             console.error('Login failed:', data);
             alert('Login failed: ' + (data.message || 'Please try again.'));

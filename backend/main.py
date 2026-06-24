@@ -1,12 +1,14 @@
 from fastapi import FastAPI, HTTPException, Depends, Response
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import os, boto3, hashlib
 from datetime import datetime, timedelta
 from utils.otp_gen import otp_generator
 from utils.send_email import email_send
 from dotenv import load_dotenv
-from schemas import InputSchema,ExtractSchema, CreateSchema, EmailSchema, LoginSchema
+from schemas import InputSchema, ExtractSchema, CreateSchema, EmailSchema, LoginSchema
 from database import Users, sessionLocal, SessionTokens
+import jwt
 load_dotenv()
 from utils.agent import lang_app
 from utils.extractor import extract, extract_ocr, extract_csv, hash_text
@@ -18,6 +20,15 @@ s3= boto3.client('s3', region_name=os.getenv("S3_REGION"), aws_access_key_id=os.
 app=FastAPI()
 redis_client=Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"), decode_responses=True)
 bucket=os.getenv("S3_BUCKET_NAME")
+
+origins = ['http://localhost']
+
+app.add_middleware(CORSMiddleware,
+                   allow_origins = origins,
+                   allow_credentials = True,
+                   allow_methods = ['*'],
+                   allow_headers = ['*'])
+
 def get_db():
     db=sessionLocal()
     try:
@@ -70,7 +81,7 @@ def veri(payload: EmailSchema, db:Session=Depends(get_db)):
     return {"message": "email verified. Proceed to login"}
 
 @app.post("/login")
-def logi(payload: LoginSchema, db:Session=Depends(get_db), response: Response):
+def logi(payload: LoginSchema, response: Response, db:Session=Depends(get_db)):
     username, password=payload.username, payload.password
     user=db.query(Users).filter(Users.username==username).first()
     if not user:
@@ -80,7 +91,7 @@ def logi(payload: LoginSchema, db:Session=Depends(get_db), response: Response):
         try:
             ph.verify(passw, password)
             pay= {"iss": "auth-service", "sub": username, "exp": }
-            token=jwt.encode(pay, os.getenv("SECRET"), algorithms=["HS256"])
+            token=jwt.encode(pay, os.getenv("SECRET"), algorithm="HS256")
             response.set_cookie(key="session_token", value=token, httponly=True, secure=True, samesite="lax", max_age=604800)
             db_no=SessionTokens(username=username, token_hash=hashlib.sha256(token.encode()).hexdigest(), expires_at=datetime.utcnow()+timedelta(days=7), revoked=False)
             db.add(db_no)

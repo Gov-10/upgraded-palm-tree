@@ -8,7 +8,7 @@ sender_email = os.getenv("MY_EMAIL")
 app_password = os.getenv("APP_PASSWORD")
 
 def email_send(email, otp):
-    if not sender_email or not app_passsword:
+    if not sender_email or not app_password:
         raise ValueError("creds missing in env")
     if not email:
         raise ValueError("email address missing")

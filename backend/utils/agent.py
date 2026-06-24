@@ -28,11 +28,11 @@ SCHEMA= ""
 def normal_node(state: State):
     prompt = f"""
            You are an invoice extraction system.
-           Convert the invoice text into JSON.Return ONLY valid JSON.
+           Convert the invoice text into JSON. Return ONLY valid JSON.
            Schema:{SCHEMA}
            Invoice Text:{state.content}"""
     resp=llm.invoke(prompt)
-    return {"normal": json.loads(resp.content}
+    return {"normal": json.loads(resp.content)}
 
 
 def final_node(state:State):

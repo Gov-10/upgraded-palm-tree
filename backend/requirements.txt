@@ -10,3 +10,4 @@ pillow
 pytesseract
 redis
 argon2-cffi
+sqlalchemy

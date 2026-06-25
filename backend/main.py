@@ -10,18 +10,24 @@ from schemas import InputSchema, ExtractSchema, CreateSchema, EmailSchema, Login
 from database import Users, sessionLocal, SessionTokens
 import jwt
 load_dotenv()
-from utils.agent import lang_app
+from utils.agent import lang_app, State
 from utils.extractor import extract, extract_ocr, extract_csv, hash_text
 import uuid
 from redis import Redis
 from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 ph = PasswordHasher()
 s3= boto3.client('s3', region_name=os.getenv("S3_REGION"), aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
 app=FastAPI()
-redis_client=Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"), decode_responses=True)
+redis_client=Redis(
+    host=os.getenv("REDIS_HOST", 'comparison-hyperspeedy-canvas-69712.db.redis.io'),
+    port=int(os.getenv("REDIS_PORT", 13818)),
+    password=os.getenv("REDIS_PASSWORD"),
+    decode_responses=True
+)
 bucket=os.getenv("S3_BUCKET_NAME")
 
-origins = ['http://localhost']
+origins = ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://127.0.0.1', '0.0.0.0']
 
 app.add_middleware(CORSMiddleware,
                    allow_origins = origins,
@@ -69,8 +75,10 @@ def veri(payload: EmailSchema, db:Session=Depends(get_db)):
     input_hash=hashlib.sha256(ot.encode()).hexdigest()
     if input_hash != stored:
         raise HTTPException(status_code=401, detail="otp does not match")
-    user=db.query(Users).filter(Users.email==email).first()
-    user.isactive=True
+    user = db.query(Users).filter(Users.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+    user.isactive = True
     try:
         db.commit()
     except Exception as e:
@@ -83,17 +91,24 @@ def veri(payload: EmailSchema, db:Session=Depends(get_db)):
 @app.post("/login")
 def logi(payload: LoginSchema, response: Response, db:Session=Depends(get_db)):
     username, password=payload.username, payload.password
-    user=db.query(Users).filter(Users.username==username).first()
+    user = db.query(Users).filter(Users.username == username).first()
     if not user:
         raise HTTPException(status_code=404, detail="user not found")
-    if user.isactive == True:
-        passw= user.password
+    if user.isactive:
+        passw = user.password
         try:
             ph.verify(passw, password)
-            pay= {"iss": "auth-service", "sub": username, "exp": }
-            token=jwt.encode(pay, os.getenv("SECRET"), algorithm="HS256")
+            secret = os.getenv("SECRET")
+            if not secret:
+                raise HTTPException(status_code=500, detail="JWT secret not configured")
+            pay = {
+                "iss": "auth-service",
+                "sub": username,
+                "exp": datetime.utcnow() + timedelta(days=7)
+            }
+            token = jwt.encode(pay, secret, algorithm="HS256")
             response.set_cookie(key="session_token", value=token, httponly=True, secure=True, samesite="lax", max_age=604800)
-            db_no=SessionTokens(username=username, token_hash=hashlib.sha256(token.encode()).hexdigest(), expires_at=datetime.utcnow()+timedelta(days=7), revoked=False)
+            db_no = SessionTokens(username=username, token_hash=hashlib.sha256(token.encode()).hexdigest(), expires_at=datetime.utcnow()+timedelta(days=7), revoked=False)
             db.add(db_no)
             try:
                 db.commit()
@@ -136,7 +151,7 @@ def extr(payload: ExtractSchema):
         if len(text.strip()) < 100:
             text = extract_ocr(file_bytes)
         combined_text += "\n\n" + text
-    result = lang_app.invoke({"content": combined_text})
+    result = lang_app.invoke(State(content=combined_text))
     text_hash = hash_text(combined_text) #isko caching mein use karenge
     return {"csv_file": result["fin"], "normal": result["normal"]}
 

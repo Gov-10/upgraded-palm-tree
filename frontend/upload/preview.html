@@ -1,0 +1,404 @@
+
+<style>
+body,.page{
+background:#0f172a !important;
+color:#e2e8f0 !important;
+}
+.card{
+background:#111827 !important;
+}
+.card-body,.card-footer,.result-wrap,.progress-wrap{
+background:#111827 !important;
+}
+.stat-card,.file-row,.result-box,.drop-zone{
+background:#1e293b !important;
+color:#e2e8f0 !important;
+border-color:#334155 !important;
+}
+.file-name,.result-title,.card-title,.dz-title{
+color:#f8fafc !important;
+}
+.file-meta,.dz-hint,.card-sub{
+color:#94a3b8 !important;
+}
+.add-btn{
+display:flex !important;
+align-items:center;
+justify-content:center;
+height:48px !important;
+padding:0 18px !important;
+border:none !important;
+border-radius:12px !important;
+background:linear-gradient(135deg,#334155,#475569) !important;
+color:white !important;
+font-weight:600 !important;
+box-shadow:0 8px 20px rgba(0,0,0,.35);
+}
+.add-btn:hover{
+transform:translateY(-2px);
+}
+</style>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--font-sans)}
+.page{min-height:600px;background:var(--color-background-tertiary);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-xl);width:100%;max-width:560px;overflow:hidden}
+.card-header{padding:2rem 2rem 1.5rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.card-header-top{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.logo-mark{width:36px;height:36px;background:#EEEDFE;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo-mark i{font-size:18px;color:#3C3489}
+.card-title{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.card-sub{font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+.card-body{padding:1.75rem 2rem}
+.drop-zone{border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:2.25rem 1rem;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:background 0.15s,border-color 0.15s;position:relative;text-align:center}
+.drop-zone.drag-over{background:var(--color-background-secondary);border-color:#7F77DD}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz-icon{width:48px;height:48px;background:#EEEDFE;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.dz-icon i{font-size:22px;color:#534AB7}
+.dz-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.dz-hint{font-size:12px;color:var(--color-text-tertiary)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:3px 8px;border-radius:20px}
+.pill-purple{background:#EEEDFE;color:#3C3489}
+.pill-green{background:#EAF3DE;color:#27500A}
+.pill-amber{background:#FAEEDA;color:#633806}
+.pill-blue{background:#E6F1FB;color:#0C447C}
+.pill-gray{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.formats{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:2px}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:1.25rem 0}
+.section-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.counter-badge{font-size:11px;font-weight:500;background:#EEEDFE;color:#534AB7;padding:2px 8px;border-radius:20px}
+.counter-badge.at-limit{background:#FAEEDA;color:#633806}
+.file-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.file-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary)}
+.file-icon-wrap{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fi-pdf{background:#E6F1FB} .fi-pdf i{color:#185FA5}
+.fi-img{background:#EAF3DE} .fi-img i{color:#3B6D11}
+.fi-csv{background:#FAEEDA} .fi-csv i{color:#854F0B}
+.fi-doc{background:#EEEDFE} .fi-doc i{color:#534AB7}
+.fi-other{background:var(--color-background-tertiary)} .fi-other i{color:var(--color-text-secondary)}
+.file-info{flex:1;min-width:0}
+.file-name{font-size:13px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-meta{font-size:11px;color:var(--color-text-tertiary);margin-top:1px}
+.file-status-icon{font-size:14px;flex-shrink:0}
+.remove-btn{background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:15px;padding:2px 4px;border-radius:4px;flex-shrink:0;line-height:1;display:flex;align-items:center}
+.remove-btn:hover{color:var(--color-text-danger);background:var(--color-background-danger)}
+.card-footer{padding:1.25rem 2rem 1.75rem;display:flex;align-items:center;gap:10px;border-top:0.5px solid var(--color-border-tertiary)}
+.add-btn{padding:0 16px;height:40px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;position:relative;overflow:hidden}
+.add-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.add-btn:hover{background:var(--color-background-secondary)}
+.extract-btn{flex:1;height:40px;border-radius:var(--border-radius-md);border:none;background:#534AB7;color:#fff;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity 0.15s}
+.extract-btn:disabled{opacity:0.4;cursor:not-allowed}
+.extract-btn:not(:disabled):hover{opacity:0.88}
+.extract-btn i{font-size:15px}
+.warn-bar{margin:0 2rem 1rem;background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:8px 12px;font-size:12px;color:#633806;display:flex;align-items:center;gap:6px}
+.progress-wrap{padding:0 2rem 1.5rem}
+.prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-label{font-size:13px;color:var(--color-text-secondary)}
+.prog-pct{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.prog-track{height:4px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:#534AB7;border-radius:4px;transition:width 0.25s}
+.result-wrap{padding:0 2rem 1.75rem}
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.result-title{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.result-actions{display:flex;gap:6px}
+.icon-btn{background:none;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:5px 10px;font-size:12px;color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;gap:4px}
+.icon-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.result-box{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:1rem;font-size:13px;color:var(--color-text-primary);font-family:var(--font-mono);line-height:1.6;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-word}
+.restart-row{display:flex;justify-content:center;margin-top:12px}
+.restart-btn{background:none;border:none;font-size:12px;color:var(--color-text-tertiary);cursor:pointer;display:flex;align-items:center;gap:4px}
+.restart-btn:hover{color:var(--color-text-primary)}
+.empty-state{text-align:center;padding:1rem 0}
+.empty-state i{font-size:28px;color:var(--color-text-tertiary);margin-bottom:6px;display:block}
+.empty-state p{font-size:13px;color:var(--color-text-tertiary)}
+
+<!-- GST SaaS Professional Theme Patch -->
+<style>
+.page{
+min-height:100vh!important;
+background:
+radial-gradient(circle at top right, rgba(79,70,229,.15), transparent 30%),
+linear-gradient(135deg,#f8fafc,#eef2ff)!important;
+padding:40px 20px!important;
+}
+.card{
+max-width:1100px!important;
+box-shadow:0 20px 60px rgba(15,23,42,.08)!important;
+border:none!important;
+}
+.card-header{
+background:linear-gradient(135deg,#4f46e5,#7c3aed)!important;
+color:white!important;
+}
+.card-title,.card-sub{color:white!important;}
+.logo-mark{
+background:rgba(255,255,255,.15)!important;
+backdrop-filter:blur(10px);
+}
+.logo-mark i{color:white!important;}
+.drop-zone{
+min-height:220px!important;
+border:2px dashed #6d5efc!important;
+background:white!important;
+}
+.drop-zone:hover{
+transform:translateY(-3px);
+box-shadow:0 12px 30px rgba(83,74,183,.12);
+}
+.file-row{
+box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.extract-btn{
+height:52px!important;
+font-size:15px!important;
+font-weight:700!important;
+background:linear-gradient(135deg,#4f46e5,#7c3aed)!important;
+box-shadow:0 10px 25px rgba(79,70,229,.25);
+}
+.stats-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:16px;
+padding:24px 32px 0;
+}
+.stat-card{
+background:white;
+border-radius:16px;
+padding:18px;
+box-shadow:0 4px 15px rgba(0,0,0,.05);
+}
+.stat-card span{font-size:12px;color:#64748b;}
+.stat-card h3{margin-top:8px;font-size:24px;color:#0f172a;}
+@media(max-width:768px){
+.stats-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+
+<div class="stats-grid">
+<div class="stat-card"><span>Total Documents</span><h3>0</h3></div>
+<div class="stat-card"><span>Invoices</span><h3>0</h3></div>
+<div class="stat-card"><span>Extracted Records</span><h3>0</h3></div>
+<div class="stat-card"><span>GST Amount</span><h3>₹0</h3></div>
+</div>
+
+
+<h2 class="sr-only">Document upload and data extraction</h2>
+
+<div class="page">
+  <div class="card">
+
+    <div class="card-header">
+      <div class="card-header-top">
+        <div class="logo-mark"><i class="ti ti-sparkles" aria-hidden="true"></i></div>
+        <span class="card-title">Extract data</span>
+      </div>
+      <div class="card-sub">Upload up to 20 documents. We'll read and extract structured data from all of them.</div>
+    </div>
+
+    <div class="card-body">
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg,.csv,.doc,.docx,.txt" />
+        <div class="dz-icon"><i class="ti ti-cloud-upload" aria-hidden="true"></i></div>
+        <div class="dz-title">Drop files here or click to browse</div>
+        <div class="dz-hint">Drag multiple files at once, or add one by one</div>
+        <div class="formats">
+          <span class="pill pill-blue"><i class="ti ti-file-type-pdf" style="font-size:11px"></i> PDF</span>
+          <span class="pill pill-green"><i class="ti ti-photo" style="font-size:11px"></i> Image</span>
+          <span class="pill pill-amber"><i class="ti ti-table" style="font-size:11px"></i> CSV</span>
+          <span class="pill pill-purple"><i class="ti ti-file-word" style="font-size:11px"></i> Word</span>
+        </div>
+      </div>
+
+      <div id="list-section" style="display:none">
+        <div class="divider"></div>
+        <div class="section-label">
+          <span>Selected files</span>
+          <span class="counter-badge" id="counter">0 / 20</span>
+        </div>
+        <div class="file-list" id="file-list"></div>
+      </div>
+
+      <div id="empty-hint" style="display:none" class="empty-state" style="margin-top:1rem">
+        <i class="ti ti-inbox" aria-hidden="true"></i>
+        <p>No files selected yet</p>
+      </div>
+    </div>
+
+    <div id="warn-bar" class="warn-bar" style="display:none">
+      <i class="ti ti-alert-triangle" style="font-size:14px" aria-hidden="true"></i>
+      20-file limit reached. Remove a file to add more.
+    </div>
+
+    <div id="progress-wrap" class="progress-wrap" style="display:none">
+      <div class="prog-row">
+        <span class="prog-label" id="prog-label">Uploading…</span>
+        <span class="prog-pct" id="prog-pct">0%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <div id="result-wrap" class="result-wrap" style="display:none">
+      <div class="result-header">
+        <span class="result-title">Extracted data</span>
+        <div class="result-actions">
+          <button class="icon-btn" onclick="copyResult()"><i class="ti ti-copy" style="font-size:12px"></i> Copy</button>
+          <button class="icon-btn" onclick="downloadCSV()"><i class="ti ti-download" style="font-size:12px"></i> CSV</button>
+        </div>
+      </div>
+      <div class="result-box" id="result-box"></div>
+      <div class="restart-row">
+        <button class="restart-btn" onclick="resetAll()"><i class="ti ti-refresh" style="font-size:12px"></i> Start over</button>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <div class="add-btn" id="add-btn" style="display:none">
+        <i class="ti ti-plus" style="font-size:14px" aria-hidden="true"></i> Add more
+        <input type="file" id="add-input" multiple accept=".pdf,.png,.jpg,.jpeg,.csv,.doc,.docx,.txt" />
+      </div>
+      <button class="extract-btn" id="extract-btn" disabled onclick="startExtraction()">
+        <i class="ti ti-wand" style="font-size:15px"></i> Extract data
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const MAX=20,BASE="http://localhost:8000";
+let files=[],csvData="";
+
+function typeOf(n){
+  const e=n.split('.').pop().toLowerCase();
+  if(e==='pdf') return 'pdf';
+  if(['png','jpg','jpeg','webp'].includes(e)) return 'img';
+  if(e==='csv') return 'csv';
+  if(['doc','docx'].includes(e)) return 'doc';
+  return 'other';
+}
+function iconFor(t){
+  return {pdf:'ti-file-type-pdf',img:'ti-photo',csv:'ti-table',doc:'ti-file-word',other:'ti-file'}[t];
+}
+function fmtSize(b){return b<1048576?(b/1024).toFixed(1)+'  KB':(b/1048576).toFixed(1)+' MB';}
+function fmtType(t){return {pdf:'PDF',img:'Image',csv:'CSV',doc:'Word',other:'File'}[t];}
+
+function render(){
+  const list=document.getElementById('file-list');
+  const sec=document.getElementById('list-section');
+  const btn=document.getElementById('extract-btn');
+  const add=document.getElementById('add-btn');
+  const warn=document.getElementById('warn-bar');
+  const ctr=document.getElementById('counter');
+  const dz=document.getElementById('drop-zone');
+
+  ctr.textContent=files.length+' / 20';
+  ctr.className='counter-badge'+(files.length>=MAX?' at-limit':'');
+  warn.style.display=files.length>=MAX?'flex':'none';
+  btn.disabled=files.length===0;
+  add.style.display=files.length>0&&files.length<MAX?'flex':'none';
+  dz.querySelector('input').disabled=files.length>=MAX;
+
+  if(files.length===0){sec.style.display='none';return;}
+  sec.style.display='block';
+  list.innerHTML=files.map((f,i)=>{
+    const t=typeOf(f.name);
+    const cls={pdf:'fi-pdf',img:'fi-img',csv:'fi-csv',doc:'fi-doc',other:'fi-other'}[t];
+    return `<div class="file-row" id="fr-${i}">
+      <div class="file-icon-wrap ${cls}"><i class="ti ${iconFor(t)}" style="font-size:15px" aria-hidden="true"></i></div>
+      <div class="file-info">
+        <div class="file-name" title="${f.name}">${f.name}</div>
+        <div class="file-meta">${fmtType(t)} · ${fmtSize(f.size)}</div>
+      </div>
+      <button class="remove-btn" onclick="removeFile(${i})" aria-label="Remove ${f.name}"><i class="ti ti-x"></i></button>
+    </div>`;
+  }).join('');
+}
+
+function addFiles(fl){
+  const arr=Array.from(fl);
+  arr.slice(0,MAX-files.length).forEach(f=>{
+    if(!files.find(x=>x.name===f.name&&x.size===f.size)) files.push(f);
+  });
+  render();
+}
+function removeFile(i){files.splice(i,1);render();}
+function resetAll(){
+  files=[];csvData='';
+  document.getElementById('progress-wrap').style.display='none';
+  document.getElementById('result-wrap').style.display='none';
+  document.getElementById('extract-btn').disabled=true;
+  render();
+}
+
+document.getElementById('file-input').addEventListener('change',e=>{addFiles(e.target.files);e.target.value='';});
+document.getElementById('add-input').addEventListener('change',e=>{addFiles(e.target.files);e.target.value='';});
+const dz=document.getElementById('drop-zone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');addFiles(e.dataTransfer.files);});
+
+function setProgress(pct,label){
+  document.getElementById('prog-fill').style.width=Math.round(pct)+'%';
+  document.getElementById('prog-pct').textContent=Math.round(pct)+'%';
+  if(label) document.getElementById('prog-label').textContent=label;
+}
+function setRowStatus(i,state){
+  const row=document.getElementById('fr-'+i);
+  if(!row) return;
+  const old=row.querySelector('.file-status-icon');
+  if(old) old.remove();
+  const ic=document.createElement('span');
+  ic.className='file-status-icon';
+  ic.innerHTML=state==='done'
+    ?'<i class="ti ti-circle-check" style="color:var(--color-text-success)"></i>'
+    :state==='err'
+    ?'<i class="ti ti-circle-x" style="color:var(--color-text-danger)"></i>'
+    :'<i class="ti ti-loader" style="color:var(--color-text-tertiary)"></i>';
+  row.querySelector('.remove-btn').replaceWith(ic);
+}
+
+async function startExtraction(){
+  if(!files.length) return;
+  document.getElementById('extract-btn').disabled=true;
+  document.getElementById('progress-wrap').style.display='block';
+  document.getElementById('result-wrap').style.display='none';
+  const keys=[];
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    setProgress((i/files.length)*80,`Uploading file ${i+1} of ${files.length}…`);
+    setRowStatus(i,'loading');
+    try{
+      const r=await fetch(`${BASE}/upload`,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',
+        body:JSON.stringify({file_name:[f.name],content_type:[f.type||'application/octet-stream']})});
+      if(!r.ok) throw new Error();
+      const {upload_url,file_key}=await r.json();
+      await fetch(upload_url,{method:'PUT',headers:{'Content-Type':f.type||'application/octet-stream'},body:f});
+      keys.push(file_key);
+      setRowStatus(i,'done');
+    }catch{setRowStatus(i,'err');}
+  }
+  if(!keys.length){setProgress(100,'Upload failed');document.getElementById('extract-btn').disabled=false;return;}
+  setProgress(88,'Extracting data…');
+  try{
+    const r=await fetch(`${BASE}/extract`,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',
+      body:JSON.stringify({file_keys:keys})});
+    if(!r.ok) throw new Error();
+    const data=await r.json();
+    csvData=data.csv_file||'';
+    setProgress(100,'Done');
+    document.getElementById('result-box').textContent=data.normal||JSON.stringify(data,null,2);
+    document.getElementById('result-wrap').style.display='block';
+  }catch(e){
+    document.getElementById('prog-label').textContent='Extraction failed. Please try again.';
+  }
+  document.getElementById('extract-btn').disabled=false;
+}
+
+function copyResult(){navigator.clipboard.writeText(document.getElementById('result-box').textContent).catch(()=>{});}
+function downloadCSV(){
+  if(!csvData) return;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csvData],{type:'text/csv'}));
+  a.download='extracted.csv';a.click();
+}
+</script>
+

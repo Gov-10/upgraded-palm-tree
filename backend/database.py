@@ -9,7 +9,7 @@ sessionLocal=sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base=declarative_base()
 class Users(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     email=Column(String, unique=True)
     username=Column(String, unique=True)
     password=Column(String)
@@ -22,5 +22,9 @@ class SessionTokens(Base):
     token_hash=Column(String)
     expires_at=Column(DateTime)
     revoked=Column(Boolean, default=False)
+
+class History(Base):
+    __tablename__ = "history"
+    id=Column(Integer, primary_key=True, index=True, autoincrement=True)
     
 Base.metadata.create_all(bind=engine)

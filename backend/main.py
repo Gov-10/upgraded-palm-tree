@@ -90,7 +90,7 @@ def logi(payload: LoginSchema, response: Response, db:Session=Depends(get_db)):
         passw= user.password
         try:
             ph.verify(passw, password)
-            pay= {"iss": "auth-service", "sub": username, "exp": }
+            pay= {"iss": "auth-service", "sub": username, "exp": datetime.utcnow()+timedelta(days=7)}
             token=jwt.encode(pay, os.getenv("SECRET"), algorithm="HS256")
             response.set_cookie(key="session_token", value=token, httponly=True, secure=True, samesite="lax", max_age=604800)
             db_no=SessionTokens(username=username, token_hash=hashlib.sha256(token.encode()).hexdigest(), expires_at=datetime.utcnow()+timedelta(days=7), revoked=False)

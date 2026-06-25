@@ -1,19 +1,19 @@
 const registrationForm = document.getElementById('registrationForm');
-let email = ""
 
-registrationForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await register();
-});
-
+if (registrationForm){
+    registrationForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await register();
+    });
+}
 async function register() {
     const username = document.getElementById('username').value;
-    email = document.getElementById('email').value;
+    const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
     const registrationData = {
-        username: username,
         email: email,
+        username: username,
         password: password
     };
 
@@ -31,8 +31,9 @@ async function register() {
         if (response.ok) {
             console.log('Registration successful:', data);
             alert('Registration successful! Please login.');
+            localStorage.setItem('email', email);
             registrationForm.reset();
-            window.location.href = 'auth.html'
+            window.location.href = 'auth.html';
         } else {
             console.error('Registration failed:', data);
             alert('Registration failed: ' + (data.message || 'Please try again.'));
@@ -54,6 +55,8 @@ if (authForm) {
 
 async function verify() {
     const otp = document.getElementById('otp').value;
+    const email = localStorage.getItem('email');
+
     const verificationData = {
         otp: otp,
         email: email
@@ -91,15 +94,15 @@ if (loginForm)
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault()
         await login()
-    })
+    });
 }
 
 async function login() {
-    const email = document.getElementById('email').value;
+    const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
     const loginData = {
-        email: email,
+        username: username,
         password: password
     };
 

@@ -6,8 +6,11 @@ from dotenv import load_dotenv
 import os, json, uuid
 import pandas as pd
 from io import StringIO
+import os
+from pydantic import SecretStr
+
 load_dotenv()
-llm=ChatGroq(model='qwen/qwen3-32b', temperature=0, max_tokens=None, reasoning_format="hidden", timeout=None, max_retries=2)
+llm=ChatGroq(model='qwen/qwen3-32b', temperature=0, max_tokens=None, reasoning_format="hidden", timeout=None, max_retries=2, api_key=SecretStr(os.getenv('GROQ_API_KEY', 'none')))
 import boto3
 s3 = boto3.client(
     "s3",
@@ -31,13 +34,18 @@ def normal_node(state: State):
            Convert the invoice text into JSON. Return ONLY valid JSON.
            Schema:{SCHEMA}
            Invoice Text:{state.content}"""
-    resp=llm.invoke(prompt)
-    return {"normal": json.loads(resp.content)}
+    resp = llm.invoke(prompt)
+    normal_data = resp.content
+    if isinstance(normal_data, str):
+        normal_data = json.loads(normal_data)
+    return {"normal": normal_data}
 
 
 def final_node(state:State):
     buffer = StringIO()
     data= state.normal
+    if data is None:
+        raise ValueError
     invoice_row = {
         "invoice_number": data.get("invoice_number"),
         "invoice_date": data.get("invoice_date"),

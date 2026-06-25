@@ -12,7 +12,7 @@ def extract(file_bytes):
     text= ""
     doc= fitz.open(stream=file_bytes, filetype="pdf")
     for page in doc:
-        text += page.get_text()
+        text += f'{page.get_text()}'
     return clean(text)
 
 def extract_ocr(file_bytes):

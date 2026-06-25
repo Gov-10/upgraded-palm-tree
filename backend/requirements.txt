@@ -11,3 +11,5 @@ pytesseract
 redis
 argon2-cffi
 sqlalchemy
+psycopg2-binary
+PyJWT

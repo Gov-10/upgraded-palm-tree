@@ -121,7 +121,7 @@ async function login() {
             console.log('Login successful:', data);
             alert('Login successful!');
             loginForm.reset();
-            window.location.href = "../index.html" //use the upload page path here to redirect to the upload page after login
+            window.location.href = "../upload/preview.html" //use the upload page path here to redirect to the upload page after login
         } else {
             console.error('Login failed:', data);
             alert('Login failed: ' + (data.message || 'Please try again.'));

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GST & Inventory Dashboard</title>
+    <!-- Tabler Icons CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Dynamic Traditional Art Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="app-container">
+        <!-- Top Navigation Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-icon">
+                    <i class="ti ti-chart-pie-filled"></i>
+                </div>
+                <div class="header-title-group">
+                    <h1>GST Ledger Hub</h1>
+                    <p class="subtitle">Real-time GST, Inventory & Financial Analytics</p>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <a href="../upload/preview.html" class="action-btn upload-btn">
+                    <i class="ti ti-upload"></i>
+                    <span>Upload Invoice</span>
+                </a>
+                <button class="action-btn filing-btn" id="open-filing-btn">
+                    <i class="ti ti-file-certificate"></i>
+                    <span>GST Filing</span>
+                </button>
+                <button class="profile-avatar-btn" id="open-profile-btn" aria-label="Open Profile">
+                    <div class="avatar-wrapper">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100" alt="User Avatar" class="avatar-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%232563EB%22/><text x=%2250%25%22 y=%2255%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2230%22 font-family=%22sans-serif%22 font-weight=%22bold%22>JD</text></svg>'">
+                        <span class="status-indicator online"></span>
+                    </div>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Panel: Financials, Inventory, and Transactions -->
+            <div class="main-content-area">
+                
+                <!-- Financial Cards (Profit & Loss and GST Summary) -->
+                <div class="financials-grid">
+                    <!-- Net Profit/Loss Tab/Card -->
+                    <div class="dashboard-card profit-loss-card">
+                        <div class="card-header">
+                            <div class="card-header-left">
+                                <i class="ti ti-cash-banknote accent-icon"></i>
+                                <h3>Net Profit & Loss</h3>
+                            </div>
+                            <span class="badge success-badge">+12.4% MoM</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="net-pl-value success-text">₹4,82,450</div>
+                            <div class="pl-breakdown">
+                                <div class="breakdown-item">
+                                    <span class="label">Total Sales (Revenue)</span>
+                                    <span class="value">₹12,40,000</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="label">Total Expense (Purchases)</span>
+                                    <span class="value">₹7,57,550</span>
+                                </div>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: 61.5%;"></div>
+                            </div>
+                            <div class="progress-labels">
+                                <span>Expenses (61.5%)</span>
+                                <span>Profit Margin (38.5%)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GST Summary Card -->
+                    <div class="dashboard-card gst-summary-card">
+                        <div class="card-header">
+                            <div class="card-header-left">
+                                <i class="ti ti-calculator accent-icon"></i>
+                                <h3>GST Liability & ITC</h3>
+                            </div>
+                            <span class="badge info-badge">June Period</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="gst-summary-grid">
+                                <div class="gst-stat-box">
+                                    <span class="stat-label">Input Tax Credit (ITC)</span>
+                                    <span class="stat-value text-emerald">₹1,14,350</span>
+                                </div>
+                                <div class="gst-stat-box">
+                                    <span class="stat-label">Tax Liability (Output)</span>
+                                    <span class="stat-value text-blue">₹1,42,800</span>
+                                </div>
+                                <div class="gst-stat-box full-width highlight">
+                                    <span class="stat-label">Net GST Payable</span>
+                                    <span class="stat-value text-warning">₹28,450</span>
+                                </div>
+                            </div>
+                            <div class="gst-breakdown-mini">
+                                <span><strong>CGST:</strong> ₹14,225</span>
+                                <span><strong>SGST:</strong> ₹14,225</span>
+                                <span><strong>IGST:</strong> ₹0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Status Tab -->
+                <div class="dashboard-card inventory-card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <i class="ti ti-packages accent-icon"></i>
+                            <h3>Inventory Status</h3>
+                        </div>
+                        <div class="card-actions">
+                            <input type="text" id="inventory-search" placeholder="Search inventory..." class="search-input">
+                            <button class="add-inventory-btn" id="add-item-mock-btn">
+                                <i class="ti ti-plus"></i> Add Item
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body no-padding">
+                        <div class="table-container">
+                            <table class="dashboard-table" id="inventory-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product Name</th>
+                                        <th>SKU</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>GST Rate</th>
+                                        <th>Stock Level</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dynamic Inventory Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions Tab -->
+                <div class="dashboard-card transactions-card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <i class="ti ti-receipt accent-icon"></i>
+                            <h3>Recent Transactions</h3>
+                        </div>
+                        <div class="card-actions">
+                            <span class="table-info-label">Showing last 4 transactions (Click row to expand details)</span>
+                        </div>
+                    </div>
+                    <div class="card-body no-padding">
+                        <div class="table-container">
+                            <table class="dashboard-table expandable-table" id="transactions-table">
+                                <thead>
+                                    <tr>
+                                        <th>Txn ID</th>
+                                        <th>Invoice #</th>
+                                        <th>Seller</th>
+                                        <th>Customer</th>
+                                        <th>Final Price</th>
+                                        <th>Net GST</th>
+                                        <th>Status</th>
+                                        <th class="text-center"><i class="ti ti-chevron-down"></i></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dynamic Transaction Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Panel: Alerts Sidebar -->
+            <aside class="alerts-sidebar">
+                <div class="sidebar-header">
+                    <i class="ti ti-bell-ringing"></i>
+                    <h2>System Alerts</h2>
+                </div>
+                <div class="alerts-list" id="alerts-container">
+                    <!-- Dynamic Alerts will be injected here -->
+                </div>
+            </aside>
+
+        </main>
+    </div>
+
+    <!-- PROFILE DRAWER (Slide-out from Right) -->
+    <div class="drawer-overlay" id="profile-drawer-overlay"></div>
+    <div class="profile-drawer" id="profile-drawer">
+        <button class="close-drawer-btn" id="close-profile-btn" aria-label="Close Profile">
+            <i class="ti ti-x"></i>
+        </button>
+        <div class="drawer-content">
+            <div class="profile-header-card">
+                <div class="profile-avatar-large">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100" alt="Jane Doe" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%232563EB%22/><text x=%2250%25%22 y=%2255%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2230%22 font-family=%22sans-serif%22 font-weight=%22bold%22>JD</text></svg>'">
+                </div>
+                <h2>Jane Doe</h2>
+                <p class="role">Chief Financial Officer</p>
+                <span class="profile-badge">Authorized Signatory</span>
+            </div>
+
+            <div class="profile-details-section">
+                <h3>Business Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Legal Name</span>
+                    <span class="detail-value">Apex Retailers Private Limited</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">GSTIN</span>
+                    <span class="detail-value highlight-text">27AAAAA1111A1Z1</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">PAN Number</span>
+                    <span class="detail-value">AAAAA1111A</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">State Jurisdiction</span>
+                    <span class="detail-value">Maharashtra - Zone 4</span>
+                </div>
+            </div>
+
+            <div class="profile-details-section">
+                <h3>Account Settings</h3>
+                <ul class="settings-list">
+                    <li>
+                        <i class="ti ti-shield-lock"></i>
+                        <span>Security & API Access</span>
+                        <i class="ti ti-chevron-right arrow-icon"></i>
+                    </li>
+                    <li>
+                        <i class="ti ti-bell"></i>
+                        <span>Notification Preferences</span>
+                        <i class="ti ti-chevron-right arrow-icon"></i>
+                    </li>
+                    <li>
+                        <i class="ti ti-database-cog"></i>
+                        <span>E-Invoicing Integration</span>
+                        <i class="ti ti-chevron-right arrow-icon"></i>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="drawer-actions">
+                <button class="logout-btn"><i class="ti ti-logout"></i> Log Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GST FILING MODAL -->
+    <div class="modal-overlay" id="filing-modal-overlay"></div>
+    <div class="filing-modal" id="filing-modal">
+        <div class="modal-header">
+            <div class="modal-header-title">
+                <i class="ti ti-file-certificate"></i>
+                <h2>Interactive GSTR-3B Filing Assistant</h2>
+            </div>
+            <button class="close-modal-btn" id="close-filing-btn"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-body">
+            <!-- Filing Progress Bar -->
+            <div class="filing-steps">
+                <div class="step active" id="step-tab-1">
+                    <div class="step-num">1</div>
+                    <span>Reconciliation</span>
+                </div>
+                <div class="step" id="step-tab-2">
+                    <div class="step-num">2</div>
+                    <span>Tax Settlement</span>
+                </div>
+                <div class="step" id="step-tab-3">
+                    <div class="step-num">3</div>
+                    <span>Submit & File</span>
+                </div>
+            </div>
+
+            <!-- Step 1 Content -->
+            <div class="step-content active" id="step-content-1">
+                <h3>Step 1: Reconcile Purchase Register with GSTR-2B</h3>
+                <p class="step-description">Verify that the input tax credit claimed matches the details uploaded by your suppliers.</p>
+                <div class="recon-summary-card">
+                    <div class="recon-stat">
+                        <span class="lbl">Eligible ITC (GSTR-2B)</span>
+                        <span class="val success-text">₹1,14,350</span>
+                    </div>
+                    <div class="recon-stat">
+                        <span class="lbl">Claimed in Books</span>
+                        <span class="val">₹1,14,350</span>
+                    </div>
+                    <div class="recon-stat">
+                        <span class="lbl">Difference</span>
+                        <span class="val zero-diff">₹0 (Perfect Match)</span>
+                    </div>
+                </div>
+                <div class="reconcile-actions">
+                    <button class="btn secondary-btn" id="cancel-filing-btn-1">Cancel</button>
+                    <button class="btn primary-btn" id="next-step-btn-1">Confirm & Proceed <i class="ti ti-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 2 Content -->
+            <div class="step-content" id="step-content-2">
+                <h3>Step 2: Offset Output Liability against ITC</h3>
+                <p class="step-description">Your output tax liability will be automatically offset using available input tax credit.</p>
+                <div class="ledger-table-wrapper">
+                    <table class="ledger-table">
+                        <thead>
+                            <tr>
+                                <th>Tax Head</th>
+                                <th>Liability (A)</th>
+                                <th>ITC Offset (B)</th>
+                                <th>Balance Payable (A - B)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CGST</td>
+                                <td>₹71,400</td>
+                                <td>₹57,175</td>
+                                <td class="payable-cell">₹14,225</td>
+                            </tr>
+                            <tr>
+                                <td>SGST</td>
+                                <td>₹71,400</td>
+                                <td>₹57,175</td>
+                                <td class="payable-cell">₹14,225</td>
+                            </tr>
+                            <tr>
+                                <td>IGST</td>
+                                <td>₹0</td>
+                                <td>₹0</td>
+                                <td>₹0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="reconcile-actions">
+                    <button class="btn secondary-btn" id="prev-step-btn-2"><i class="ti ti-arrow-left"></i> Back</button>
+                    <button class="btn primary-btn" id="next-step-btn-2">Authorize Offset <i class="ti ti-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 3 Content -->
+            <div class="step-content" id="step-content-3">
+                <h3>Step 3: Verification & Submission</h3>
+                <p class="step-description">Verify the figures and sign with your DSC (Digital Signature Certificate) or EVC.</p>
+                <div class="verification-box">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="declaration-check">
+                        <span class="checkmark"></span>
+                        <span class="declaration-text">I hereby solemnly declare and affirm that the information given herein above is true and correct to the best of my knowledge and belief and nothing has been concealed therefrom.</span>
+                    </label>
+                    <div class="signatory-selector">
+                        <label for="signatory">Authorized Signatory</label>
+                        <select id="signatory">
+                            <option value="jane">Jane Doe (CFO)</option>
+                            <option value="john">John Smith (Director)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="reconcile-actions">
+                    <button class="btn secondary-btn" id="prev-step-btn-3"><i class="ti ti-arrow-left"></i> Back</button>
+                    <button class="btn success-btn" id="file-submit-btn" disabled><i class="ti ti-circle-check"></i> File GSTR-3B</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOCK ADD INVENTORY DIALOG -->
+    <div class="modal-overlay" id="inventory-modal-overlay"></div>
+    <div class="inventory-modal" id="inventory-modal">
+        <div class="modal-header">
+            <h2>Add Mock Inventory Item</h2>
+            <button class="close-modal-btn" id="close-inventory-btn"><i class="ti ti-x"></i></button>
+        </div>
+        <form id="inventory-form" class="modal-body">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="prod-name">Product Name</label>
+                    <input type="text" id="prod-name" placeholder="e.g. Premium Office Desk" required>
+                </div>
+                <div class="form-group">
+                    <label for="prod-sku">SKU Code</label>
+                    <input type="text" id="prod-sku" placeholder="e.g. SKU-OFF-DSK-01" required>
+                </div>
+                <div class="form-group">
+                    <label for="prod-qty">Quantity</label>
+                    <input type="number" id="prod-qty" placeholder="100" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="prod-price">Unit Price (₹)</label>
+                    <input type="number" id="prod-price" placeholder="4500" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="prod-gst">GST Rate (%)</label>
+                    <select id="prod-gst">
+                        <option value="5">5%</option>
+                        <option value="12">12%</option>
+                        <option value="18" selected>18%</option>
+                        <option value="28">28%</option>
+                    </select>
+                </div>
+            </div>
+            <div class="reconcile-actions">
+                <button type="button" class="btn secondary-btn" id="cancel-inventory-btn">Cancel</button>
+                <button type="submit" class="btn primary-btn">Add to Stock</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

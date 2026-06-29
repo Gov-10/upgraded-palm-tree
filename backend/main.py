@@ -8,6 +8,7 @@ from utils.send_email import email_send
 from dotenv import load_dotenv
 from schemas import InputSchema, ExtractSchema, CreateSchema, EmailSchema, LoginSchema
 from database import Users, sessionLocal, SessionTokens
+from botocore.config import Config
 import jwt
 load_dotenv()
 from utils.agent import lang_app, State
@@ -17,7 +18,7 @@ from redis import Redis
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 ph = PasswordHasher()
-s3= boto3.client('s3', region_name=os.getenv("S3_REGION"), aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
+s3= boto3.client('s3', region_name=os.getenv("S3_REGION"), aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"), config=Config(signature_version="s3v4", s3={'addressing_style': 'virtual'}))
 app=FastAPI()
 redis_client=Redis(
     host=os.getenv("REDIS_HOST", 'comparison-hyperspeedy-canvas-69712.db.redis.io'),
@@ -30,7 +31,7 @@ bucket=os.getenv("S3_BUCKET_NAME")
 origins = ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://127.0.0.1', '0.0.0.0']
 
 app.add_middleware(CORSMiddleware,
-                   allow_origins = origins,
+                   allow_origins = ["*"],
                    allow_credentials = True,
                    allow_methods = ['*'],
                    allow_headers = ['*'])

@@ -27,7 +27,7 @@ def email_send(email, otp):
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
         server.starttls()
-        server.login(os.getenv('MY_EMAIL', 'none'), os.getenv('APP_PASSWORD', 'none'))
+        server.login(sender_email, app_password)
         server.sendmail(sender_email, email, msg.as_string())
         return True
     except Exception as e:

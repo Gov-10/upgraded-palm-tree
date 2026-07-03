@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports – GST Ledger Hub</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/sidebar.css">
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="console-shell">
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
+            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">Account</div>
+            <a href="../profile/profile.html" class="nav-item" data-tooltip="My Profile"><i class="ti ti-user-circle nav-icon"></i><span class="nav-label">My Profile</span></a>
+            <div class="nav-sub-group">
+                <a href="../profile/personal-info.html" class="nav-sub-item"><i class="ti ti-id-badge"></i> Personal Info</a>
+                <a href="../profile/account-info.html" class="nav-sub-item"><i class="ti ti-building"></i> Account &amp; Business</a>
+                <a href="../profile/security.html" class="nav-sub-item"><i class="ti ti-shield-lock"></i> Security &amp; Password</a>
+            </div>
+            <div class="nav-section-label" style="margin-top:8px;">Console</div>
+            <a href="../overview/overview.html" class="nav-item" data-tooltip="Overview"><i class="ti ti-layout-dashboard nav-icon"></i><span class="nav-label">Overview</span></a>
+            <a href="../vouchers/vouchers.html" class="nav-item" data-tooltip="Vouchers"><i class="ti ti-receipt-2 nav-icon"></i><span class="nav-label">Vouchers</span></a>
+            <a href="../reconciliations/reconciliations.html" class="nav-item" data-tooltip="Reconciliations"><i class="ti ti-arrows-exchange nav-icon"></i><span class="nav-label">Reconciliations</span></a>
+            <a href="../reports/reports.html" class="nav-item active" data-tooltip="Reports"><i class="ti ti-chart-bar nav-icon"></i><span class="nav-label">Reports</span></a>
+            <div class="nav-section-label" style="margin-top:8px;">Tools</div>
+            <a href="../../upload/preview.html" class="nav-item" data-tooltip="Upload Invoice"><i class="ti ti-cloud-upload nav-icon"></i><span class="nav-label">Upload Invoice</span></a>
+            <a href="../settings/settings.html" class="nav-item" data-tooltip="Settings"><i class="ti ti-settings nav-icon"></i><span class="nav-label">Settings</span></a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="../profile/profile.html" class="sidebar-user">
+                <div class="sidebar-avatar">JD</div>
+                <div class="sidebar-user-info"><div class="sidebar-user-name">Jane Doe</div><div class="sidebar-user-role">CFO · Apex Retailers</div></div>
+            </a>
+        </div>
+    </nav>
+    <button class="sidebar-toggle" id="sidebar-toggle"><i class="ti ti-chevron-left"></i></button>
+
+    <div class="console-main">
+        <div class="console-topbar">
+            <div class="topbar-left">
+                <div class="topbar-page-title">Reports</div>
+                <div class="topbar-breadcrumb"><span>Console</span><i class="ti ti-chevron-right" style="font-size:11px;"></i><span>Reports</span></div>
+            </div>
+            <div class="topbar-right">
+                <button class="topbar-btn topbar-btn-outline"><i class="ti ti-download"></i> Export All</button>
+            </div>
+        </div>
+
+        <div class="console-content">
+
+            <!-- Report Cards Grid -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+
+                <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
+                    <div style="width:44px;height:44px;background:rgba(37,99,235,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-file-text" style="color:#2563EB;font-size:22px;"></i></div>
+                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">GSTR-3B Summary</div>
+                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Monthly consolidated GST liability return with ITC reconciliation and tax payment breakdowns.</div>
+                    <div style="margin-top:16px;font-size:12px;color:#2563EB;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
+                </div>
+
+                <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
+                    <div style="width:44px;height:44px;background:rgba(16,185,129,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-trending-up" style="color:#10B981;font-size:22px;"></i></div>
+                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">Profit &amp; Loss Statement</div>
+                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Detailed income and expense report with gross profit, operating expenses, and net margins.</div>
+                    <div style="margin-top:16px;font-size:12px;color:#10B981;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
+                </div>
+
+                <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
+                    <div style="width:44px;height:44px;background:rgba(245,158,11,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-packages" style="color:#F59E0B;font-size:22px;"></i></div>
+                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">Inventory Valuation Report</div>
+                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Stock-wise valuation with GST rate mapping, closing stock value, and reorder recommendations.</div>
+                    <div style="margin-top:16px;font-size:12px;color:#F59E0B;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
+                </div>
+
+                <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
+                    <div style="width:44px;height:44px;background:rgba(37,99,235,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-receipt" style="color:#2563EB;font-size:22px;"></i></div>
+                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">Outward Supplies (GSTR-1)</div>
+                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Monthly details of all B2B and B2C sales with HSN summary and tax invoice register.</div>
+                    <div style="margin-top:16px;font-size:12px;color:#2563EB;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
+                </div>
+
+                <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
+                    <div style="width:44px;height:44px;background:rgba(16,185,129,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-arrows-exchange" style="color:#10B981;font-size:22px;"></i></div>
+                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">ITC Ledger Report</div>
+                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Detailed Input Tax Credit availability, utilization, and balance for each tax head (CGST/SGST/IGST).</div>
+                    <div style="margin-top:16px;font-size:12px;color:#10B981;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
+                </div>
+
+                <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
+                    <div style="width:44px;height:44px;background:rgba(239,68,68,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-file-certificate" style="color:#EF4444;font-size:22px;"></i></div>
+                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">Annual Return (GSTR-9)</div>
+                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Consolidated annual GST return compiling all monthly filings, eligible ITC, and tax paid summary.</div>
+                    <div style="margin-top:16px;font-size:12px;color:#EF4444;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="../shared/sidebar.js"></script>
+</body>
+</html>

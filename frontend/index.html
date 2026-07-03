@@ -3,95 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GST PROJECT</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .container {
-            text-align: center;
-            background: white;
-            padding: 50px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
-            width: 100%;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 40px;
-            font-size: 2.5em;
-            letter-spacing: 2px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
-        button {
-            padding: 12px 40px;
-            font-size: 1em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            min-width: 150px;
-        }
-
-        .register-btn {
-            background-color: #667eea;
-            color: white;
-        }
-
-        .register-btn:hover {
-            background-color: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .login-btn {
-            background-color: #764ba2;
-            color: white;
-        }
-
-        .login-btn:hover {
-            background-color: #63408b;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
-        }
-    </style>
+    <title>GST Ledger Hub - Real-time GST & Financial Analytics</title>
+    <!-- Tabler Icons CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <div class="container">
-        <h1>GST PROJECT</h1>
-        <div class="button-group">
-            <a href="loginNAuth/registration.html">
-                <button class="register-btn">Register</button>
-            </a>
-            <a href="loginNAuth/login.html">
-                <button class="login-btn">Login</button>
-            </a>
+    <!-- Dynamic Indian-style Geometric Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="app-container">
+        <!-- Top Navigation Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-icon">
+                    <i class="ti ti-chart-pie-filled"></i>
+                </div>
+                <div class="header-title-group">
+                    <h1>GST Ledger Hub</h1>
+                    <p class="subtitle">Real-time GST, Inventory & Financial Analytics</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <a href="loginNAuth/login.html" class="action-btn secondary-btn" id="nav-login-btn">Sign In</a>
+                <a href="loginNAuth/registration.html" class="action-btn primary-btn" id="nav-register-btn">Get Started</a>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-badge">
+                <i class="ti ti-sparkles"></i> AI-Powered GST Platform
+            </div>
+            <h2 class="hero-title">Financial Clarity,<br>Simplified GST Ledger</h2>
+            <p class="hero-subtitle">Optimize inventory levels, reconcile input tax credit (ITC) automatically, and file GSTR reports through a clean, unified dashboard.</p>
+        </section>
+
+        <!-- Bento Box Grid -->
+        <div class="bento-grid">
+            <!-- Card 1: Main Platform Visualization (large 2x2) -->
+            <div class="bento-card col-2 row-2">
+                <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=800" alt="Financial Analytics Chart" class="bento-card-bg">
+                <div class="bento-card-content">
+                    <div class="bento-card-header">
+                        <div class="bento-card-icon"><i class="ti ti-presentation-analytics"></i></div>
+                        <h3 class="bento-card-title">Real-Time GST Reconciliations</h3>
+                    </div>
+                    <div>
+                        <p class="bento-card-text">Compare purchases directly with supplier uploads. Track your CGST, SGST, and IGST components instantly to maximize eligible Input Tax Credits (ITC) and minimize liabilities.</p>
+                    </div>
+                    <a href="loginNAuth/registration.html" class="bento-card-footer">Explore Analytics <i class="ti ti-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Card 2: Interactive Statistics -->
+            <div class="bento-card">
+                <div class="bento-card-content">
+                    <div class="bento-card-header">
+                        <div class="bento-card-icon"><i class="ti ti-activity"></i></div>
+                        <h3 class="bento-card-title">System Performance</h3>
+                    </div>
+                    <div class="stats-container">
+                        <div class="stat-box">
+                            <span class="stat-number">99.9%</span>
+                            <span class="stat-label">Uptime</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number">₹4.8L+</span>
+                            <span class="stat-label">Avg Savings</span>
+                        </div>
+                    </div>
+                    <a href="loginNAuth/registration.html" class="bento-card-footer">Learn more <i class="ti ti-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Card 3: Testimonial -->
+            <div class="bento-card testimonial-card">
+                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=600" alt="Corporate Team Working" class="bento-card-bg">
+                <div class="bento-card-content">
+                    <p class="testimonial-text">"GST Ledger Hub completely transformed how we prepare GSTR returns. Reconciliations are done in minutes rather than days."</p>
+                    <div>
+                        <p class="testimonial-author">Priya Sharma</p>
+                        <p class="testimonial-company">CFO, Apex Enterprises</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Smart Inventory Alerts -->
+            <div class="bento-card">
+                <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=600" alt="Financial Growth and Coins" class="bento-card-bg">
+                <div class="bento-card-content">
+                    <div class="bento-card-header">
+                        <div class="bento-card-icon"><i class="ti ti-packages"></i></div>
+                        <h3 class="bento-card-title">Inventory Tracking</h3>
+                    </div>
+                    <div>
+                        <p class="bento-card-text">Monitor stock rates, calculate product taxes automatically, and receive instant alert notifications when stock levels hit critical thresholds.</p>
+                    </div>
+                    <a href="loginNAuth/registration.html" class="bento-card-footer">Verify Alerts <i class="ti ti-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Card 5: Secure Ledger -->
+            <div class="bento-card">
+                <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600" alt="Finance Calculator & Graph" class="bento-card-bg">
+                <div class="bento-card-content">
+                    <div class="bento-card-header">
+                        <div class="bento-card-icon"><i class="ti ti-shield-check"></i></div>
+                        <h3 class="bento-card-title">Bank-Grade Security</h3>
+                    </div>
+                    <div>
+                        <p class="bento-card-text">Your financial records are fully encrypted and backed by secure authentication protocols, ensuring audit safety and strict data privacy compliance.</p>
+                    </div>
+                    <a href="loginNAuth/registration.html" class="bento-card-footer">Security Details <i class="ti ti-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Card 6: Invoicing -->
+            <div class="bento-card">
+                <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=600" alt="Working on financial reports" class="bento-card-bg">
+                <div class="bento-card-content">
+                    <div class="bento-card-header">
+                        <div class="bento-card-icon"><i class="ti ti-receipt"></i></div>
+                        <h3 class="bento-card-title">Smart Invoice Imports</h3>
+                    </div>
+                    <div>
+                        <p class="bento-card-text">Directly drag and drop PDFs, scanned copies, or ledger printouts. Our smart ingestion engine updates your financial books automatically.</p>
+                    </div>
+                    <a href="loginNAuth/registration.html" class="bento-card-footer">View Import Engine <i class="ti ti-arrow-right"></i></a>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Background Animation Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const canvas = document.getElementById("bg-canvas");
+            const ctx = canvas.getContext("2d");
+
+            let w = canvas.width = window.innerWidth;
+            let h = canvas.height = window.innerHeight;
+
+            window.addEventListener("resize", () => {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            });
+
+            let mouseX = w / 2;
+            let mouseY = h / 2;
+
+            window.addEventListener("mousemove", (e) => {
+                mouseX += (e.clientX - mouseX) * 0.05;
+                mouseY += (e.clientY - mouseY) * 0.05;
+            });
+
+            let angle = 0;
+
+            function drawMandala(cx, cy, radius, petLength, petals, complexity) {
+                ctx.beginPath();
+                for (let i = 0; i < petals * complexity; i++) {
+                    let theta = (i * Math.PI * 2) / (petals * complexity) + angle;
+                    
+                    let r = radius + Math.sin(theta * petals) * petLength;
+                    r += Math.cos(theta * 3 + (mouseX / w) * 10) * 15;
+                    
+                    let x = cx + Math.cos(theta) * r;
+                    let y = cy + Math.sin(theta) * r;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, w, h);
+                
+                let gradient = ctx.createRadialGradient(mouseX, mouseY, 50, w/2, h/2, Math.max(w, h));
+                gradient.addColorStop(0, "#0c152b");
+                gradient.addColorStop(1, "#060913");
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, w, h);
+
+                angle += 0.001;
+
+                let cx = w / 2;
+                let cy = h / 2;
+
+                ctx.strokeStyle = "rgba(37, 99, 235, 0.08)";
+                ctx.lineWidth = 1.5;
+                drawMandala(cx, cy, 250, 45, 12, 4);
+
+                ctx.strokeStyle = "rgba(16, 185, 129, 0.06)";
+                ctx.lineWidth = 1.0;
+                drawMandala(cx, cy, 180, 30, 8, 3);
+
+                ctx.strokeStyle = "rgba(245, 158, 11, 0.04)";
+                ctx.lineWidth = 1.0;
+                drawMandala(cx, cy, 100, 15, 6, 2);
+
+                ctx.fillStyle = "rgba(255, 255, 255, 0.02)";
+                for (let i = 0; i < 40; i++) {
+                    let pX = (Math.sin(angle * (i + 1) * 0.1) * w/3) + cx;
+                    let pY = (Math.cos(angle * (i + 1) * 0.1) * h/3) + cy;
+                    ctx.beginPath();
+                    ctx.arc(pX, pY, 2 + (i % 3), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        });
+    </script>
 </body>
 </html>

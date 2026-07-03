@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account & Business – GST Ledger Hub</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/sidebar.css">
+    <style>
+        .form-section { display:flex; flex-direction:column; gap:24px; }
+        .form-row { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; }
+        .form-group { display:flex; flex-direction:column; gap:8px; }
+        .form-group.full { grid-column:span 2; }
+        .form-label { font-size:12px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em; }
+        .form-input { background:rgba(15,23,42,.8); border:1px solid rgba(255,255,255,.09); border-radius:10px; padding:12px 16px; font-size:14px; color:#f8fafc; font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
+        .form-input:focus { border-color:rgba(37,99,235,.5); box-shadow:0 0 0 3px rgba(37,99,235,.08); }
+        .form-input[readonly] { opacity:.6; cursor:not-allowed; }
+        .form-hint { font-size:11px; color:#64748b; margin-top:-4px; }
+        .form-actions { display:flex; gap:12px; justify-content:flex-end; padding-top:8px; }
+        .btn-save { background:#2563EB; color:white; border:none; border-radius:10px; padding:12px 28px; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; }
+        .btn-save:hover { background:#1D4ED8; transform:translateY(-1px); }
+        .btn-cancel { background:transparent; color:#94a3b8; border:1px solid rgba(255,255,255,.09); border-radius:10px; padding:12px 28px; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; }
+        .btn-cancel:hover { background:rgba(255,255,255,.05); color:#f8fafc; }
+    </style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="console-shell">
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
+            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">Account</div>
+            <a href="../profile/profile.html" class="nav-item active" data-tooltip="My Profile"><i class="ti ti-user-circle nav-icon"></i><span class="nav-label">My Profile</span></a>
+            <div class="nav-sub-group">
+                <a href="../profile/personal-info.html" class="nav-sub-item"><i class="ti ti-id-badge"></i> Personal Info</a>
+                <a href="../profile/account-info.html" class="nav-sub-item active"><i class="ti ti-building"></i> Account &amp; Business</a>
+                <a href="../profile/security.html" class="nav-sub-item"><i class="ti ti-shield-lock"></i> Security &amp; Password</a>
+            </div>
+            <div class="nav-section-label" style="margin-top:8px;">Console</div>
+            <a href="../overview/overview.html" class="nav-item" data-tooltip="Overview"><i class="ti ti-layout-dashboard nav-icon"></i><span class="nav-label">Overview</span></a>
+            <a href="../vouchers/vouchers.html" class="nav-item" data-tooltip="Vouchers"><i class="ti ti-receipt-2 nav-icon"></i><span class="nav-label">Vouchers</span></a>
+            <a href="../reconciliations/reconciliations.html" class="nav-item" data-tooltip="Reconciliations"><i class="ti ti-arrows-exchange nav-icon"></i><span class="nav-label">Reconciliations</span></a>
+            <a href="../reports/reports.html" class="nav-item" data-tooltip="Reports"><i class="ti ti-chart-bar nav-icon"></i><span class="nav-label">Reports</span></a>
+            <div class="nav-section-label" style="margin-top:8px;">Tools</div>
+            <a href="../../upload/preview.html" class="nav-item" data-tooltip="Upload Invoice"><i class="ti ti-cloud-upload nav-icon"></i><span class="nav-label">Upload Invoice</span></a>
+            <a href="../settings/settings.html" class="nav-item" data-tooltip="Settings"><i class="ti ti-settings nav-icon"></i><span class="nav-label">Settings</span></a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="../profile/profile.html" class="sidebar-user">
+                <div class="sidebar-avatar">JD</div>
+                <div class="sidebar-user-info"><div class="sidebar-user-name">Jane Doe</div><div class="sidebar-user-role">CFO · Apex Retailers</div></div>
+            </a>
+        </div>
+    </nav>
+    <button class="sidebar-toggle" id="sidebar-toggle"><i class="ti ti-chevron-left"></i></button>
+
+    <div class="console-main">
+        <div class="console-topbar">
+            <div class="topbar-left">
+                <div class="topbar-page-title">Account &amp; Business</div>
+                <div class="topbar-breadcrumb">
+                    <span>Account</span><i class="ti ti-chevron-right" style="font-size:11px;"></i>
+                    <a href="profile.html" style="color:#94a3b8;text-decoration:none;">Profile</a>
+                    <i class="ti ti-chevron-right" style="font-size:11px;"></i><span>Account &amp; Business</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="console-content" style="max-width:800px;">
+            <div class="glass-card">
+                <div class="glass-card-header">
+                    <h3><i class="ti ti-building"></i> Business &amp; Tax Registration</h3>
+                </div>
+                <div class="glass-card-body">
+                    <form class="form-section">
+                        <div class="form-row">
+                            <div class="form-group full">
+                                <label class="form-label">Legal Business Name</label>
+                                <input type="text" class="form-input" value="Apex Retailers Private Limited">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">GSTIN</label>
+                                <input type="text" class="form-input" value="27AAAAA1111A1Z1" readonly>
+                                <span class="form-hint">Contact support to update GSTIN</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">PAN Number</label>
+                                <input type="text" class="form-input" value="AAAAA1111A" readonly>
+                                <span class="form-hint">Contact support to update PAN</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">State</label>
+                                <input type="text" class="form-input" value="Maharashtra">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Jurisdiction</label>
+                                <input type="text" class="form-input" value="Zone 4 – Mumbai North">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full">
+                                <label class="form-label">Registered Business Address</label>
+                                <input type="text" class="form-input" value="Plot No. 14, MIDC Industrial Area, Andheri East, Mumbai – 400093">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-cancel" onclick="history.back()">Cancel</button>
+                            <button type="submit" class="btn-save"><i class="ti ti-check"></i> Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../shared/sidebar.js"></script>
+</body>
+</html>

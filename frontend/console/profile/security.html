@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security & Password – GST Ledger Hub</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/sidebar.css">
+    <style>
+        .security-item { display:flex; align-items:center; justify-content:space-between; padding:20px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+        .security-item:last-child { border-bottom:none; }
+        .security-item-left { display:flex; align-items:center; gap:16px; }
+        .sec-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+        .security-item h4 { font-size:14px; font-weight:600; color:#f8fafc; }
+        .security-item p { font-size:12px; color:#64748b; margin-top:2px; }
+        .sec-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:6px; }
+        .sec-enabled { background:rgba(16,185,129,.1); color:#10B981; }
+        .sec-disabled { background:rgba(239,68,68,.1); color:#EF4444; }
+        .sec-toggle { background:var(--color-primary); color:white; border:none; border-radius:8px; padding:8px 16px; font-size:12px; font-weight:600; cursor:pointer; transition:all .2s; }
+        .sec-toggle:hover { background:var(--color-primary-hover); }
+        .form-section { display:flex; flex-direction:column; gap:20px; }
+        .form-group { display:flex; flex-direction:column; gap:8px; }
+        .form-label { font-size:12px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em; }
+        .form-input { background:rgba(15,23,42,.8); border:1px solid rgba(255,255,255,.09); border-radius:10px; padding:12px 16px; font-size:14px; color:#f8fafc; font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
+        .form-input:focus { border-color:rgba(37,99,235,.5); box-shadow:0 0 0 3px rgba(37,99,235,.08); }
+        .form-actions { display:flex; justify-content:flex-end; margin-top:8px; }
+        .btn-save { background:#2563EB; color:white; border:none; border-radius:10px; padding:12px 28px; font-size:14px; font-weight:600; cursor:pointer; }
+        .btn-save:hover { background:#1D4ED8; }
+    </style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="console-shell">
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
+            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">Account</div>
+            <a href="../profile/profile.html" class="nav-item active" data-tooltip="My Profile"><i class="ti ti-user-circle nav-icon"></i><span class="nav-label">My Profile</span></a>
+            <div class="nav-sub-group">
+                <a href="../profile/personal-info.html" class="nav-sub-item"><i class="ti ti-id-badge"></i> Personal Info</a>
+                <a href="../profile/account-info.html" class="nav-sub-item"><i class="ti ti-building"></i> Account &amp; Business</a>
+                <a href="../profile/security.html" class="nav-sub-item active"><i class="ti ti-shield-lock"></i> Security &amp; Password</a>
+            </div>
+            <div class="nav-section-label" style="margin-top:8px;">Console</div>
+            <a href="../overview/overview.html" class="nav-item" data-tooltip="Overview"><i class="ti ti-layout-dashboard nav-icon"></i><span class="nav-label">Overview</span></a>
+            <a href="../vouchers/vouchers.html" class="nav-item" data-tooltip="Vouchers"><i class="ti ti-receipt-2 nav-icon"></i><span class="nav-label">Vouchers</span></a>
+            <a href="../reconciliations/reconciliations.html" class="nav-item" data-tooltip="Reconciliations"><i class="ti ti-arrows-exchange nav-icon"></i><span class="nav-label">Reconciliations</span></a>
+            <a href="../reports/reports.html" class="nav-item" data-tooltip="Reports"><i class="ti ti-chart-bar nav-icon"></i><span class="nav-label">Reports</span></a>
+            <div class="nav-section-label" style="margin-top:8px;">Tools</div>
+            <a href="../../upload/preview.html" class="nav-item" data-tooltip="Upload Invoice"><i class="ti ti-cloud-upload nav-icon"></i><span class="nav-label">Upload Invoice</span></a>
+            <a href="../settings/settings.html" class="nav-item" data-tooltip="Settings"><i class="ti ti-settings nav-icon"></i><span class="nav-label">Settings</span></a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="../profile/profile.html" class="sidebar-user">
+                <div class="sidebar-avatar">JD</div>
+                <div class="sidebar-user-info"><div class="sidebar-user-name">Jane Doe</div><div class="sidebar-user-role">CFO · Apex Retailers</div></div>
+            </a>
+        </div>
+    </nav>
+    <button class="sidebar-toggle" id="sidebar-toggle"><i class="ti ti-chevron-left"></i></button>
+
+    <div class="console-main">
+        <div class="console-topbar">
+            <div class="topbar-left">
+                <div class="topbar-page-title">Security &amp; Password</div>
+                <div class="topbar-breadcrumb">
+                    <span>Account</span><i class="ti ti-chevron-right" style="font-size:11px;"></i>
+                    <a href="profile.html" style="color:#94a3b8;text-decoration:none;">Profile</a>
+                    <i class="ti ti-chevron-right" style="font-size:11px;"></i><span>Security</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="console-content" style="max-width:800px;">
+
+            <!-- Security Status -->
+            <div class="glass-card">
+                <div class="glass-card-header">
+                    <h3><i class="ti ti-shield-check"></i> Security Settings</h3>
+                </div>
+                <div class="glass-card-body">
+                    <div class="security-item">
+                        <div class="security-item-left">
+                            <div class="sec-icon" style="background:rgba(16,185,129,.1);"><i class="ti ti-device-mobile" style="color:#10B981;"></i></div>
+                            <div>
+                                <h4>Two-Factor Authentication (2FA)</h4>
+                                <p>Verify identity via OTP on login</p>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <span class="sec-badge sec-enabled">Enabled</span>
+                            <button class="sec-toggle" style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.09);">Disable</button>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-item-left">
+                            <div class="sec-icon" style="background:rgba(37,99,235,.1);"><i class="ti ti-key" style="color:#2563EB;"></i></div>
+                            <div>
+                                <h4>API Access Keys</h4>
+                                <p>Manage tokens for third-party integrations</p>
+                            </div>
+                        </div>
+                        <button class="sec-toggle">Manage Keys</button>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-item-left">
+                            <div class="sec-icon" style="background:rgba(245,158,11,.1);"><i class="ti ti-clock" style="color:#F59E0B;"></i></div>
+                            <div>
+                                <h4>Session Timeout</h4>
+                                <p>Auto-logout after inactivity (currently 30 min)</p>
+                            </div>
+                        </div>
+                        <button class="sec-toggle">Configure</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Password -->
+            <div class="glass-card">
+                <div class="glass-card-header">
+                    <h3><i class="ti ti-lock"></i> Change Password</h3>
+                </div>
+                <div class="glass-card-body">
+                    <form class="form-section">
+                        <div class="form-group">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" class="form-input" placeholder="Enter current password">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-input" placeholder="Min. 8 characters">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-input" placeholder="Re-enter new password">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-save"><i class="ti ti-lock"></i> Update Password</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="../shared/sidebar.js"></script>
+</body>
+</html>

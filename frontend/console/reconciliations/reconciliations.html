@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconciliations – GST Ledger Hub</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/sidebar.css">
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="console-shell">
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
+            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">Account</div>
+            <a href="../profile/profile.html" class="nav-item" data-tooltip="My Profile"><i class="ti ti-user-circle nav-icon"></i><span class="nav-label">My Profile</span></a>
+            <div class="nav-sub-group">
+                <a href="../profile/personal-info.html" class="nav-sub-item"><i class="ti ti-id-badge"></i> Personal Info</a>
+                <a href="../profile/account-info.html" class="nav-sub-item"><i class="ti ti-building"></i> Account &amp; Business</a>
+                <a href="../profile/security.html" class="nav-sub-item"><i class="ti ti-shield-lock"></i> Security &amp; Password</a>
+            </div>
+            <div class="nav-section-label" style="margin-top:8px;">Console</div>
+            <a href="../overview/overview.html" class="nav-item" data-tooltip="Overview"><i class="ti ti-layout-dashboard nav-icon"></i><span class="nav-label">Overview</span></a>
+            <a href="../vouchers/vouchers.html" class="nav-item" data-tooltip="Vouchers"><i class="ti ti-receipt-2 nav-icon"></i><span class="nav-label">Vouchers</span></a>
+            <a href="../reconciliations/reconciliations.html" class="nav-item active" data-tooltip="Reconciliations"><i class="ti ti-arrows-exchange nav-icon"></i><span class="nav-label">Reconciliations</span></a>
+            <a href="../reports/reports.html" class="nav-item" data-tooltip="Reports"><i class="ti ti-chart-bar nav-icon"></i><span class="nav-label">Reports</span></a>
+            <div class="nav-section-label" style="margin-top:8px;">Tools</div>
+            <a href="../../upload/preview.html" class="nav-item" data-tooltip="Upload Invoice"><i class="ti ti-cloud-upload nav-icon"></i><span class="nav-label">Upload Invoice</span></a>
+            <a href="../settings/settings.html" class="nav-item" data-tooltip="Settings"><i class="ti ti-settings nav-icon"></i><span class="nav-label">Settings</span></a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="../profile/profile.html" class="sidebar-user">
+                <div class="sidebar-avatar">JD</div>
+                <div class="sidebar-user-info"><div class="sidebar-user-name">Jane Doe</div><div class="sidebar-user-role">CFO · Apex Retailers</div></div>
+            </a>
+        </div>
+    </nav>
+    <button class="sidebar-toggle" id="sidebar-toggle"><i class="ti ti-chevron-left"></i></button>
+
+    <div class="console-main">
+        <div class="console-topbar">
+            <div class="topbar-left">
+                <div class="topbar-page-title">Reconciliations</div>
+                <div class="topbar-breadcrumb"><span>Console</span><i class="ti ti-chevron-right" style="font-size:11px;"></i><span>Reconciliations</span></div>
+            </div>
+            <div class="topbar-right">
+                <button class="topbar-btn topbar-btn-outline"><i class="ti ti-download"></i> Export Report</button>
+                <button class="topbar-btn topbar-btn-primary"><i class="ti ti-refresh"></i> Run Reconciliation</button>
+            </div>
+        </div>
+
+        <div class="console-content">
+
+            <!-- Status Cards -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+                <div class="glass-card" style="padding:20px;border-color:rgba(16,185,129,0.25);">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                        <div style="width:36px;height:36px;background:rgba(16,185,129,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#10B981;font-size:18px;"></i></div>
+                        <div style="font-size:13px;font-weight:600;color:#94a3b8;">Matched Invoices</div>
+                    </div>
+                    <div style="font-size:32px;font-weight:800;color:#10B981;">₹1,14,350</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:4px;">94% of total ITC · GSTR-2B vs Books</div>
+                </div>
+                <div class="glass-card" style="padding:20px;border-color:rgba(245,158,11,0.25);">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                        <div style="width:36px;height:36px;background:rgba(245,158,11,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-alert-triangle" style="color:#F59E0B;font-size:18px;"></i></div>
+                        <div style="font-size:13px;font-weight:600;color:#94a3b8;">Discrepancies Found</div>
+                    </div>
+                    <div style="font-size:32px;font-weight:800;color:#F59E0B;">₹7,200</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:4px;">6% mismatch · Requires attention</div>
+                </div>
+                <div class="glass-card" style="padding:20px;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                        <div style="width:36px;height:36px;background:rgba(37,99,235,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-clock" style="color:#2563EB;font-size:18px;"></i></div>
+                        <div style="font-size:13px;font-weight:600;color:#94a3b8;">Last Run</div>
+                    </div>
+                    <div style="font-size:24px;font-weight:800;color:#f8fafc;">28 Jun 2026</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:4px;">Auto-scheduled · Next: 1 Jul 2026</div>
+                </div>
+            </div>
+
+            <!-- Recon Table -->
+            <div class="glass-card">
+                <div class="glass-card-header">
+                    <h3><i class="ti ti-arrows-exchange"></i> ITC Reconciliation Matrix – GSTR-2B vs Purchase Register</h3>
+                </div>
+                <div style="overflow-x:auto;padding:0 0 8px 0;">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="border-bottom:1px solid rgba(255,255,255,0.09);">
+                                <th style="padding:14px 20px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Supplier GSTIN</th>
+                                <th style="padding:14px 20px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Supplier Name</th>
+                                <th style="padding:14px 20px;text-align:right;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">GSTR-2B ITC</th>
+                                <th style="padding:14px 20px;text-align:right;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Books ITC</th>
+                                <th style="padding:14px 20px;text-align:right;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Difference</th>
+                                <th style="padding:14px 20px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:14px 20px;font-family:monospace;color:#60a5fa;">27AAACC1234D1Z5</td>
+                                <td style="padding:14px 20px;color:#f8fafc;font-weight:500;">Radiant Electro Distributors</td>
+                                <td style="padding:14px 20px;text-align:right;color:#f8fafc;">₹72,000</td>
+                                <td style="padding:14px 20px;text-align:right;color:#f8fafc;">₹72,000</td>
+                                <td style="padding:14px 20px;text-align:right;color:#10B981;font-weight:700;">₹0</td>
+                                <td style="padding:14px 20px;"><span style="color:#10B981;font-weight:600;font-size:12px;">✓ Matched</span></td>
+                            </tr>
+                            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:14px 20px;font-family:monospace;color:#60a5fa;">29BBBEE5678F1Z9</td>
+                                <td style="padding:14px 20px;color:#f8fafc;font-weight:500;">Nexus Office Suppliers</td>
+                                <td style="padding:14px 20px;text-align:right;color:#f8fafc;">₹42,350</td>
+                                <td style="padding:14px 20px;text-align:right;color:#f8fafc;">₹35,150</td>
+                                <td style="padding:14px 20px;text-align:right;color:#F59E0B;font-weight:700;">₹7,200</td>
+                                <td style="padding:14px 20px;"><span style="color:#F59E0B;font-weight:600;font-size:12px;">⚠ Mismatch</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="../shared/sidebar.js"></script>
+</body>
+</html>

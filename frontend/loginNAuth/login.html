@@ -3,17 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - GST Ledger Hub</title>
+    <!-- Tabler Icons CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Dynamic Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Back to Home -->
+    <a href="../index.html" class="back-to-home">
+        <i class="ti ti-arrow-left"></i> Back to Home
+    </a>
+
     <div class="login-container">
-        <h1>Login</h1>
+        <h1>Welcome Back</h1>
+        <p class="auth-subtitle">Sign in to your GST Ledger Hub account</p>
+        
         <form id="loginForm">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input 
-                    type="username" 
+                    type="text" 
                     id="username" 
                     name="username" 
                     placeholder="Enter your username" 
@@ -32,8 +48,14 @@
                 >
             </div>
 
-            <button type="submit" id="loginBtn" class="login-button">Login</button>
+            <button type="submit" id="loginBtn" class="login-button">
+                Sign In <i class="ti ti-login"></i>
+            </button>
         </form>
+
+        <div class="auth-footer-link">
+            Don't have an account? <a href="registration.html">Get Started</a>
+        </div>
     </div>
 
     <script src="app.js"></script>

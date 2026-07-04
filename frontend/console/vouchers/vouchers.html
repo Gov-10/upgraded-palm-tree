@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vouchers – GST Ledger Hub</title>
+    <title>Vouchers â€“ GST Ledger Hub</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -316,7 +316,7 @@
                 <div class="sidebar-avatar">JD</div>
                 <div class="sidebar-user-info">
                     <div class="sidebar-user-name">Jane Doe</div>
-                    <div class="sidebar-user-role">CFO · Apex Retailers</div>
+                    <div class="sidebar-user-role">CFO Â· Apex Retailers</div>
                 </div>
             </a>
         </div>
@@ -441,12 +441,12 @@
 
                 <div class="form-row-2">
                     <div class="form-group">
-                        <label for="v-amount">Amount (₹)</label>
-                        <input type="number" id="v-amount" placeholder="e.g. 50000" min="0" required>
+                        <label for="v-amount">Amount</label>
+                        <input type="number" id="v-amount" placeholder="e.g. 50000" min="0" step="0.01" required>
                     </div>
                     <div class="form-group">
-                        <label for="v-gst">GST Amount (₹)</label>
-                        <input type="number" id="v-gst" placeholder="e.g. 9000" min="0" required>
+                        <label for="v-gst">GST Amount</label>
+                        <input type="number" id="v-gst" placeholder="e.g. 9000" min="0" step="0.01" required>
                     </div>
                 </div>
 
@@ -495,200 +495,6 @@
 </div>
 
 <script src="../shared/sidebar.js"></script>
-<script>
-// Populate sample vouchers
-const vouchers = [
-    { no: "VCH-2026-0448", date: "28 Jun 2026", type: "Sales", party: "Zenith Tech Labs", amount: "₹85,550", gst: "₹13,050", status: "verified" },
-    { no: "VCH-2026-0447", date: "27 Jun 2026", type: "Purchase", party: "Radiant Electro", amount: "₹1,12,000", gst: "₹12,000", status: "verified" },
-    { no: "VCH-2026-0446", date: "25 Jun 2026", type: "Payment", party: "State Bank NEFT", amount: "₹28,450", gst: "₹0", status: "cleared" },
-    { no: "VCH-2026-0445", date: "24 Jun 2026", type: "Sales", party: "Hyperion Retail", amount: "₹31,500", gst: "₹4,800", status: "pending" },
-    { no: "VCH-2026-0444", date: "22 Jun 2026", type: "Journal", party: "Internal Transfer", amount: "₹15,000", gst: "₹0", status: "verified" },
-    { no: "VCH-2026-0443", date: "20 Jun 2026", type: "Receipt", party: "Global Systems Corp", amount: "₹16,750", gst: "₹2,550", status: "verified" },
-];
-const statusColor = { verified: "#10B981", pending: "#F59E0B", cleared: "#2563EB" };
-const tbody = document.getElementById("voucher-tbody");
-
-function formatCurrency(num) {
-    return "₹" + Number(num).toLocaleString('en-IN');
-}
-
-function renderVouchers() {
-    tbody.innerHTML = "";
-    
-    const searchInput = document.getElementById("search-input");
-    const filterType = document.getElementById("filter-type");
-    
-    const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
-    const typeFilter = filterType ? filterType.value : "All Types";
-
-    const filtered = vouchers.filter(v => {
-        const matchesType = (typeFilter === "All Types" || v.type.toLowerCase() === typeFilter.toLowerCase());
-        const matchesQuery = (
-            v.no.toLowerCase().includes(query) ||
-            v.party.toLowerCase().includes(query) ||
-            v.amount.toLowerCase().includes(query) ||
-            v.gst.toLowerCase().includes(query)
-        );
-        return matchesType && matchesQuery;
-    });
-
-    if (filtered.length === 0) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td colspan="7" style="padding: 24px; text-align: center; color: #64748b;">No vouchers matching your search/filters found.</td>
-        `;
-        tbody.appendChild(tr);
-        return;
-    }
-
-    filtered.forEach(v => {
-        const tr = document.createElement("tr");
-        tr.style.cssText = "border-bottom:1px solid rgba(255,255,255,0.05);transition:background .2s;";
-        tr.onmouseenter = () => tr.style.background = "rgba(255,255,255,0.03)";
-        tr.onmouseleave = () => tr.style.background = "";
-        tr.innerHTML = `
-            <td style="padding:14px 20px;color:#60a5fa;font-weight:600;font-family:monospace;">${v.no}</td>
-            <td style="padding:14px 20px;color:#94a3b8;">${v.date}</td>
-            <td style="padding:14px 20px;"><span style="background:rgba(37,99,235,.1);color:#60a5fa;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;">${v.type}</span></td>
-            <td style="padding:14px 20px;color:#f8fafc;">${v.party}</td>
-            <td style="padding:14px 20px;text-align:right;font-weight:700;color:#f8fafc;">${v.amount}</td>
-            <td style="padding:14px 20px;text-align:right;color:#94a3b8;">${v.gst}</td>
-            <td style="padding:14px 20px;"><span style="color:${statusColor[v.status]};font-weight:600;font-size:12px;text-transform:capitalize;">${v.status}</span></td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-renderVouchers();
-
-// Add search and filter listeners
-document.getElementById("search-input").addEventListener("input", renderVouchers);
-document.getElementById("filter-type").addEventListener("change", renderVouchers);
-
-// Modal logic
-const newVoucherBtn = document.getElementById("new-voucher-btn");
-const modalOverlay = document.getElementById("new-voucher-modal");
-const modalCloseBtn = document.getElementById("modal-close-btn");
-const btnModalCancel = document.getElementById("btn-modal-cancel");
-const newVoucherForm = document.getElementById("new-voucher-form");
-
-// Set default date to today
-document.getElementById("v-date").valueAsDate = new Date();
-
-function openModal() {
-    modalOverlay.classList.add("show");
-    document.getElementById("v-date").valueAsDate = new Date();
-}
-
-function closeModal() {
-    modalOverlay.classList.remove("show");
-    newVoucherForm.reset();
-    resetOCRState();
-}
-
-newVoucherBtn.addEventListener("click", openModal);
-modalCloseBtn.addEventListener("click", closeModal);
-btnModalCancel.addEventListener("click", closeModal);
-modalOverlay.addEventListener("click", (e) => {
-    if (e.target === modalOverlay) closeModal();
-});
-
-// Drag and drop OCR upload logic
-const ocrDropArea = document.getElementById("ocr-drop-area");
-const ocrFileInput = document.getElementById("ocr-file-input");
-const ocrUploadTrigger = document.getElementById("ocr-upload-trigger");
-const ocrDropTitle = document.getElementById("ocr-drop-title");
-const ocrDropDesc = document.getElementById("ocr-drop-desc");
-const ocrFileInfo = document.getElementById("ocr-file-info");
-const ocrFilename = document.getElementById("ocr-filename");
-const ocrLoader = document.getElementById("ocr-loader");
-
-ocrUploadTrigger.addEventListener("click", (e) => {
-    e.stopPropagation();
-    ocrFileInput.click();
-});
-
-ocrFileInput.addEventListener("change", (e) => {
-    if (e.target.files.length > 0) {
-        handleOCRFile(e.target.files[0]);
-    }
-});
-
-// Drag events
-['dragenter', 'dragover'].forEach(eventName => {
-    ocrDropArea.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        ocrDropArea.classList.add('dragover');
-    }, false);
-});
-
-['dragleave', 'drop'].forEach(eventName => {
-    ocrDropArea.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        ocrDropArea.classList.remove('dragover');
-    }, false);
-});
-
-ocrDropArea.addEventListener('drop', (e) => {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-    if (files.length > 0) {
-        handleOCRFile(files[0]);
-    }
-});
-
-function resetOCRState() {
-    ocrDropTitle.style.display = "block";
-    ocrDropDesc.style.display = "block";
-    ocrFileInfo.style.display = "none";
-    ocrLoader.style.display = "none";
-}
-
-function handleOCRFile(file) {
-    // Show spinner
-    ocrDropTitle.style.display = "none";
-    ocrDropDesc.style.display = "none";
-    ocrFileInfo.style.display = "none";
-    ocrLoader.style.display = "flex";
-
-    // Simulate OCR delay (1.5 seconds)
-    setTimeout(() => {
-        ocrLoader.style.display = "none";
-        ocrFileInfo.style.display = "flex";
-        ocrFilename.textContent = file.name;
-
-        // Autofill logic based on simulated scan
-        document.getElementById("v-type").value = "Purchase";
-        document.getElementById("v-no").value = "VCH-2026-" + Math.floor(1000 + Math.random() * 9000);
-        document.getElementById("v-party").value = "OCR Auto-Filled Ltd.";
-        document.getElementById("v-amount").value = "45600";
-        document.getElementById("v-gst").value = "8208";
-        document.getElementById("v-status").value = "pending";
-    }, 1500);
-}
-
-// Form submission
-newVoucherForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const type = document.getElementById("v-type").value;
-    const rawDate = new Date(document.getElementById("v-date").value);
-    const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    const date = rawDate.toLocaleDateString('en-GB', options);
-    const no = document.getElementById("v-no").value;
-    const party = document.getElementById("v-party").value;
-    const amount = formatCurrency(document.getElementById("v-amount").value);
-    const gst = formatCurrency(document.getElementById("v-gst").value);
-    const status = document.getElementById("v-status").value;
-
-    const newVoucher = { no, date, type, party, amount, gst, status };
-    
-    // Add to top of list
-    vouchers.unshift(newVoucher);
-    renderVouchers();
-    closeModal();
-});
-</script>
+<script src="vouchers.js"></script>
 </body>
 </html>

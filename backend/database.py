@@ -26,5 +26,14 @@ class SessionTokens(Base):
     token_hash: Mapped[str] = mapped_column(String)
     expires_at: Mapped[datetime] = mapped_column(DateTime)
     revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+
+class History(Base):
+    __tablename__ = "histories"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    username = Column(String)
+    input_file = Column(String, unique=True)
+    output_file = Column(String, unique=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
     
 Base.metadata.create_all(bind=engine)

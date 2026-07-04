@@ -43,7 +43,10 @@ SCHEMA = """
   },
   "totals": {
     "grand_total": ""
-  }
+  },
+  "receiver_name": "",
+  "place_of_supply": "",
+  "supply_type": "",
 }
 """
 
@@ -71,6 +74,7 @@ Schema:
 {SCHEMA}
 Invoice Text:
 {state.content}
+If any field has missing data, assign 'NA' to that field ONLY
 """
 
     resp = llm.invoke(prompt)

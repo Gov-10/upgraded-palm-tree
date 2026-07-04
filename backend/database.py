@@ -39,4 +39,13 @@ class Vouchers(Base):
     status: Mapped[str] = mapped_column(String, default="pending")
     file_key: Mapped[str] = mapped_column(String, unique=True)
 
+class History(Base):
+    __tablename__ = "histories"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    username = Column(String)
+    input_file = Column(String, unique=True)
+    output_file = Column(String, unique=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    
 Base.metadata.create_all(bind=engine)

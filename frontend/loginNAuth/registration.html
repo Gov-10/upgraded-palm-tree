@@ -3,12 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration</title>
+    <title>Register - GST Ledger Hub</title>
+    <!-- Tabler Icons CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Dynamic Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Back to Home -->
+    <a href="../index.html" class="back-to-home">
+        <i class="ti ti-arrow-left"></i> Back to Home
+    </a>
+
     <div class="registration-container">
-        <h1>Register</h1>
+        <h1>Create Account</h1>
+        <p class="auth-subtitle">Get started with AI-powered GST analytics</p>
+
         <form id="registrationForm">
             <div class="form-group">
                 <label for="username">Username</label>
@@ -16,7 +32,7 @@
                     type="text" 
                     id="username" 
                     name="username" 
-                    placeholder="Enter your username" 
+                    placeholder="Choose a username" 
                     required
                 >
             </div>
@@ -27,7 +43,7 @@
                     type="email" 
                     id="email" 
                     name="email" 
-                    placeholder="Enter your email" 
+                    placeholder="Enter your business email" 
                     required
                 >
             </div>
@@ -38,13 +54,19 @@
                     type="password" 
                     id="password" 
                     name="password" 
-                    placeholder="Enter your password" 
+                    placeholder="Create a secure password" 
                     required
                 >
             </div>
 
-            <button type="submit" id="registerBtn" class="register-button">Register</button>
+            <button type="submit" id="registerBtn" class="register-button">
+                Register <i class="ti ti-user-plus"></i>
+            </button>
         </form>
+
+        <div class="auth-footer-link">
+            Already have an account? <a href="login.html">Sign In</a>
+        </div>
     </div>
 
     <script src="app.js"></script>

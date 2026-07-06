@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Response
+from fastapi import FastAPI, HTTPException, Depends, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import os, boto3, hashlib
@@ -10,6 +10,7 @@ from schemas import InputSchema, ExtractSchema, CreateSchema, EmailSchema, Login
 from database import Users, sessionLocal, SessionTokens
 from botocore.config import Config
 import jwt
+import mimetypes
 load_dotenv()
 from utils.agent import lang_app, State
 from utils.extractor import extract, extract_ocr, extract_csv, hash_text
@@ -17,6 +18,12 @@ import uuid
 from redis import Redis
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+from typing import Any
+from utils.direct_ocr_extractor import ocr_extraction
+from botocore.exceptions import ClientError
+from schemas import VoucherSchema
+from database import Vouchers
+
 ph = PasswordHasher()
 s3= boto3.client('s3', region_name=os.getenv("S3_REGION"), aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"), config=Config(signature_version="s3v4", s3={'addressing_style': 'virtual'}))
 app=FastAPI()
@@ -26,9 +33,14 @@ redis_client=Redis(
     password=os.getenv("REDIS_PASSWORD"),
     decode_responses=True
 )
+binary_redis_client=Redis(
+    host=os.getenv("REDIS_HOST", 'comparison-hyperspeedy-canvas-69712.db.redis.io'),
+    port=int(os.getenv("REDIS_PORT", 6379)),
+    password=os.getenv("REDIS_PASSWORD"),
+)
 bucket=os.getenv("S3_BUCKET_NAME")
 
-origins = ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://127.0.0.1', '0.0.0.0']
+origins = ['http://localhost:5500', 'http://127.0.0.1:5501', 'http://127.0.0.1:5502', 'http://127.0.0.1', '0.0.0.0']
 
 app.add_middleware(CORSMiddleware,
                    allow_origins = ["*"],
@@ -157,4 +169,93 @@ def extr(payload: ExtractSchema):
     return {"csv_file": result["fin"], "normal": result["normal"]}
 
 
+@app.post("/extract_ocr")
+async def extractOCR(request: Request):
+    content_type = request.headers.get("Content-Type")
+    allowed_types = ["application/pdf", "image/jpeg", "image/png"]
+    if content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type")
+    file_bytes = await request.body()
+    binary_redis_client.set('cached_file', file_bytes, ex=600)
+    redis_client.set('cached_file_type', content_type, ex=600)
+    return ocr_extraction(file_bytes, content_type)
+
+@app.post("/upload-to-AWS")
+async def upload_to_AWS():
+    content_type = redis_client.get('cached_file_type')
+    allowed_types = ["application/pdf", "image/jpeg", "image/png"]
+    ext = [".pdf", ".jpg", ".png"]
+    if content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type")
+    file_bytes = binary_redis_client.get('cached_file')
+    file_name = str(uuid.uuid4())
+    redis_client.set("file_key", f'{file_name}{ext[allowed_types.index(content_type)]}', ex=600)
+    try:
+        response = s3.put_object(
+            Bucket=bucket,
+            Key=f'vouchers/{file_name}{ext[allowed_types.index(content_type)]}',
+            Body=file_bytes,                  # Pass the byte array directly here
+            ContentType=content_type
+            )
+        
+        status_code = response['ResponseMetadata']['HTTPStatusCode']
+    
+        if status_code == 200:
+            print("Upload successful!")
+            print(f"File ETag (MD5 Hash): {response['ETag']}")
+        else:
+            print(f"Upload failed with status code: {status_code}")
+    except ClientError as e:
+    # Catches AWS-specific errors (Access Denied, Bucket Not Found, etc.)
+        print(f"AWS Error: {e.response['Error']['Message']}")
+    except Exception as e:
+    # Catches network timeouts or system errors
+        print(f"An unexpected error occurred: {e}")
+
+@app.post("/add-voucher")
+def add_voucher(payload: VoucherSchema, db: Session = Depends(get_db)):
+    voucher = Vouchers(
+        voucher_type=payload.voucher_type,
+        date=payload.date,
+        voucher_no=payload.voucher_no,
+        party=payload.party,
+        amount=payload.amount,
+        gst_amount=payload.gst_amount,
+        status=payload.status,
+        file_key=redis_client.get("file_key")
+    )
+    db.add(voucher)
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    db.refresh(voucher)
+    return {
+        "id": voucher.id,
+        "voucher_type": voucher.voucher_type,
+        "date": voucher.date,
+        "voucher_no": voucher.voucher_no,
+        "party": voucher.party,
+        "amount": voucher.amount,
+        "gst_amount": voucher.gst_amount,
+        "status": voucher.status
+    }
+
+@app.get("/vouchers")
+def get_vouchers(db: Session = Depends(get_db)):
+    rows = db.query(Vouchers).order_by(Vouchers.id.desc()).all()
+    return [
+        {
+            "id": v.id,
+            "voucher_type": v.voucher_type,
+            "date": v.date,
+            "voucher_no": v.voucher_no,
+            "party": v.party,
+            "amount": v.amount,
+            "gst_amount": v.gst_amount,
+            "status": v.status
+        }
+        for v in rows
+    ]
 

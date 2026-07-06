@@ -1251,3 +1251,31 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* =====================================================
+   CONSOLE SHELL OVERRIDES
+   Make dashboard-grid fill the console-content area
+   ===================================================== */
+.console-content .dashboard-grid {
+    width: 100%;
+    max-width: 100%;
+    grid-template-columns: 1fr 300px;
+    animation: none;
+}
+
+.console-content .main-content-area {
+    min-width: 0;
+}
+
+/* Hide the old top-bar header since we now use the sidebar topbar */
+.app-header {
+    display: none !important;
+}
+
+/* Remove old app-container spacing, wrap is now console-content */
+.app-container {
+    padding: 0;
+    gap: 0;
+    max-width: 100%;
+}
+

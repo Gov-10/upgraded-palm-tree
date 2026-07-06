@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "cors": "^2.8.6"
+    "cors": "^2.8.6",
+    "localforage": "^1.10.0",
+    "localstorage-memory": "^1.0.3"
   }
 }

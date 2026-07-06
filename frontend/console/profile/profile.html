@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile – GST Ledger Hub</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/sidebar.css">
+    <style>
+        .profile-hero { display:flex; align-items:center; gap:28px; padding:32px; background:var(--color-bg-surface); backdrop-filter:blur(12px); border:1px solid var(--color-border); border-radius:var(--border-radius-lg); }
+        .profile-avatar-xl { width:88px; height:88px; border-radius:50%; background:linear-gradient(135deg,#2563EB,#3b82f6); display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:800; color:white; flex-shrink:0; box-shadow:0 0 0 4px rgba(37,99,235,.2); }
+        .profile-info h2 { font-size:24px; font-weight:800; color:#f8fafc; }
+        .profile-info p { font-size:14px; color:#94a3b8; margin-top:4px; }
+        .profile-badge-inline { display:inline-flex; align-items:center; gap:6px; background:rgba(37,99,235,.1); border:1px solid rgba(37,99,235,.2); padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; color:#60a5fa; margin-top:10px; }
+        .profile-menu-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+        .profile-menu-card { display:flex; align-items:center; gap:16px; padding:20px 24px; background:var(--color-bg-surface); backdrop-filter:blur(12px); border:1px solid var(--color-border); border-radius:var(--border-radius-md); cursor:pointer; transition:all .25s; text-decoration:none; color:inherit; }
+        .profile-menu-card:hover { border-color:rgba(255,255,255,.18); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.2); }
+        .profile-menu-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+        .profile-menu-text h4 { font-size:14px; font-weight:600; color:#f8fafc; }
+        .profile-menu-text p { font-size:12px; color:#64748b; margin-top:2px; }
+    </style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="console-shell">
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
+            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">Account</div>
+            <a href="../profile/profile.html" class="nav-item active" data-tooltip="My Profile"><i class="ti ti-user-circle nav-icon"></i><span class="nav-label">My Profile</span></a>
+            <div class="nav-sub-group">
+                <a href="../profile/personal-info.html" class="nav-sub-item"><i class="ti ti-id-badge"></i> Personal Info</a>
+                <a href="../profile/account-info.html" class="nav-sub-item"><i class="ti ti-building"></i> Account &amp; Business</a>
+                <a href="../profile/security.html" class="nav-sub-item"><i class="ti ti-shield-lock"></i> Security &amp; Password</a>
+            </div>
+            <div class="nav-section-label" style="margin-top:8px;">Console</div>
+            <a href="../overview/overview.html" class="nav-item" data-tooltip="Overview"><i class="ti ti-layout-dashboard nav-icon"></i><span class="nav-label">Overview</span></a>
+            <a href="../vouchers/vouchers.html" class="nav-item" data-tooltip="Vouchers"><i class="ti ti-receipt-2 nav-icon"></i><span class="nav-label">Vouchers</span></a>
+            <a href="../reconciliations/reconciliations.html" class="nav-item" data-tooltip="Reconciliations"><i class="ti ti-arrows-exchange nav-icon"></i><span class="nav-label">Reconciliations</span></a>
+            <a href="../reports/reports.html" class="nav-item" data-tooltip="Reports"><i class="ti ti-chart-bar nav-icon"></i><span class="nav-label">Reports</span></a>
+            <div class="nav-section-label" style="margin-top:8px;">Tools</div>
+            <a href="../../upload/preview.html" class="nav-item" data-tooltip="Upload Invoice"><i class="ti ti-cloud-upload nav-icon"></i><span class="nav-label">Upload Invoice</span></a>
+            <a href="../settings/settings.html" class="nav-item" data-tooltip="Settings"><i class="ti ti-settings nav-icon"></i><span class="nav-label">Settings</span></a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="../profile/profile.html" class="sidebar-user">
+                <div class="sidebar-avatar">JD</div>
+                <div class="sidebar-user-info"><div class="sidebar-user-name">Jane Doe</div><div class="sidebar-user-role">CFO · Apex Retailers</div></div>
+            </a>
+        </div>
+    </nav>
+    <button class="sidebar-toggle" id="sidebar-toggle"><i class="ti ti-chevron-left"></i></button>
+
+    <div class="console-main">
+        <div class="console-topbar">
+            <div class="topbar-left">
+                <div class="topbar-page-title">My Profile</div>
+                <div class="topbar-breadcrumb"><span>Account</span><i class="ti ti-chevron-right" style="font-size:11px;"></i><span>Profile</span></div>
+            </div>
+        </div>
+
+        <div class="console-content">
+            <!-- Hero -->
+            <div class="profile-hero">
+                <div class="profile-avatar-xl">JD</div>
+                <div class="profile-info">
+                    <h2>Jane Doe</h2>
+                    <p>Chief Financial Officer · Apex Retailers Private Limited</p>
+                    <p style="margin-top:4px;color:#64748b;font-size:13px;">jane.doe@apexretailers.in &nbsp;·&nbsp; GSTIN: 27AAAAA1111A1Z1</p>
+                    <div class="profile-badge-inline"><i class="ti ti-shield-check"></i> Authorized Signatory</div>
+                </div>
+            </div>
+
+            <!-- Profile Menu Cards -->
+            <div class="profile-menu-grid">
+                <a href="personal-info.html" class="profile-menu-card">
+                    <div class="profile-menu-icon" style="background:rgba(37,99,235,.1);"><i class="ti ti-id-badge" style="color:#2563EB;"></i></div>
+                    <div class="profile-menu-text">
+                        <h4>Personal Information</h4>
+                        <p>Name, email, phone, designation</p>
+                    </div>
+                </a>
+                <a href="account-info.html" class="profile-menu-card">
+                    <div class="profile-menu-icon" style="background:rgba(16,185,129,.1);"><i class="ti ti-building" style="color:#10B981;"></i></div>
+                    <div class="profile-menu-text">
+                        <h4>Account &amp; Business</h4>
+                        <p>GSTIN, PAN, legal name, address</p>
+                    </div>
+                </a>
+                <a href="security.html" class="profile-menu-card">
+                    <div class="profile-menu-icon" style="background:rgba(245,158,11,.1);"><i class="ti ti-shield-lock" style="color:#F59E0B;"></i></div>
+                    <div class="profile-menu-text">
+                        <h4>Security &amp; Password</h4>
+                        <p>Two-factor auth, password reset</p>
+                    </div>
+                </a>
+                <a href="#" class="profile-menu-card">
+                    <div class="profile-menu-icon" style="background:rgba(37,99,235,.1);"><i class="ti ti-bell" style="color:#2563EB;"></i></div>
+                    <div class="profile-menu-text">
+                        <h4>Notifications</h4>
+                        <p>Alert preferences &amp; email digest</p>
+                    </div>
+                </a>
+                <a href="#" class="profile-menu-card">
+                    <div class="profile-menu-icon" style="background:rgba(239,68,68,.1);"><i class="ti ti-users" style="color:#EF4444;"></i></div>
+                    <div class="profile-menu-text">
+                        <h4>Team &amp; Access</h4>
+                        <p>Manage authorized signatories</p>
+                    </div>
+                </a>
+                <a href="#" class="profile-menu-card" onclick="if(confirm('Are you sure you want to log out?')) window.location.href='../../loginNAuth/login.html'">
+                    <div class="profile-menu-icon" style="background:rgba(100,116,139,.1);"><i class="ti ti-logout" style="color:#64748b;"></i></div>
+                    <div class="profile-menu-text">
+                        <h4>Log Out</h4>
+                        <p>Sign out of your account</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../shared/sidebar.js"></script>
+</body>
+</html>

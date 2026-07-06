@@ -21,3 +21,11 @@ class LoginSchema(BaseModel):
     username:str
     password: str
 
+class VoucherSchema(BaseModel):
+    voucher_type: str
+    date: str
+    voucher_no: str
+    party: str
+    amount: float
+    gst_amount: float
+    status: str

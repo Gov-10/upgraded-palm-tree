@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Float
 from sqlalchemy.orm import declarative_base, sessionmaker, Mapped, mapped_column
 import os
 from datetime import datetime
@@ -26,6 +26,18 @@ class SessionTokens(Base):
     token_hash: Mapped[str] = mapped_column(String)
     expires_at: Mapped[datetime] = mapped_column(DateTime)
     revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+
+class Vouchers(Base):
+    __tablename__ = "vouchers"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    voucher_type: Mapped[str] = mapped_column(String)
+    date: Mapped[str] = mapped_column(String)
+    voucher_no: Mapped[str] = mapped_column(String, unique=True, index=True)
+    party: Mapped[str] = mapped_column(String)
+    amount: Mapped[float] = mapped_column(Float)
+    gst_amount: Mapped[float] = mapped_column(Float)
+    status: Mapped[str] = mapped_column(String, default="pending")
+    file_key: Mapped[str] = mapped_column(String, unique=True)
 
 class History(Base):
     __tablename__ = "histories"

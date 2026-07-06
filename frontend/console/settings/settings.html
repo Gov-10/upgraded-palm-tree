@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings – GST Ledger Hub</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/sidebar.css">
+    <style>
+        .settings-group { display:flex; flex-direction:column; gap:0; }
+        .settings-row { display:flex; align-items:center; justify-content:space-between; padding:20px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+        .settings-row:last-child { border-bottom:none; }
+        .settings-row-left { display:flex; align-items:center; gap:16px; }
+        .settings-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+        .settings-row h4 { font-size:14px; font-weight:600; color:#f8fafc; }
+        .settings-row p { font-size:12px; color:#64748b; margin-top:2px; }
+        /* Toggle Switch */
+        .toggle { position:relative; width:44px; height:24px; flex-shrink:0; }
+        .toggle input { opacity:0; width:0; height:0; }
+        .toggle-slider { position:absolute; cursor:pointer; inset:0; background:#1e293b; border:1px solid rgba(255,255,255,.09); border-radius:20px; transition:.3s; }
+        .toggle-slider:before { content:''; position:absolute; height:16px; width:16px; left:3px; bottom:3px; background:#64748b; border-radius:50%; transition:.3s; }
+        .toggle input:checked + .toggle-slider { background:rgba(37,99,235,.3); border-color:rgba(37,99,235,.4); }
+        .toggle input:checked + .toggle-slider:before { transform:translateX(20px); background:#2563EB; }
+    </style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="console-shell">
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
+            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">Account</div>
+            <a href="../profile/profile.html" class="nav-item" data-tooltip="My Profile"><i class="ti ti-user-circle nav-icon"></i><span class="nav-label">My Profile</span></a>
+            <div class="nav-sub-group">
+                <a href="../profile/personal-info.html" class="nav-sub-item"><i class="ti ti-id-badge"></i> Personal Info</a>
+                <a href="../profile/account-info.html" class="nav-sub-item"><i class="ti ti-building"></i> Account &amp; Business</a>
+                <a href="../profile/security.html" class="nav-sub-item"><i class="ti ti-shield-lock"></i> Security &amp; Password</a>
+            </div>
+            <div class="nav-section-label" style="margin-top:8px;">Console</div>
+            <a href="../overview/overview.html" class="nav-item" data-tooltip="Overview"><i class="ti ti-layout-dashboard nav-icon"></i><span class="nav-label">Overview</span></a>
+            <a href="../vouchers/vouchers.html" class="nav-item" data-tooltip="Vouchers"><i class="ti ti-receipt-2 nav-icon"></i><span class="nav-label">Vouchers</span></a>
+            <a href="../reconciliations/reconciliations.html" class="nav-item" data-tooltip="Reconciliations"><i class="ti ti-arrows-exchange nav-icon"></i><span class="nav-label">Reconciliations</span></a>
+            <a href="../reports/reports.html" class="nav-item" data-tooltip="Reports"><i class="ti ti-chart-bar nav-icon"></i><span class="nav-label">Reports</span></a>
+            <div class="nav-section-label" style="margin-top:8px;">Tools</div>
+            <a href="../../upload/preview.html" class="nav-item" data-tooltip="Upload Invoice"><i class="ti ti-cloud-upload nav-icon"></i><span class="nav-label">Upload Invoice</span></a>
+            <a href="../settings/settings.html" class="nav-item active" data-tooltip="Settings"><i class="ti ti-settings nav-icon"></i><span class="nav-label">Settings</span></a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="../profile/profile.html" class="sidebar-user">
+                <div class="sidebar-avatar">JD</div>
+                <div class="sidebar-user-info"><div class="sidebar-user-name">Jane Doe</div><div class="sidebar-user-role">CFO · Apex Retailers</div></div>
+            </a>
+        </div>
+    </nav>
+    <button class="sidebar-toggle" id="sidebar-toggle"><i class="ti ti-chevron-left"></i></button>
+
+    <div class="console-main">
+        <div class="console-topbar">
+            <div class="topbar-left">
+                <div class="topbar-page-title">Settings</div>
+                <div class="topbar-breadcrumb"><span>Tools</span><i class="ti ti-chevron-right" style="font-size:11px;"></i><span>Settings</span></div>
+            </div>
+        </div>
+
+        <div class="console-content" style="max-width:800px;">
+
+            <div class="glass-card">
+                <div class="glass-card-header">
+                    <h3><i class="ti ti-bell"></i> Notifications</h3>
+                </div>
+                <div class="glass-card-body settings-group">
+                    <div class="settings-row">
+                        <div class="settings-row-left">
+                            <div class="settings-icon" style="background:rgba(37,99,235,.1);"><i class="ti ti-mail" style="color:#2563EB;"></i></div>
+                            <div><h4>Email Notifications</h4><p>Receive reports and alerts via email</p></div>
+                        </div>
+                        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-left">
+                            <div class="settings-icon" style="background:rgba(16,185,129,.1);"><i class="ti ti-bell-ringing" style="color:#10B981;"></i></div>
+                            <div><h4>GST Filing Reminders</h4><p>Alert before due dates (7 days, 3 days, 1 day)</p></div>
+                        </div>
+                        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-left">
+                            <div class="settings-icon" style="background:rgba(245,158,11,.1);"><i class="ti ti-packages" style="color:#F59E0B;"></i></div>
+                            <div><h4>Inventory Alerts</h4><p>Low stock and out-of-stock notifications</p></div>
+                        </div>
+                        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-left">
+                            <div class="settings-icon" style="background:rgba(100,116,139,.1);"><i class="ti ti-device-desktop" style="color:#64748b;"></i></div>
+                            <div><h4>Browser Push Notifications</h4><p>Real-time alerts in browser</p></div>
+                        </div>
+                        <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <div class="glass-card-header">
+                    <h3><i class="ti ti-database"></i> Data &amp; Privacy</h3>
+                </div>
+                <div class="glass-card-body settings-group">
+                    <div class="settings-row">
+                        <div class="settings-row-left">
+                            <div class="settings-icon" style="background:rgba(37,99,235,.1);"><i class="ti ti-download" style="color:#2563EB;"></i></div>
+                            <div><h4>Export All Data</h4><p>Download your complete financial history as CSV/XLSX</p></div>
+                        </div>
+                        <button class="topbar-btn topbar-btn-outline" style="font-size:12px;padding:7px 14px;"><i class="ti ti-download"></i> Export</button>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-left">
+                            <div class="settings-icon" style="background:rgba(239,68,68,.1);"><i class="ti ti-trash" style="color:#EF4444;"></i></div>
+                            <div><h4>Delete Account</h4><p>Permanently remove all data (irreversible)</p></div>
+                        </div>
+                        <button style="background:rgba(239,68,68,.1);color:#EF4444;border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">Delete Account</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="../shared/sidebar.js"></script>
+</body>
+</html>

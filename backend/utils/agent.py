@@ -8,6 +8,10 @@ import json
 import uuid
 import pandas as pd
 from io import StringIO
+from pydantic import SecretStr
+
+load_dotenv()
+llm=ChatGroq(model='qwen/qwen3-32b', temperature=0, max_tokens=None, reasoning_format="hidden", timeout=None, max_retries=2, api_key=SecretStr(os.getenv('GROQ_API_KEY', 'none')))
 import boto3
 load_dotenv()
 llm = ChatGroq(

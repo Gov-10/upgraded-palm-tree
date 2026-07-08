@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory &ndash; GST Ledger Hub</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="../../favicon.png">
+<link rel="stylesheet" href="../shared/sidebar.css">
+<style>
+:root{
+    --bg-0:#0a0e17; --surface:rgba(255,255,255,0.035); --border:rgba(255,255,255,0.09);
+    --border-strong:rgba(255,255,255,0.14); --text-hi:#f8fafc; --text-mid:#94a3b8; --text-lo:#64748b;
+    --green:#10B981; --amber:#F59E0B; --red:#EF4444; --blue:#2563EB; --blue-light:#60a5fa; --purple:#8b5cf6;
+    --radius:16px;
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+
+.mono{font-family:'SFMono-Regular',Consolas,monospace;}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:20px;white-space:nowrap;}
+.badge-green{background:rgba(16,185,129,0.12);color:var(--green);}
+.badge-amber{background:rgba(245,158,11,0.12);color:var(--amber);}
+.badge-red{background:rgba(239,68,68,0.12);color:var(--red);}
+.badge-blue{background:rgba(37,99,235,0.12);color:var(--blue-light);}
+.badge-purple{background:rgba(139,92,246,0.12);color:var(--purple);}
+.badge-gray{background:rgba(148,163,184,0.12);color:var(--text-mid);}
+
+.glass-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);backdrop-filter:blur(16px);overflow:hidden;}
+.glass-card-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap;}
+.glass-card-header h3{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.glass-card-header h3 i{color:var(--blue-light);font-size:16px;}
+.card-link{font-size:12.5px;color:var(--blue-light);text-decoration:none;font-weight:600;cursor:pointer;}
+.card-link:hover{text-decoration:underline;}
+.header-actions{display:flex;gap:8px;align-items:center;}
+.mini-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border-strong);color:var(--text-mid);background:transparent;font-family:inherit;}
+.mini-btn:hover{color:var(--text-hi);}
+.mini-btn.primary{background:linear-gradient(135deg,var(--blue),#3b82f6);color:#fff;border-color:transparent;}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{padding:12px 20px;text-align:left;font-weight:600;color:var(--text-lo);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+td{padding:13px 20px;color:var(--text-hi);border-bottom:1px solid rgba(255,255,255,0.05);white-space:nowrap;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,0.02);}
+
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.stat-card{padding:20px;}
+.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.stat-label{font-size:12.5px;font-weight:600;color:var(--text-mid);}
+.stat-value{font-size:28px;font-weight:800;line-height:1;}
+.stat-sub{font-size:11.5px;color:var(--text-lo);margin-top:6px;}
+
+.two-col{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start;}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;}
+
+.progress-track{height:7px;border-radius:20px;background:rgba(255,255,255,0.06);overflow:hidden;}
+.progress-fill{height:100%;border-radius:20px;}
+
+.row-item{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid rgba(255,255,255,0.05);gap:12px;}
+.row-item:last-child{border-bottom:none;}
+.row-name{font-size:13.5px;font-weight:600;}
+.row-meta{font-size:11.5px;color:var(--text-lo);margin-top:2px;}
+.row-value{font-size:14px;font-weight:700;text-align:right;white-space:nowrap;}
+
+.toolbar{display:flex;align-items:center;gap:10px;padding:16px 20px;flex-wrap:wrap;}
+.search-box{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:9px 14px;}
+.search-box i{color:var(--text-lo);font-size:15px;}
+.search-box input{background:transparent;border:none;outline:none;color:var(--text-hi);font-size:13px;width:100%;font-family:inherit;}
+.search-box input::placeholder{color:var(--text-lo);}
+.filter-chip{display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:10px;border:1px solid var(--border-strong);color:var(--text-mid);font-size:12.5px;font-weight:600;cursor:pointer;}
+.filter-chip:hover{color:var(--text-hi);}
+
+.item-name-cell{display:flex;flex-direction:column;gap:2px;}
+.item-sub{font-size:11px;color:var(--text-lo);}
+.stock-bar{width:70px;}
+
+/* Forms */
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:20px;}
+.form-grid.cols-3{grid-template-columns:repeat(3,1fr);}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{font-size:12px;font-weight:600;color:var(--text-mid);}
+.form-group input,.form-group select,.form-group textarea{
+    background:rgba(255,255,255,0.03);border:1px solid var(--border-strong);border-radius:9px;
+    padding:10px 12px;color:var(--text-hi);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue-light);}
+.form-group textarea{resize:vertical;min-height:70px;}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid var(--border);}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;}
+.tag{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border-strong);color:var(--text-mid);cursor:pointer;}
+.tag.selected{background:rgba(37,99,235,0.14);color:var(--blue-light);border-color:var(--blue-light);}
+
+.tree{padding:8px 20px 16px;}
+.tree-item{display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13px;}
+.tree-item i.chevron{font-size:13px;color:var(--text-lo);}
+.tree-item.lvl2{padding-left:26px;color:var(--text-mid);}
+.tree-item.lvl3{padding-left:52px;color:var(--text-lo);font-size:12.5px;}
+.tree-count{margin-left:auto;font-size:11.5px;color:var(--text-lo);}
+
+.stepper{display:flex;align-items:center;gap:0;padding:20px 20px 0;}
+.step{display:flex;align-items:center;gap:8px;color:var(--text-lo);font-size:12.5px;font-weight:600;}
+.step-num{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.step.done .step-num{background:var(--green);color:#fff;}
+.step.current .step-num{background:var(--blue);color:#fff;}
+.step-line{width:40px;height:1px;background:var(--border-strong);margin:0 10px;}
+
+.module-tabs{display:flex;gap:4px;padding:14px 32px 0;border-bottom:1px solid var(--border);overflow-x:auto;position:sticky;top:73px;z-index:5;background:rgba(10,14,23,0.75);backdrop-filter:blur(12px);}
+.module-tab{display:flex;align-items:center;gap:7px;padding:10px 16px;font-size:12.5px;font-weight:600;color:var(--text-mid);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;}
+.module-tab i{font-size:15px;}
+.module-tab:hover{color:var(--text-hi);}
+.module-tab.active{color:var(--blue-light);border-bottom-color:var(--blue-light);}
+
+.console-content{padding:26px 32px 60px;display:none;flex-direction:column;gap:22px;}
+.console-content.active{display:flex;}
+
+/* Topbar */
+.console-main{flex:1;min-width:0;overflow-x:hidden;}
+.console-topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid var(--border);background:rgba(10,14,23,0.6);backdrop-filter:blur(12px);position:sticky;top:0;z-index:6;}
+.topbar-page-title{font-size:19px;font-weight:700;}
+.topbar-breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-lo);margin-top:3px;}
+.topbar-right{display:flex;gap:10px;}
+.topbar-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s;white-space:nowrap;font-family:inherit;}
+.topbar-btn-outline{background:transparent;border-color:var(--border-strong);color:var(--text-mid);}
+.topbar-btn-outline:hover{color:var(--text-hi);border-color:var(--text-mid);}
+.topbar-btn-primary{background:linear-gradient(135deg,var(--blue),#3b82f6);color:#fff;}
+.topbar-btn-primary:hover{filter:brightness(1.1);}
+
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+@media (max-width:1200px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .two-col,.three-col{grid-template-columns:1fr;}
+    .form-grid,.form-grid.cols-3{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="console-shell">
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
+            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">Account</div>
+            <a href="../profile/profile.html" class="nav-item" data-tooltip="My Profile">
+                <i class="ti ti-user-circle nav-icon"></i><span class="nav-label">My Profile</span>
+            </a>
+            <div class="nav-sub-group">
+                <a href="../profile/personal-info.html" class="nav-sub-item"><i class="ti ti-id-badge"></i> Personal Info</a>
+                <a href="../profile/account-info.html" class="nav-sub-item"><i class="ti ti-building"></i> Account &amp; Business</a>
+                <a href="../profile/security.html" class="nav-sub-item"><i class="ti ti-shield-lock"></i> Security &amp; Password</a>
+            </div>
+            <div class="nav-section-label" style="margin-top:8px;">Console</div>
+            <a href="../overview/overview.html" class="nav-item" data-tooltip="Overview">
+                <i class="ti ti-layout-dashboard nav-icon"></i><span class="nav-label">Overview</span>
+            </a>
+            <a href="../vouchers/vouchers.html" class="nav-item" data-tooltip="Vouchers">
+                <i class="ti ti-receipt-2 nav-icon"></i><span class="nav-label">Vouchers</span>
+            </a>
+            <a href="../bank-statements/bank-statements.html" class="nav-item" data-tooltip="Bank Statements">
+                <i class="ti ti-building-bank nav-icon"></i><span class="nav-label">Bank Statements</span>
+            </a>
+            <a href="../inventory/inventory.html" class="nav-item active" data-tooltip="Inventory">
+                <i class="ti ti-package nav-icon"></i><span class="nav-label">Inventory</span>
+            </a>
+            <a href="../reconciliations/reconciliations.html" class="nav-item" data-tooltip="Reconciliations">
+                <i class="ti ti-arrows-exchange nav-icon"></i><span class="nav-label">Reconciliations</span>
+            </a>
+            <a href="../reports/reports.html" class="nav-item" data-tooltip="Reports">
+                <i class="ti ti-chart-bar nav-icon"></i><span class="nav-label">Reports</span>
+            </a>
+            <div class="nav-section-label" style="margin-top:8px;">Tools</div>
+            <a href="../../upload/preview.html" class="nav-item" data-tooltip="Upload Invoice">
+                <i class="ti ti-cloud-upload nav-icon"></i><span class="nav-label">Upload Invoice</span>
+            </a>
+            <a href="../settings/settings.html" class="nav-item" data-tooltip="Settings">
+                <i class="ti ti-settings nav-icon"></i><span class="nav-label">Settings</span>
+            </a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="../profile/profile.html" class="sidebar-user">
+                <div class="sidebar-avatar">JD</div>
+                <div class="sidebar-user-info">
+                    <div class="sidebar-user-name">Jane Doe</div>
+                    <div class="sidebar-user-role">CFO &middot; Apex Retailers</div>
+                </div>
+            </a>
+        </div>
+    </nav>
+    <button class="sidebar-toggle" id="sidebar-toggle"><i class="ti ti-chevron-left"></i></button>
+
+    <div class="console-main">
+        <div class="console-topbar">
+            <div class="topbar-left">
+                <div class="topbar-page-title" id="page-title">Inventory &middot; Dashboard</div>
+                <div class="topbar-breadcrumb"><span>Console</span><i class="ti ti-chevron-right" style="font-size:11px;"></i><span>Inventory</span></div>
+            </div>
+            <div class="topbar-right">
+                <button class="topbar-btn topbar-btn-outline"><i class="ti ti-download"></i> Export</button>
+                <button class="topbar-btn topbar-btn-primary"><i class="ti ti-plus"></i> Quick Add</button>
+            </div>
+        </div>
+
+        <div class="module-tabs" id="module-tabs">
+            <div class="module-tab active" data-tab="dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+            <div class="module-tab" data-tab="items"><i class="ti ti-box"></i> Stock Items</div>
+            <div class="module-tab" data-tab="groups"><i class="ti ti-sitemap"></i> Groups &amp; Categories</div>
+            <div class="module-tab" data-tab="units"><i class="ti ti-ruler-2"></i> Units of Measure</div>
+            <div class="module-tab" data-tab="godowns"><i class="ti ti-building-warehouse"></i> Godowns</div>
+            <div class="module-tab" data-tab="purchase"><i class="ti ti-truck-delivery"></i> Purchase / GRN</div>
+            <div class="module-tab" data-tab="sales"><i class="ti ti-package-export"></i> Sales / Delivery</div>
+            <div class="module-tab" data-tab="journal"><i class="ti ti-arrows-transfer-up"></i> Stock Journal</div>
+            <div class="module-tab" data-tab="manufacturing"><i class="ti ti-settings-cog"></i> Manufacturing / BOM</div>
+            <div class="module-tab" data-tab="physical"><i class="ti ti-clipboard-check"></i> Physical Stock</div>
+            <div class="module-tab" data-tab="batch"><i class="ti ti-barcode"></i> Batch &amp; Serial</div>
+            <div class="module-tab" data-tab="jobwork"><i class="ti ti-tool"></i> Job Work</div>
+            <div class="module-tab" data-tab="reports"><i class="ti ti-chart-bar"></i> Reports</div>
+        </div>
+
+        <!-- ============ DASHBOARD ============ -->
+        <div class="console-content active" id="tab-dashboard">
+            <div class="stat-grid">
+                <div class="glass-card stat-card">
+                    <div class="stat-top"><div class="stat-label">Total Stock Value</div><div class="stat-icon" style="background:rgba(37,99,235,.12);"><i class="ti ti-currency-rupee" style="color:var(--blue-light);"></i></div></div>
+                    <div class="stat-value">&#8377;18,42,600</div><div class="stat-sub">Across 6 godowns &middot; 214 SKUs</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-top"><div class="stat-label">Total SKUs</div><div class="stat-icon" style="background:rgba(16,185,129,.12);"><i class="ti ti-box" style="color:var(--green);"></i></div></div>
+                    <div class="stat-value">214</div><div class="stat-sub">18 groups &middot; 42 categories</div>
+                </div>
+                <div class="glass-card stat-card" style="border-color:rgba(245,158,11,0.25);">
+                    <div class="stat-top"><div class="stat-label">Low Stock Alerts</div><div class="stat-icon" style="background:rgba(245,158,11,.12);"><i class="ti ti-alert-triangle" style="color:var(--amber);"></i></div></div>
+                    <div class="stat-value" style="color:var(--amber);">9</div><div class="stat-sub">Below reorder level</div>
+                </div>
+                <div class="glass-card stat-card" style="border-color:rgba(239,68,68,0.25);">
+                    <div class="stat-top"><div class="stat-label">Expiring in 30 Days</div><div class="stat-icon" style="background:rgba(239,68,68,.12);"><i class="ti ti-clock-exclamation" style="color:var(--red);"></i></div></div>
+                    <div class="stat-value" style="color:var(--red);">4</div><div class="stat-sub">Batch-tracked items</div>
+                </div>
+            </div>
+            <div class="two-col">
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-list-details"></i> Stock Items</h3><a class="card-link" data-goto="items">View All &rarr;</a></div>
+                    <div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Item</th><th>Godown</th><th style="text-align:right;">On Hand</th><th>Level</th><th style="text-align:right;">Value</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr><td><div class="item-name-cell"><span style="font-weight:600;">Samsung Galaxy A15 (128GB)</span><span class="item-sub mono">SKU-EL-0231</span></div></td><td>Main Warehouse</td><td style="text-align:right;font-weight:600;">128 Pcs</td><td><div class="progress-track stock-bar"><div class="progress-fill" style="width:78%;background:var(--green);"></div></div></td><td style="text-align:right;font-weight:600;">&#8377;2,24,000</td><td><span class="badge badge-green"><i class="ti ti-check"></i> In Stock</span></td></tr>
+                            <tr><td><div class="item-name-cell"><span style="font-weight:600;">HP DeskJet Ink Cartridge 680</span><span class="item-sub mono">SKU-OF-0112</span></div></td><td>Andheri Godown</td><td style="text-align:right;font-weight:600;">14 Pcs</td><td><div class="progress-track stock-bar"><div class="progress-fill" style="width:18%;background:var(--amber);"></div></div></td><td style="text-align:right;font-weight:600;">&#8377;8,260</td><td><span class="badge badge-amber"><i class="ti ti-alert-triangle"></i> Low Stock</span></td></tr>
+                            <tr><td><div class="item-name-cell"><span style="font-weight:600;">Steel Almirah 3-Door</span><span class="item-sub mono">SKU-FN-0045</span></div></td><td>Main Warehouse</td><td style="text-align:right;font-weight:600;">0 Pcs</td><td><div class="progress-track stock-bar"><div class="progress-fill" style="width:0%;background:var(--red);"></div></div></td><td style="text-align:right;font-weight:600;">&#8377;0</td><td><span class="badge badge-red"><i class="ti ti-ban"></i> Out of Stock</span></td></tr>
+                        </tbody>
+                    </table></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:20px;">
+                    <div class="glass-card">
+                        <div class="glass-card-header"><h3><i class="ti ti-building-warehouse"></i> Stock by Godown</h3></div>
+                        <div>
+                            <div class="row-item"><div><div class="row-name">Main Warehouse</div><div class="row-meta">86 SKUs</div></div><div class="row-value">&#8377;9,14,200</div></div>
+                            <div class="row-item"><div><div class="row-name">Andheri Godown</div><div class="row-meta">54 SKUs</div></div><div class="row-value">&#8377;4,02,150</div></div>
+                            <div class="row-item"><div><div class="row-name">Cold Storage &ndash; B2</div><div class="row-meta">21 SKUs</div></div><div class="row-value">&#8377;1,88,900</div></div>
+                        </div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="glass-card-header"><h3><i class="ti ti-transfer"></i> Recent Movements</h3></div>
+                        <div>
+                            <div class="row-item"><div><div class="row-name">GRN #GR-2231</div><div class="row-meta">Radiant Electro &middot; +40 Pcs</div></div><span class="badge badge-blue">Inward</span></div>
+                            <div class="row-item"><div><div class="row-name">Stock Journal #SJ-0091</div><div class="row-meta">Main &rarr; Pune &middot; 15 Pcs</div></div><span class="badge badge-gray">Transfer</span></div>
+                            <div class="row-item"><div><div class="row-name">Delivery Note #DN-1187</div><div class="row-meta">Nexus Office &middot; &minus;8 Pcs</div></div><span class="badge badge-blue">Outward</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ STOCK ITEMS (MASTER) ============ -->
+        <div class="console-content" id="tab-items">
+            <div class="two-col">
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-list-details"></i> Stock Items Master</h3>
+                        <div class="header-actions"><button class="mini-btn"><i class="ti ti-upload"></i> Import CSV</button><button class="mini-btn primary"><i class="ti ti-plus"></i> New Item</button></div>
+                    </div>
+                    <div class="toolbar">
+                        <div class="search-box"><i class="ti ti-search"></i><input type="text" placeholder="Search by item name, SKU or HSN..."></div>
+                        <div class="filter-chip"><i class="ti ti-sitemap"></i> All Groups</div>
+                        <div class="filter-chip"><i class="ti ti-building-warehouse"></i> All Godowns</div>
+                    </div>
+                    <div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Item</th><th>Group</th><th>Unit</th><th style="text-align:right;">Rate</th><th style="text-align:right;">On Hand</th><th>Status</th><th></th></tr></thead>
+                        <tbody>
+                            <tr><td><div class="item-name-cell"><span style="font-weight:600;">Samsung Galaxy A15 (128GB)</span><span class="item-sub mono">SKU-EL-0231 &middot; HSN 8517</span></div></td><td>Electronics &gt; Mobiles</td><td>Pcs</td><td style="text-align:right;">&#8377;17,500</td><td style="text-align:right;">128</td><td><span class="badge badge-green">Active</span></td><td><i class="ti ti-dots" style="color:var(--text-lo);cursor:pointer;"></i></td></tr>
+                            <tr><td><div class="item-name-cell"><span style="font-weight:600;">HP DeskJet Ink Cartridge 680</span><span class="item-sub mono">SKU-OF-0112 &middot; HSN 8443</span></div></td><td>Office &gt; Printer Supplies</td><td>Pcs</td><td style="text-align:right;">&#8377;590</td><td style="text-align:right;">14</td><td><span class="badge badge-amber">Low Stock</span></td><td><i class="ti ti-dots" style="color:var(--text-lo);cursor:pointer;"></i></td></tr>
+                            <tr><td><div class="item-name-cell"><span style="font-weight:600;">Amul Fresh Cream 1L</span><span class="item-sub mono">SKU-FD-0087 &middot; Batch tracked</span></div></td><td>FMCG &gt; Dairy</td><td>Ltr</td><td style="text-align:right;">&#8377;170</td><td style="text-align:right;">40</td><td><span class="badge badge-red">Expiring</span></td><td><i class="ti ti-dots" style="color:var(--text-lo);cursor:pointer;"></i></td></tr>
+                            <tr><td><div class="item-name-cell"><span style="font-weight:600;">Steel Almirah 3-Door</span><span class="item-sub mono">SKU-FN-0045 &middot; HSN 9403</span></div></td><td>Furniture</td><td>Pcs</td><td style="text-align:right;">&#8377;9,200</td><td style="text-align:right;">0</td><td><span class="badge badge-red">Out of Stock</span></td><td><i class="ti ti-dots" style="color:var(--text-lo);cursor:pointer;"></i></td></tr>
+                            <tr><td><div class="item-name-cell"><span style="font-weight:600;">Bosch Cordless Drill GSR120</span><span class="item-sub mono">SKU-TL-0019 &middot; Serialized</span></div></td><td>Tools &amp; Hardware</td><td>Pcs</td><td style="text-align:right;">&#8377;6,000</td><td style="text-align:right;">22</td><td><span class="badge badge-green">Active</span></td><td><i class="ti ti-dots" style="color:var(--text-lo);cursor:pointer;"></i></td></tr>
+                        </tbody>
+                    </table></div>
+                </div>
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-square-plus"></i> New Stock Item</h3></div>
+                    <div class="form-grid" style="grid-template-columns:1fr;">
+                        <div class="form-group"><label>Item Name</label><input type="text" placeholder="e.g. Samsung Galaxy A15 (128GB)"></div>
+                        <div class="form-group"><label>Stock Group</label><select><option>Electronics &gt; Mobiles</option><option>Office &gt; Printer Supplies</option><option>FMCG &gt; Dairy</option></select></div>
+                        <div class="form-group"><label>Stock Category</label><select><option>Fast Moving</option><option>Seasonal</option><option>Slow Moving</option></select></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group"><label>Unit of Measure</label><select><option>Pcs</option><option>Kg</option><option>Ltr</option><option>Box of 12 Pcs</option></select></div>
+                            <div class="form-group"><label>HSN / SAC Code</label><input type="text" placeholder="8517"></div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group"><label>Opening Qty</label><input type="number" placeholder="0"></div>
+                            <div class="form-group"><label>Opening Value (&#8377;)</label><input type="number" placeholder="0.00"></div>
+                        </div>
+                        <div class="form-group"><label>GST Rate</label><select><option>5%</option><option>12%</option><option selected>18%</option><option>28%</option></select></div>
+                        <div class="form-group"><label>Track As</label>
+                            <div class="tag-row"><div class="tag selected">Plain</div><div class="tag">Batch-wise</div><div class="tag">Serial-wise</div></div>
+                        </div>
+                    </div>
+                    <div class="form-actions"><button class="mini-btn">Cancel</button><button class="mini-btn primary"><i class="ti ti-check"></i> Save Item</button></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ GROUPS & CATEGORIES ============ -->
+        <div class="console-content" id="tab-groups">
+            <div class="two-col">
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-sitemap"></i> Stock Groups (Hierarchy)</h3><button class="mini-btn primary"><i class="ti ti-plus"></i> New Group</button></div>
+                    <div class="tree">
+                        <div class="tree-item"><i class="ti ti-chevron-down chevron"></i><i class="ti ti-folder" style="color:var(--blue-light);"></i> Electronics <span class="tree-count">86 items</span></div>
+                        <div class="tree-item lvl2"><i class="ti ti-corner-down-right"></i> Mobiles <span class="tree-count">42 items</span></div>
+                        <div class="tree-item lvl3">&#8627; Accessories <span class="tree-count">18 items</span></div>
+                        <div class="tree-item lvl2"><i class="ti ti-corner-down-right"></i> Laptops &amp; Accessories <span class="tree-count">26 items</span></div>
+                        <div class="tree-item"><i class="ti ti-chevron-down chevron"></i><i class="ti ti-folder" style="color:var(--green);"></i> FMCG <span class="tree-count">54 items</span></div>
+                        <div class="tree-item lvl2"><i class="ti ti-corner-down-right"></i> Dairy <span class="tree-count">21 items</span></div>
+                        <div class="tree-item lvl2"><i class="ti ti-corner-down-right"></i> Beverages <span class="tree-count">33 items</span></div>
+                        <div class="tree-item"><i class="ti ti-chevron-right chevron"></i><i class="ti ti-folder" style="color:var(--amber);"></i> Office Supplies <span class="tree-count">39 items</span></div>
+                        <div class="tree-item"><i class="ti ti-chevron-right chevron"></i><i class="ti ti-folder" style="color:var(--purple);"></i> Furniture <span class="tree-count">35 items</span></div>
+                    </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:20px;">
+                    <div class="glass-card">
+                        <div class="glass-card-header"><h3><i class="ti ti-tags"></i> Stock Categories</h3></div>
+                        <div>
+                            <div class="row-item"><div class="row-name">Fast Moving</div><span class="badge badge-blue">96 items</span></div>
+                            <div class="row-item"><div class="row-name">Slow Moving</div><span class="badge badge-gray">54 items</span></div>
+                            <div class="row-item"><div class="row-name">Seasonal</div><span class="badge badge-amber">28 items</span></div>
+                            <div class="row-item"><div class="row-name">High Value</div><span class="badge badge-purple">36 items</span></div>
+                        </div>
+                        <div class="form-actions"><button class="mini-btn primary" style="width:100%;justify-content:center;"><i class="ti ti-plus"></i> New Category</button></div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="glass-card-header"><h3><i class="ti ti-square-plus"></i> Quick Add Group</h3></div>
+                        <div class="form-grid" style="grid-template-columns:1fr;">
+                            <div class="form-group"><label>Group Name</label><input type="text" placeholder="e.g. Accessories"></div>
+                            <div class="form-group"><label>Under Group</label><select><option>Primary (Top Level)</option><option>Electronics</option><option>Electronics &gt; Mobiles</option></select></div>
+                        </div>
+                        <div class="form-actions"><button class="mini-btn primary" style="width:calc(100% - 40px);justify-content:center;margin:0 20px 20px;"><i class="ti ti-check"></i> Create Group</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ UNITS ============ -->
+        <div class="console-content" id="tab-units">
+            <div class="two-col">
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-ruler-2"></i> Units of Measure</h3><button class="mini-btn primary"><i class="ti ti-plus"></i> New Unit</button></div>
+                    <div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Symbol</th><th>Name</th><th>Type</th><th>Decimal Places</th><th></th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">Pcs</td><td>Pieces</td><td><span class="badge badge-blue">Simple</span></td><td>0</td><td><i class="ti ti-dots" style="color:var(--text-lo);cursor:pointer;"></i></td></tr>
+                            <tr><td class="mono">Kg</td><td>Kilogram</td><td><span class="badge badge-blue">Simple</span></td><td>3</td><td><i class="ti ti-dots" style="color:var(--text-lo);cursor:pointer;"></i></td></tr>
+                            <tr><td class="mono">Ltr</td><td>Litre</td><td><span class="badge badge-blue">Simple</span></td><td>2</td><td><i class="ti ti-dots" style="color:var(--text-lo);cursor:pointer;"></i></td></tr>
+                            <tr><td class="mono">Box</td><td>Box of 12 Pcs</td><td><span class="badge badge-purple">Compound</span></td><td>0</td><td><i class="ti ti-dots" style="color:var(--text-lo);cursor:pointer;"></i></td></tr>
+                            <tr><td class="mono">Dz</td><td>Dozen (12 Pcs)</td><td><span class="badge badge-purple">Compound</span></td><td>0</td><td><i class="ti ti-dots" style="color:var(--text-lo);cursor:pointer;"></i></td></tr>
+                        </tbody>
+                    </table></div>
+                </div>
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-square-plus"></i> New Unit</h3></div>
+                    <div class="form-grid" style="grid-template-columns:1fr;">
+                        <div class="form-group"><label>Unit Type</label>
+                            <div class="tag-row"><div class="tag selected">Simple</div><div class="tag">Compound</div></div>
+                        </div>
+                        <div class="form-group"><label>Symbol</label><input type="text" placeholder="e.g. Box"></div>
+                        <div class="form-group"><label>Full Name</label><input type="text" placeholder="e.g. Box of 12 Pcs"></div>
+                        <div class="form-group"><label>Conversion (Compound only)</label><input type="text" placeholder="1 Box = 12 Pcs"></div>
+                        <div class="form-group"><label>Decimal Places</label><input type="number" value="0"></div>
+                    </div>
+                    <div class="form-actions"><button class="mini-btn">Cancel</button><button class="mini-btn primary"><i class="ti ti-check"></i> Save Unit</button></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ GODOWNS ============ -->
+        <div class="console-content" id="tab-godowns">
+            <div class="two-col">
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-building-warehouse"></i> Godowns / Warehouses</h3><button class="mini-btn primary"><i class="ti ti-plus"></i> New Godown</button></div>
+                    <div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Godown</th><th>Location</th><th>SKUs</th><th style="text-align:right;">Stock Value</th><th>Sub-locations</th></tr></thead>
+                        <tbody>
+                            <tr><td style="font-weight:600;">Main Warehouse</td><td>Bhiwandi, MH</td><td>86</td><td style="text-align:right;">&#8377;9,14,200</td><td>Rack A&ndash;F</td></tr>
+                            <tr><td style="font-weight:600;">Andheri Godown</td><td>Andheri E, Mumbai</td><td>54</td><td style="text-align:right;">&#8377;4,02,150</td><td>Rack 1&ndash;3</td></tr>
+                            <tr><td style="font-weight:600;">Cold Storage &ndash; B2</td><td>Bhiwandi, MH</td><td>21</td><td style="text-align:right;">&#8377;1,88,900</td><td>Chiller 1&ndash;2</td></tr>
+                            <tr><td style="font-weight:600;">Pune Branch</td><td>Hinjewadi, Pune</td><td>53</td><td style="text-align:right;">&#8377;3,37,350</td><td>&mdash;</td></tr>
+                        </tbody>
+                    </table></div>
+                </div>
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-square-plus"></i> New Godown</h3></div>
+                    <div class="form-grid" style="grid-template-columns:1fr;">
+                        <div class="form-group"><label>Godown Name</label><input type="text" placeholder="e.g. Nagpur Depot"></div>
+                        <div class="form-group"><label>Under Godown</label><select><option>Primary (Top Level)</option><option>Main Warehouse</option></select></div>
+                        <div class="form-group"><label>Address</label><textarea placeholder="Full address"></textarea></div>
+                        <div class="form-group"><label>Allow Negative Stock</label>
+                            <div class="tag-row"><div class="tag selected">No</div><div class="tag">Yes</div></div>
+                        </div>
+                    </div>
+                    <div class="form-actions"><button class="mini-btn">Cancel</button><button class="mini-btn primary"><i class="ti ti-check"></i> Save Godown</button></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ PURCHASE / GRN ============ -->
+        <div class="console-content" id="tab-purchase">
+            <div class="glass-card">
+                <div class="glass-card-header"><h3><i class="ti ti-truck-delivery"></i> Purchase Order &rarr; GRN &rarr; Purchase Invoice</h3></div>
+                <div class="stepper">
+                    <div class="step done"><div class="step-num"><i class="ti ti-check" style="font-size:13px;"></i></div> Purchase Order</div><div class="step-line"></div>
+                    <div class="step current"><div class="step-num">2</div> Receipt Note (GRN)</div><div class="step-line"></div>
+                    <div class="step"><div class="step-num">3</div> Purchase Invoice</div>
+                </div>
+                <div class="toolbar">
+                    <div class="search-box"><i class="ti ti-search"></i><input type="text" placeholder="Search PO / GRN number, supplier..."></div>
+                    <div class="filter-chip"><i class="ti ti-calendar"></i> This Month</div>
+                    <button class="mini-btn primary"><i class="ti ti-plus"></i> New Purchase Order</button>
+                </div>
+                <div style="overflow-x:auto;"><table>
+                    <thead><tr><th>Doc No.</th><th>Type</th><th>Supplier</th><th>Godown</th><th style="text-align:right;">Qty</th><th>Date</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td class="mono">PO-4471</td><td><span class="badge badge-blue">Order</span></td><td>Radiant Electro Distributors</td><td>Main Warehouse</td><td style="text-align:right;">60 Pcs</td><td>02 Jul 2026</td><td><span class="badge badge-amber">Pending GRN</span></td></tr>
+                        <tr><td class="mono">GR-2231</td><td><span class="badge badge-purple">GRN</span></td><td>Radiant Electro Distributors</td><td>Main Warehouse</td><td style="text-align:right;">40 Pcs</td><td>05 Jul 2026</td><td><span class="badge badge-green">Received</span></td></tr>
+                        <tr><td class="mono">PO-4468</td><td><span class="badge badge-blue">Order</span></td><td>Nexus Office Suppliers</td><td>Andheri Godown</td><td style="text-align:right;">200 Pcs</td><td>28 Jun 2026</td><td><span class="badge badge-green">Fully Received</span></td></tr>
+                        <tr><td class="mono">GR-2219</td><td><span class="badge badge-purple">GRN</span></td><td>Nexus Office Suppliers</td><td>Andheri Godown</td><td style="text-align:right;">200 Pcs</td><td>30 Jun 2026</td><td><span class="badge badge-gray">Invoiced Later</span></td></tr>
+                    </tbody>
+                </table></div>
+            </div>
+            <div class="glass-card">
+                <div class="glass-card-header"><h3><i class="ti ti-square-plus"></i> New Receipt Note (GRN)</h3></div>
+                <div class="form-grid cols-3">
+                    <div class="form-group"><label>Against PO</label><select><option>PO-4471 &middot; Radiant Electro</option><option>PO-4468 &middot; Nexus Office</option></select></div>
+                    <div class="form-group"><label>Supplier</label><input type="text" value="Radiant Electro Distributors" readonly></div>
+                    <div class="form-group"><label>Receipt Date</label><input type="date"></div>
+                    <div class="form-group"><label>Godown</label><select><option>Main Warehouse</option><option>Andheri Godown</option></select></div>
+                    <div class="form-group"><label>Item</label><select><option>Samsung Galaxy A15 (128GB)</option></select></div>
+                    <div class="form-group"><label>Qty Received</label><input type="number" placeholder="0"></div>
+                </div>
+                <div class="form-actions"><button class="mini-btn">Save Draft</button><button class="mini-btn primary"><i class="ti ti-check"></i> Confirm Receipt</button></div>
+            </div>
+        </div>
+
+        <!-- ============ SALES / DELIVERY ============ -->
+        <div class="console-content" id="tab-sales">
+            <div class="glass-card">
+                <div class="glass-card-header"><h3><i class="ti ti-package-export"></i> Sales Order &rarr; Delivery Note &rarr; Sales Invoice</h3></div>
+                <div class="stepper">
+                    <div class="step done"><div class="step-num"><i class="ti ti-check" style="font-size:13px;"></i></div> Sales Order</div><div class="step-line"></div>
+                    <div class="step done"><div class="step-num"><i class="ti ti-check" style="font-size:13px;"></i></div> Delivery Note</div><div class="step-line"></div>
+                    <div class="step current"><div class="step-num">3</div> Sales Invoice</div>
+                </div>
+                <div class="toolbar">
+                    <div class="search-box"><i class="ti ti-search"></i><input type="text" placeholder="Search SO / DN number, customer..."></div>
+                    <div class="filter-chip"><i class="ti ti-calendar"></i> This Month</div>
+                    <button class="mini-btn primary"><i class="ti ti-plus"></i> New Sales Order</button>
+                </div>
+                <div style="overflow-x:auto;"><table>
+                    <thead><tr><th>Doc No.</th><th>Type</th><th>Customer</th><th>Godown</th><th style="text-align:right;">Qty</th><th>Date</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td class="mono">SO-3391</td><td><span class="badge badge-blue">Order</span></td><td>Nexus Office Suppliers</td><td>Andheri Godown</td><td style="text-align:right;">8 Pcs</td><td>06 Jul 2026</td><td><span class="badge badge-green">Delivered</span></td></tr>
+                        <tr><td class="mono">DN-1187</td><td><span class="badge badge-purple">Delivery</span></td><td>Nexus Office Suppliers</td><td>Andheri Godown</td><td style="text-align:right;">8 Pcs</td><td>07 Jul 2026</td><td><span class="badge badge-amber">Awaiting Invoice</span></td></tr>
+                        <tr><td class="mono">SO-3388</td><td><span class="badge badge-blue">Order</span></td><td>Vertex Retail Pvt Ltd</td><td>Main Warehouse</td><td style="text-align:right;">15 Pcs</td><td>03 Jul 2026</td><td><span class="badge badge-red">Partially Delivered</span></td></tr>
+                    </tbody>
+                </table></div>
+            </div>
+            <div class="glass-card">
+                <div class="glass-card-header"><h3><i class="ti ti-corner-up-left"></i> Debit / Credit Notes</h3><button class="mini-btn primary"><i class="ti ti-plus"></i> New Note</button></div>
+                <div style="overflow-x:auto;"><table>
+                    <thead><tr><th>Note No.</th><th>Type</th><th>Party</th><th>Reason</th><th style="text-align:right;">Qty</th><th>Date</th></tr></thead>
+                    <tbody>
+                        <tr><td class="mono">CN-0091</td><td><span class="badge badge-green">Credit Note</span></td><td>Nexus Office Suppliers</td><td>Sales Return &ndash; Damaged</td><td style="text-align:right;">2 Pcs</td><td>06 Jul 2026</td></tr>
+                        <tr><td class="mono">DN-0044</td><td><span class="badge badge-red">Debit Note</span></td><td>Radiant Electro Distributors</td><td>Purchase Return &ndash; Wrong Item</td><td style="text-align:right;">5 Pcs</td><td>01 Jul 2026</td></tr>
+                    </tbody>
+                </table></div>
+            </div>
+        </div>
+
+        <!-- ============ STOCK JOURNAL ============ -->
+        <div class="console-content" id="tab-journal">
+            <div class="two-col">
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-arrows-transfer-up"></i> Stock Journal &ndash; Transfers &amp; Adjustments</h3></div>
+                    <div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Journal No.</th><th>From Godown</th><th>To Godown</th><th>Item</th><th style="text-align:right;">Qty</th><th>Date</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">SJ-0091</td><td>Main Warehouse</td><td>Pune Branch</td><td>Bosch Cordless Drill GSR120</td><td style="text-align:right;">15 Pcs</td><td>06 Jul 2026</td></tr>
+                            <tr><td class="mono">SJ-0089</td><td>Andheri Godown</td><td>Main Warehouse</td><td>HP DeskJet Ink 680</td><td style="text-align:right;">30 Pcs</td><td>02 Jul 2026</td></tr>
+                            <tr><td class="mono">SJ-0085</td><td>Main Warehouse</td><td>Cold Storage &ndash; B2</td><td>Amul Fresh Cream 1L</td><td style="text-align:right;">60 Ltr</td><td>28 Jun 2026</td></tr>
+                        </tbody>
+                    </table></div>
+                </div>
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-square-plus"></i> New Stock Journal</h3></div>
+                    <div class="form-grid" style="grid-template-columns:1fr;">
+                        <div class="form-group"><label>Journal Type</label>
+                            <div class="tag-row"><div class="tag selected">Transfer</div><div class="tag">Consumption</div><div class="tag">Adjustment</div></div>
+                        </div>
+                        <div class="form-group"><label>Item</label><select><option>Bosch Cordless Drill GSR120</option></select></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group"><label>From Godown</label><select><option>Main Warehouse</option></select></div>
+                            <div class="form-group"><label>To Godown</label><select><option>Pune Branch</option></select></div>
+                        </div>
+                        <div class="form-group"><label>Quantity</label><input type="number" placeholder="0"></div>
+                        <div class="form-group"><label>Remarks</label><textarea placeholder="Optional note"></textarea></div>
+                    </div>
+                    <div class="form-actions"><button class="mini-btn">Cancel</button><button class="mini-btn primary"><i class="ti ti-check"></i> Post Journal</button></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ MANUFACTURING / BOM ============ -->
+        <div class="console-content" id="tab-manufacturing">
+            <div class="two-col">
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-settings-cog"></i> Bill of Materials (BOM)</h3><button class="mini-btn primary"><i class="ti ti-plus"></i> New BOM</button></div>
+                    <div class="glass-card-header" style="border-top:1px solid var(--border);border-bottom:none;background:rgba(255,255,255,0.015);">
+                        <h3 style="font-size:13px;"><i class="ti ti-box"></i> Finished Good: Office Desk Combo (1 Unit)</h3>
+                    </div>
+                    <div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Raw Material</th><th style="text-align:right;">Qty per Unit</th><th>Unit</th><th style="text-align:right;">Rate</th></tr></thead>
+                        <tbody>
+                            <tr><td>MDF Board 18mm</td><td style="text-align:right;">2</td><td>Pcs</td><td style="text-align:right;">&#8377;850</td></tr>
+                            <tr><td>Steel Leg Set</td><td style="text-align:right;">1</td><td>Set</td><td style="text-align:right;">&#8377;620</td></tr>
+                            <tr><td>Laminate Sheet</td><td style="text-align:right;">1.5</td><td>Sq.m</td><td style="text-align:right;">&#8377;340</td></tr>
+                            <tr><td>Wood Screws (Assorted)</td><td style="text-align:right;">24</td><td>Pcs</td><td style="text-align:right;">&#8377;4</td></tr>
+                        </tbody>
+                    </table></div>
+                </div>
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-square-plus"></i> Manufacturing Journal</h3></div>
+                    <div class="form-grid" style="grid-template-columns:1fr;">
+                        <div class="form-group"><label>Finished Good (BOM)</label><select><option>Office Desk Combo</option></select></div>
+                        <div class="form-group"><label>Godown</label><select><option>Main Warehouse</option></select></div>
+                        <div class="form-group"><label>Units to Produce</label><input type="number" placeholder="0"></div>
+                        <div class="form-group"><label>Auto-consume Raw Materials</label>
+                            <div class="tag-row"><div class="tag selected">Yes</div><div class="tag">No</div></div>
+                        </div>
+                    </div>
+                    <div class="form-actions"><button class="mini-btn">Cancel</button><button class="mini-btn primary"><i class="ti ti-check"></i> Post Production</button></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ PHYSICAL STOCK ============ -->
+        <div class="console-content" id="tab-physical">
+            <div class="glass-card">
+                <div class="glass-card-header"><h3><i class="ti ti-clipboard-check"></i> Physical Stock Verification</h3><button class="mini-btn primary"><i class="ti ti-plus"></i> New Count Sheet</button></div>
+                <div class="toolbar">
+                    <div class="filter-chip"><i class="ti ti-building-warehouse"></i> Main Warehouse</div>
+                    <div class="filter-chip"><i class="ti ti-calendar"></i> 07 Jul 2026</div>
+                </div>
+                <div style="overflow-x:auto;"><table>
+                    <thead><tr><th>Item</th><th style="text-align:right;">System Qty</th><th style="text-align:right;">Counted Qty</th><th style="text-align:right;">Variance</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td>Samsung Galaxy A15 (128GB)</td><td style="text-align:right;">128</td><td style="text-align:right;">128</td><td style="text-align:right;color:var(--green);">0</td><td><span class="badge badge-green">Matched</span></td></tr>
+                        <tr><td>HP DeskJet Ink Cartridge 680</td><td style="text-align:right;">14</td><td style="text-align:right;">12</td><td style="text-align:right;color:var(--red);">&minus;2</td><td><span class="badge badge-red">Shortage</span></td></tr>
+                        <tr><td>Bosch Cordless Drill GSR120</td><td style="text-align:right;">22</td><td style="text-align:right;">24</td><td style="text-align:right;color:var(--amber);">+2</td><td><span class="badge badge-amber">Excess</span></td></tr>
+                    </tbody>
+                </table></div>
+                <div class="form-actions"><button class="mini-btn">Discard</button><button class="mini-btn primary"><i class="ti ti-check"></i> Post Adjustment Entries</button></div>
+            </div>
+        </div>
+
+        <!-- ============ BATCH & SERIAL ============ -->
+        <div class="console-content" id="tab-batch">
+            <div class="two-col">
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-barcode"></i> Batch / Lot Tracking</h3></div>
+                    <div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Batch No.</th><th>Item</th><th>Mfg Date</th><th>Expiry Date</th><th style="text-align:right;">Qty</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">B-AMUL-0621</td><td>Amul Fresh Cream 1L</td><td>15 Jun 2026</td><td>22 Jul 2026</td><td style="text-align:right;">40 Ltr</td><td><span class="badge badge-red">Expiring Soon</span></td></tr>
+                            <tr><td class="mono">B-AMUL-0598</td><td>Amul Fresh Cream 1L</td><td>28 May 2026</td><td>05 Jul 2026</td><td style="text-align:right;">0 Ltr</td><td><span class="badge badge-gray">Expired &amp; Cleared</span></td></tr>
+                            <tr><td class="mono">B-MED-1102</td><td>Dettol Handwash 500ml</td><td>10 Jun 2026</td><td>10 Dec 2027</td><td style="text-align:right;">120 Pcs</td><td><span class="badge badge-green">Healthy</span></td></tr>
+                        </tbody>
+                    </table></div>
+                </div>
+                <div class="glass-card">
+                    <div class="glass-card-header"><h3><i class="ti ti-qrcode"></i> Serial Number Tracking</h3></div>
+                    <div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Serial No.</th><th>Item</th><th>Godown</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">BSH-DRL-88291</td><td>Bosch Cordless Drill</td><td>Pune Branch</td><td><span class="badge badge-green">In Stock</span></td></tr>
+                            <tr><td class="mono">BSH-DRL-88292</td><td>Bosch Cordless Drill</td><td>Pune Branch</td><td><span class="badge badge-blue">Sold</span></td></tr>
+                            <tr><td class="mono">BSH-DRL-88293</td><td>Bosch Cordless Drill</td><td>Main Warehouse</td><td><span class="badge badge-green">In Stock</span></td></tr>
+                        </tbody>
+                    </table></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ JOB WORK ============ -->
+        <div class="console-content" id="tab-jobwork">
+            <div class="glass-card">
+                <div class="glass-card-header"><h3><i class="ti ti-tool"></i> Job Work In / Out</h3><button class="mini-btn primary"><i class="ti ti-plus"></i> New Job Work Entry</button></div>
+                <div style="overflow-x:auto;"><table>
+                    <thead><tr><th>Entry No.</th><th>Type</th><th>Party (Job Worker)</th><th>Item Sent</th><th style="text-align:right;">Qty</th><th>Expected Return</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td class="mono">JW-0031</td><td><span class="badge badge-blue">Out</span></td><td>Precision Powder Coaters</td><td>Steel Leg Set (Raw)</td><td style="text-align:right;">100 Sets</td><td>15 Jul 2026</td><td><span class="badge badge-amber">In Process</span></td></tr>
+                        <tr><td class="mono">JW-0028</td><td><span class="badge badge-purple">In</span></td><td>Precision Powder Coaters</td><td>Steel Leg Set (Coated)</td><td style="text-align:right;">80 Sets</td><td>&mdash;</td><td><span class="badge badge-green">Received</span></td></tr>
+                    </tbody>
+                </table></div>
+            </div>
+        </div>
+
+        <!-- ============ REPORTS ============ -->
+        <div class="console-content" id="tab-reports">
+            <div class="three-col">
+                <div class="glass-card" style="padding:20px;">
+                    <div class="stat-icon" style="background:rgba(37,99,235,.12);margin-bottom:12px;"><i class="ti ti-report-analytics" style="color:var(--blue-light);"></i></div>
+                    <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Stock Summary</div>
+                    <div style="font-size:12px;color:var(--text-lo);">Group-wise, category-wise &amp; godown-wise stock position</div>
+                </div>
+                <div class="glass-card" style="padding:20px;">
+                    <div class="stat-icon" style="background:rgba(16,185,129,.12);margin-bottom:12px;"><i class="ti ti-history" style="color:var(--green);"></i></div>
+                    <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Item-wise Ledger</div>
+                    <div style="font-size:12px;color:var(--text-lo);">Chronological movement history per stock item</div>
+                </div>
+                <div class="glass-card" style="padding:20px;">
+                    <div class="stat-icon" style="background:rgba(245,158,11,.12);margin-bottom:12px;"><i class="ti ti-hourglass" style="color:var(--amber);"></i></div>
+                    <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Ageing Analysis</div>
+                    <div style="font-size:12px;color:var(--text-lo);">Slow-moving &amp; dead stock identification</div>
+                </div>
+                <div class="glass-card" style="padding:20px;">
+                    <div class="stat-icon" style="background:rgba(139,92,246,.12);margin-bottom:12px;"><i class="ti ti-currency-rupee" style="color:var(--purple);"></i></div>
+                    <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Stock Valuation</div>
+                    <div style="font-size:12px;color:var(--text-lo);">FIFO / LIFO / Weighted Average comparison</div>
+                </div>
+                <div class="glass-card" style="padding:20px;">
+                    <div class="stat-icon" style="background:rgba(239,68,68,.12);margin-bottom:12px;"><i class="ti ti-alert-triangle" style="color:var(--red);"></i></div>
+                    <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Reorder Status</div>
+                    <div style="font-size:12px;color:var(--text-lo);">Items below reorder / minimum threshold</div>
+                </div>
+                <div class="glass-card" style="padding:20px;">
+                    <div class="stat-icon" style="background:rgba(37,99,235,.12);margin-bottom:12px;"><i class="ti ti-transfer-in" style="color:var(--blue-light);"></i></div>
+                    <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Movement Register</div>
+                    <div style="font-size:12px;color:var(--text-lo);">All inward/outward/transfer transactions</div>
+                </div>
+            </div>
+            <div class="glass-card">
+                <div class="glass-card-header"><h3><i class="ti ti-chart-bar"></i> Stock Valuation Report &ndash; Preview</h3>
+                    <div class="header-actions"><div class="filter-chip"><i class="ti ti-calendar"></i> As on 07 Jul 2026</div><button class="mini-btn"><i class="ti ti-download"></i> Export</button></div>
+                </div>
+                <div style="overflow-x:auto;"><table>
+                    <thead><tr><th>Item</th><th>Valuation Method</th><th style="text-align:right;">Qty</th><th style="text-align:right;">Avg Cost</th><th style="text-align:right;">Total Value</th></tr></thead>
+                    <tbody>
+                        <tr><td>Samsung Galaxy A15 (128GB)</td><td><span class="badge badge-blue">FIFO</span></td><td style="text-align:right;">128</td><td style="text-align:right;">&#8377;17,500</td><td style="text-align:right;font-weight:700;">&#8377;22,40,000</td></tr>
+                        <tr><td>Amul Fresh Cream 1L</td><td><span class="badge badge-purple">Weighted Avg</span></td><td style="text-align:right;">40</td><td style="text-align:right;">&#8377;170</td><td style="text-align:right;font-weight:700;">&#8377;6,800</td></tr>
+                        <tr><td>Bosch Cordless Drill GSR120</td><td><span class="badge badge-blue">FIFO</span></td><td style="text-align:right;">22</td><td style="text-align:right;">&#8377;6,000</td><td style="text-align:right;font-weight:700;">&#8377;1,32,000</td></tr>
+                    </tbody>
+                </table></div>
+            </div>
+        </div>
+
+    </div><!-- end console-main -->
+</div><!-- end console-shell -->
+
+<script src="../shared/sidebar.js"></script>
+<script src="inventory.js"></script>
+</body>
+</html>

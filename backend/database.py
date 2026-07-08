@@ -47,5 +47,29 @@ class History(Base):
     output_file = Column(String, unique=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
+class BankStatements(Base):
+    __tablename__ = "bankStatements"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    bank_name: Mapped[str] = mapped_column(String)
+    account_number: Mapped[str] = mapped_column(String)
+    referrence_no: Mapped[str] = mapped_column(String)
+    transaction_date: Mapped[str] = mapped_column(String)
+    description: Mapped[str] = mapped_column(String)
+    transaction_type: Mapped[str] = mapped_column(String)
+    amount: Mapped[float] = mapped_column(Float)
+    category: Mapped[str] = mapped_column(String)
+    reconciliation_status: Mapped[str] = mapped_column(String, default='Pending')
+    party_name: Mapped[str] = mapped_column(String, default=None)
+    voucher_ref: Mapped[str] = mapped_column(String, unique=True, default=None)
+
+class BRS(Base):
+    __tablename__ = "BRS"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    transaction_id: Mapped[int] = mapped_column(String)
+    voucher_no: Mapped[str] = mapped_column(String)
+    description: Mapped[str] = mapped_column(String)
+    amount: Mapped[float] = mapped_column(Float)
+    gst_amount: Mapped[float] = mapped_column(Float)
+    statement_amount: Mapped[float] = mapped_column(Float)
     
 Base.metadata.create_all(bind=engine)

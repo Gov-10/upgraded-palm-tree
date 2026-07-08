@@ -18,11 +18,11 @@ import uuid
 from redis import Redis
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from typing import Any
+from typing import Any, List
 from utils.direct_ocr_extractor import ocr_extraction
 from botocore.exceptions import ClientError
-from schemas import VoucherSchema
-from database import Vouchers
+from schemas import VoucherSchema, BankStatementInputSchema, BRSInputSchema
+from database import Vouchers, BankStatements, BRS
 
 ph = PasswordHasher()
 s3= boto3.client('s3', region_name=os.getenv("S3_REGION"), aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"), config=Config(signature_version="s3v4", s3={'addressing_style': 'virtual'}))
@@ -40,7 +40,7 @@ binary_redis_client=Redis(
 )
 bucket=os.getenv("S3_BUCKET_NAME")
 
-origins = ['http://localhost:5500', 'http://127.0.0.1:5501', 'http://127.0.0.1:5502', 'http://127.0.0.1', '0.0.0.0']
+origins = ['http://localhost:5503', 'http://127.0.0.1:5501', 'http://127.0.0.1:5502', 'http://127.0.0.1', '0.0.0.0']
 
 app.add_middleware(CORSMiddleware,
                    allow_origins = ["*"],
@@ -169,20 +169,22 @@ def extr(payload: ExtractSchema):
     return {"csv_file": result["fin"], "normal": result["normal"]}
 
 
-@app.post("/extract_ocr")
+@app.post("/extract-OCR")
 async def extractOCR(request: Request):
     content_type = request.headers.get("Content-Type")
+    schema = request.headers.get("Schema")
     allowed_types = ["application/pdf", "image/jpeg", "image/png"]
     if content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Invalid file type")
     file_bytes = await request.body()
     binary_redis_client.set('cached_file', file_bytes, ex=600)
     redis_client.set('cached_file_type', content_type, ex=600)
-    return ocr_extraction(file_bytes, content_type)
+    return ocr_extraction(file_bytes, content_type, schema)
 
 @app.post("/upload-to-AWS")
-async def upload_to_AWS():
+async def upload_to_AWS(request: Request):
     content_type = redis_client.get('cached_file_type')
+    schema = request.headers.get("Schema")
     allowed_types = ["application/pdf", "image/jpeg", "image/png"]
     ext = [".pdf", ".jpg", ".png"]
     if content_type not in allowed_types:
@@ -190,10 +192,11 @@ async def upload_to_AWS():
     file_bytes = binary_redis_client.get('cached_file')
     file_name = str(uuid.uuid4())
     redis_client.set("file_key", f'{file_name}{ext[allowed_types.index(content_type)]}', ex=600)
+    prefix = "bank_statements" if schema == "bankStatement" else "vouchers"
     try:
         response = s3.put_object(
             Bucket=bucket,
-            Key=f'vouchers/{file_name}{ext[allowed_types.index(content_type)]}',
+            Key=f'{prefix}/{file_name}{ext[allowed_types.index(content_type)]}',
             Body=file_bytes,                  # Pass the byte array directly here
             ContentType=content_type
             )
@@ -206,41 +209,52 @@ async def upload_to_AWS():
         else:
             print(f"Upload failed with status code: {status_code}")
     except ClientError as e:
-    # Catches AWS-specific errors (Access Denied, Bucket Not Found, etc.)
+        # Catches AWS-specific errors (Access Denied, Bucket Not Found, etc.)
         print(f"AWS Error: {e.response['Error']['Message']}")
     except Exception as e:
-    # Catches network timeouts or system errors
+        # Catches network timeouts or system errors
         print(f"An unexpected error occurred: {e}")
 
 @app.post("/add-voucher")
-def add_voucher(payload: VoucherSchema, db: Session = Depends(get_db)):
-    voucher = Vouchers(
-        voucher_type=payload.voucher_type,
-        date=payload.date,
-        voucher_no=payload.voucher_no,
-        party=payload.party,
-        amount=payload.amount,
-        gst_amount=payload.gst_amount,
-        status=payload.status,
-        file_key=redis_client.get("file_key")
-    )
-    db.add(voucher)
+def add_voucher(payload: List[VoucherSchema], db: Session = Depends(get_db)):
+    file_key = redis_client.get("file_key")
+    vouchers_added = []
+    for item in payload:
+        voucher = Vouchers(
+            voucher_type=item.voucher_type,
+            date=item.date,
+            voucher_no=item.voucher_no,
+            party=item.party,
+            amount=item.amount,
+            gst_amount=item.gst_amount,
+            status=item.status,
+            file_key=file_key
+        )
+        db.add(voucher)
+        vouchers_added.append(voucher)
+    
     try:
         db.commit()
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-    db.refresh(voucher)
-    return {
-        "id": voucher.id,
-        "voucher_type": voucher.voucher_type,
-        "date": voucher.date,
-        "voucher_no": voucher.voucher_no,
-        "party": voucher.party,
-        "amount": voucher.amount,
-        "gst_amount": voucher.gst_amount,
-        "status": voucher.status
-    }
+        
+    for v in vouchers_added:
+        db.refresh(v)
+        
+    return [
+        {
+            "id": v.id,
+            "voucher_type": v.voucher_type,
+            "date": v.date,
+            "voucher_no": v.voucher_no,
+            "party": v.party,
+            "amount": v.amount,
+            "gst_amount": v.gst_amount,
+            "status": v.status
+        }
+        for v in vouchers_added
+    ]
 
 @app.get("/vouchers")
 def get_vouchers(db: Session = Depends(get_db)):
@@ -259,3 +273,195 @@ def get_vouchers(db: Session = Depends(get_db)):
         for v in rows
     ]
 
+@app.put("/vouchers/{voucher_id}")
+def update_voucher(voucher_id: int, payload: VoucherSchema, db: Session = Depends(get_db)):
+    voucher = db.query(Vouchers).filter(Vouchers.id == voucher_id).first()
+    if not voucher:
+        raise HTTPException(status_code=404, detail="Voucher not found")
+    voucher.voucher_type = payload.voucher_type
+    voucher.date = payload.date
+    voucher.voucher_no = payload.voucher_no
+    voucher.party = payload.party
+    voucher.amount = payload.amount
+    voucher.gst_amount = payload.gst_amount
+    voucher.status = payload.status
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    db.refresh(voucher)
+    return {
+        "id": voucher.id,
+        "voucher_type": voucher.voucher_type,
+        "date": voucher.date,
+        "voucher_no": voucher.voucher_no,
+        "party": voucher.party,
+        "amount": voucher.amount,
+        "gst_amount": voucher.gst_amount,
+        "status": voucher.status
+    }
+
+@app.delete("/vouchers/{voucher_id}")
+def delete_voucher(voucher_id: int, db: Session = Depends(get_db)):
+    voucher = db.query(Vouchers).filter(Vouchers.id == voucher_id).first()
+    if not voucher:
+        raise HTTPException(status_code=404, detail="Voucher not found")
+    try:
+        db.delete(voucher)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    return {"message": "Voucher deleted successfully"}
+
+def _bs_to_dict(bs):
+    return {
+        "id": bs.id,
+        "bank_name": bs.bank_name,
+        "account_number": bs.account_number,
+        "referrence_no": bs.referrence_no,
+        "transaction_date": bs.transaction_date,
+        "description": bs.description,
+        "transaction_type": bs.transaction_type,
+        "amount": bs.amount,
+        "category": bs.category,
+        "reconciliation_status": bs.reconciliation_status,
+        "party_name": bs.party_name,
+        "voucher_ref": bs.voucher_ref
+    }
+
+@app.post("/bank-statements")
+def add_bank_statements(payload: List[BankStatementInputSchema], db: Session = Depends(get_db)):
+    records_added = []
+    for item in payload:
+        bs = BankStatements(
+            bank_name=item.bank_name,
+            account_number=item.account_number,
+            referrence_no=item.referrence_no,
+            transaction_date=item.transaction_date,
+            description=item.description,
+            transaction_type=item.transaction_type,
+            amount=item.amount,
+            category=item.category,
+            reconciliation_status=item.reconciliation_status,
+            party_name=item.party_name,
+            voucher_ref=item.voucher_ref
+        )
+        db.add(bs)
+        records_added.append(bs)
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    for r in records_added:
+        db.refresh(r)
+    return [_bs_to_dict(r) for r in records_added]
+
+@app.get("/bank-statements")
+def get_bank_statements(db: Session = Depends(get_db)):
+    rows = db.query(BankStatements).order_by(BankStatements.id.desc()).all()
+    return [_bs_to_dict(r) for r in rows]
+
+@app.get("/bank-statements/{bs_id}")
+def get_bank_statement(bs_id: int, db: Session = Depends(get_db)):
+    bs = db.query(BankStatements).filter(BankStatements.id == bs_id).first()
+    if not bs:
+        raise HTTPException(status_code=404, detail="Bank statement not found")
+    return _bs_to_dict(bs)
+
+@app.put("/bank-statements/{bs_id}")
+def update_bank_statement(bs_id: int, payload: BankStatementInputSchema, db: Session = Depends(get_db)):
+    bs = db.query(BankStatements).filter(BankStatements.id == bs_id).first()
+    if not bs:
+        raise HTTPException(status_code=404, detail="Bank statement not found")
+    bs.bank_name = payload.bank_name
+    bs.account_number = payload.account_number
+    bs.referrence_no = payload.referrence_no
+    bs.transaction_date = payload.transaction_date
+    bs.description = payload.description
+    bs.transaction_type = payload.transaction_type
+    bs.amount = payload.amount
+    bs.category = payload.category or "Miscellaneous"
+    bs.reconciliation_status = payload.reconciliation_status or "pending"
+    bs.party_name = payload.party_name or ''
+    bs.voucher_ref = payload.voucher_ref or ''
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    db.refresh(bs)
+    return _bs_to_dict(bs)
+
+@app.delete("/bank-statements/{bs_id}")
+def delete_bank_statement(bs_id: int, db: Session = Depends(get_db)):
+    bs = db.query(BankStatements).filter(BankStatements.id == bs_id).first()
+    if not bs:
+        raise HTTPException(status_code=404, detail="Bank statement not found")
+    try:
+        db.delete(bs)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    return {"message": "Bank statement deleted successfully"}
+
+def _brs_to_dict(b):
+    return {
+        "id": b.id,
+        "transaction_id": b.transaction_id,
+        "voucher_no": b.voucher_no,
+        "description": b.description,
+        "amount": b.amount,
+        "gst_amount": b.gst_amount,
+    }
+
+@app.post("/BRS")
+def add_BRS(payload: BRSInputSchema, db: Session = Depends(get_db)):
+    brs = BRS(
+        transaction_id=payload.transaction_id,
+        voucher_no=payload.voucher_no,
+        description=payload.description,
+        amount=payload.amount,
+        gst_amount=payload.gst_amount,
+    )
+    db.add(brs)
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    db.refresh(brs)
+    return _brs_to_dict(brs)
+
+@app.get("/BRS")
+def get_BRS(db: Session = Depends(get_db)):
+    rows = db.query(BRS).order_by(BRS.id.desc()).all()
+    return [_brs_to_dict(r) for r in rows]
+
+@app.delete("/BRS/{brs_id}")
+def delete_BRS(brs_id: int, db: Session = Depends(get_db)):
+    brs = db.query(BRS).filter(BRS.id == brs_id).first()
+    if not brs:
+        raise HTTPException(status_code=404, detail="BRS record not found")
+    bs_id     = brs.transaction_id
+    voucher_no = brs.voucher_no
+    try:
+        db.delete(brs)
+        # Revert bank statement to pending, clear party and voucher ref
+        bs = db.query(BankStatements).filter(BankStatements.id == bs_id).first()
+        if bs:
+            bs.reconciliation_status = "pending"
+            bs.party_name = ''
+            bs.voucher_ref = ''
+        # Revert voucher status to Pending
+        vch = db.query(Vouchers).filter(Vouchers.voucher_no == voucher_no).first()
+        if vch:
+            vch.status = "Pending"
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    return {"message": "BRS record deleted and related records reverted to pending"}

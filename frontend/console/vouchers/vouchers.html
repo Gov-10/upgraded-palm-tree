@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -268,6 +268,46 @@
             background: #1d4ed8;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
+
+        .action-dropdown {
+            position: absolute;
+            right: 20px;
+            top: 36px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            display: none;
+            min-width: 100px;
+            overflow: hidden;
+        }
+        .action-dropdown.show {
+            display: block;
+        }
+        .action-dropdown-item {
+            padding: 8px 12px;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: left;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .action-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #f8fafc;
+        }
+        .action-dropdown-item.remove {
+            color: #f87171;
+        }
+        .action-dropdown-item.remove:hover {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+        }
     </style>
 </head>
 <body>
@@ -296,6 +336,12 @@
             </a>
             <a href="../vouchers/vouchers.html" class="nav-item active" data-tooltip="Vouchers">
                 <i class="ti ti-receipt-2 nav-icon"></i><span class="nav-label">Vouchers</span>
+            </a>
+            <a href="../bank-statements/bank-statements.html" class="nav-item" data-tooltip="Bank Statements">
+                <i class="ti ti-building-bank nav-icon"></i><span class="nav-label">Bank Statements</span>
+            </a>
+            <a href="../inventory/inventory.html" class="nav-item" data-tooltip="Inventory">
+                <i class="ti ti-package nav-icon"></i><span class="nav-label">Inventory</span>
             </a>
             <a href="../reconciliations/reconciliations.html" class="nav-item" data-tooltip="Reconciliations">
                 <i class="ti ti-arrows-exchange nav-icon"></i><span class="nav-label">Reconciliations</span>
@@ -390,6 +436,7 @@
                                 <th style="padding:14px 20px;text-align:right;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Amount</th>
                                 <th style="padding:14px 20px;text-align:right;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">GST</th>
                                 <th style="padding:14px 20px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Status</th>
+                                <th style="padding:14px 20px;text-align:right;width:50px;"></th>
                             </tr>
                         </thead>
                         <tbody id="voucher-tbody">
@@ -411,78 +458,90 @@
         </div>
         <form id="new-voucher-form">
             <div class="modal-body">
-                <div class="form-row-2">
+                <!-- Wrapper for manual fields so they can be hidden when multiple records checkbox is checked -->
+                <div id="manual-fields-container">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="v-type">Voucher Type</label>
+                            <select id="v-type" data-required="true" required>
+                                <option value="Sales">Sales</option>
+                                <option value="Purchase">Purchase</option>
+                                <option value="Journal">Journal</option>
+                                <option value="Payment">Payment</option>
+                                <option value="Receipt">Receipt</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="v-date">Date</label>
+                            <input type="date" id="v-date" data-required="true" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="v-no">Voucher No.</label>
+                            <input type="text" id="v-no" placeholder="e.g. VCH-2026-0449" data-required="true" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="v-party">Party</label>
+                            <input type="text" id="v-party" placeholder="e.g. Zenith Tech Labs" data-required="true" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="v-amount">Amount</label>
+                            <input type="number" id="v-amount" placeholder="e.g. 50000" min="0" step="0.01" data-required="true" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="v-gst">GST Amount</label>
+                            <input type="number" id="v-gst" placeholder="e.g. 9000" min="0" step="0.01" data-required="true" required>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label for="v-type">Voucher Type</label>
-                        <select id="v-type" required>
-                            <option value="Sales">Sales</option>
-                            <option value="Purchase">Purchase</option>
-                            <option value="Journal">Journal</option>
-                            <option value="Payment">Payment</option>
-                            <option value="Receipt">Receipt</option>
+                        <label for="v-status">Status</label>
+                        <select id="v-status" data-required="true" required>
+                            <option value="pending">Pending</option>
+                            <option value="verified">Verified</option>
+                            <option value="cleared">Cleared</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="v-date">Date</label>
-                        <input type="date" id="v-date" required>
-                    </div>
-                </div>
-
-                <div class="form-row-2">
-                    <div class="form-group">
-                        <label for="v-no">Voucher No.</label>
-                        <input type="text" id="v-no" placeholder="e.g. VCH-2026-0449" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="v-party">Party</label>
-                        <input type="text" id="v-party" placeholder="e.g. Zenith Tech Labs" required>
-                    </div>
-                </div>
-
-                <div class="form-row-2">
-                    <div class="form-group">
-                        <label for="v-amount">Amount</label>
-                        <input type="number" id="v-amount" placeholder="e.g. 50000" min="0" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="v-gst">GST Amount</label>
-                        <input type="number" id="v-gst" placeholder="e.g. 9000" min="0" step="0.01" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="v-status">Status</label>
-                    <select id="v-status" required>
-                        <option value="pending">Pending</option>
-                        <option value="verified">Verified</option>
-                        <option value="cleared">Cleared</option>
-                    </select>
                 </div>
 
                 <!-- OCR DRAG AND DROP ZONE -->
-                <div class="form-group">
+                <div id="ocr-section-container">
                     <label>Auto-fill from Document (OCR)</label>
-                    <div class="ocr-drop-area" id="ocr-drop-area">
-                        <i class="ti ti-cloud-upload ocr-icon"></i>
-                        <div class="ocr-title" id="ocr-drop-title">Drag & drop your files here to auto-fill</div>
-                        <div class="ocr-desc" id="ocr-drop-desc">Supports PDF, PNG, JPG (Max 5MB)</div>
-                        
-                        <!-- File info container -->
-                        <div class="ocr-file-info" id="ocr-file-info">
-                            <i class="ti ti-file-check"></i>
-                            <span id="ocr-filename">invoice_0449.pdf</span>
-                        </div>
-                        
-                        <!-- Loader spinner -->
-                        <div class="ocr-loader" id="ocr-loader">
-                            <div class="spinner"></div>
-                            <span>Scanning document with OCR...</span>
-                        </div>
+                    <div class="form-group" style="display:flex; flex-direction:row; align-items:center; gap:8px; margin-bottom:8px;" id="ocr-checkbox-container">
+                         <input type="checkbox" id="v-multiple-records" style="width:16px; height:16px; cursor:pointer; accent-color:#2563EB;">
+                         <label for="v-multiple-records" style="cursor:pointer; text-transform:none; font-size:12px; font-weight:500; color:#cbd5e1;">Add multiple records</label>
+                    </div>
+                    <!-- OCR Extracted Records Preview -->
+                    <div id="ocr-records-preview" style="display: none; margin-bottom: 12px; max-height: 200px; overflow-y: auto; padding: 10px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; flex-direction: column; gap: 8px;"></div>
+                    
+                    <div class="form-group">
+                        <div class="ocr-drop-area" id="ocr-drop-area">
+                            <i class="ti ti-cloud-upload ocr-icon"></i>
+                            <div class="ocr-title" id="ocr-drop-title">Drag & drop your files here to auto-fill</div>
+                            <div class="ocr-desc" id="ocr-drop-desc">Supports PDF, PNG, JPG (Max 5MB)</div>
+                            
+                            <!-- File info container -->
+                            <div class="ocr-file-info" id="ocr-file-info">
+                                <i class="ti ti-file-check"></i>
+                                <span id="ocr-filename">invoice_0449.pdf</span>
+                            </div>
+                            
+                            <!-- Loader spinner -->
+                            <div class="ocr-loader" id="ocr-loader">
+                                <div class="spinner"></div>
+                                <span>Scanning document with OCR...</span>
+                            </div>
 
-                        <input type="file" id="ocr-file-input" style="display: none;" accept="image/*,application/pdf">
-                        <button type="button" class="upload-btn-secondary" id="ocr-upload-trigger">
-                            <i class="ti ti-upload"></i> Upload File
-                        </button>
+                            <input type="file" id="ocr-file-input" style="display: none;" accept="image/*,application/pdf">
+                            <button type="button" class="upload-btn-secondary" id="ocr-upload-trigger">
+                                <i class="ti ti-upload"></i> Upload File
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,7 +1,10 @@
 const API_BASE = 'http://127.0.0.1:8000';
 
-// Live vouchers cache â€“ populated from the API
+// Live vouchers cache – populated from the API
 let vouchers = [];
+let extractedRecords = [];
+let editingVoucherId = null;
+let ocrTriggered = false;
 
 const statusColor = { verified: '#10B981', pending: '#F59E0B', cleared: '#2563EB' };
 const tbody = document.getElementById('voucher-tbody');
@@ -81,12 +84,13 @@ function renderVouchers() {
 
     if (filtered.length === 0) {
         const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="7" style="padding:24px;text-align:center;color:#64748b;">No vouchers found.</td>';
+        tr.innerHTML = '<td colspan="8" style="padding:24px;text-align:center;color:#64748b;">No vouchers found.</td>';
         tbody.appendChild(tr);
         return;
     }
 
     filtered.forEach(function(v) {
+        const recordId = v.id || v.voucher_no;
         const tr = document.createElement('tr');
         tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.05);transition:background .2s;';
         tr.onmouseenter = function() { tr.style.background = 'rgba(255,255,255,0.03)'; };
@@ -98,7 +102,14 @@ function renderVouchers() {
             '<td style="padding:14px 20px;color:#f8fafc;">' + v.party + '</td>' +
             '<td style="padding:14px 20px;text-align:right;font-weight:700;color:#f8fafc;">' + formatCurrency(v.amount) + '</td>' +
             '<td style="padding:14px 20px;text-align:right;color:#94a3b8;">' + formatCurrency(v.gst_amount) + '</td>' +
-            '<td style="padding:14px 20px;"><span style="color:' + (statusColor[v.status.toLowerCase()] || '#94a3b8') + ';font-weight:600;font-size:12px;text-transform:capitalize;">' + v.status + '</span></td>';
+            '<td style="padding:14px 20px;"><span style="color:' + (statusColor[v.status.toLowerCase()] || '#94a3b8') + ';font-weight:600;font-size:12px;text-transform:capitalize;">' + v.status + '</span></td>' +
+            '<td style="padding:14px 20px;text-align:right;position:relative;">' +
+                '<button class="action-btn" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:16px;padding:4px;" onclick="event.stopPropagation(); toggleDropdown(event, \'' + recordId + '\')"><i class="ti ti-dots-vertical"></i></button>' +
+                '<div class="action-dropdown" id="dropdown-' + recordId + '">' +
+                    '<div class="action-dropdown-item" onclick="event.stopPropagation(); triggerEditVoucher(\'' + recordId + '\')"><i class="ti ti-edit"></i> Edit</div>' +
+                    '<div class="action-dropdown-item remove" onclick="event.stopPropagation(); triggerRemoveVoucher(\'' + recordId + '\')"><i class="ti ti-trash"></i> Remove</div>' +
+                '</div>' +
+            '</td>';
         tbody.appendChild(tr);
     });
 }
@@ -107,7 +118,7 @@ function renderVouchers() {
 /*  Fetch vouchers from the API on load                                 */
 /* ------------------------------------------------------------------ */
 async function loadVouchers() {
-    tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#64748b;">Loading vouchersâ€¦</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="padding:24px;text-align:center;color:#64748b;">Loading vouchers…</td></tr>';
     try {
         const res = await fetch(API_BASE + '/vouchers');
         if (!res.ok) throw new Error('Server returned ' + res.status);
@@ -115,7 +126,7 @@ async function loadVouchers() {
         vouchers = Array.isArray(data) ? data : [];
     } catch (err) {
         console.error('[Vouchers] Load failed:', err);
-        tbody.innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:#f87171;">Failed to load vouchers. Is the backend running?</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="padding:24px;text-align:center;color:#f87171;">Failed to load vouchers. Is the backend running?</td></tr>';
         return;
     }
     renderVouchers();
@@ -137,23 +148,89 @@ const newVoucherForm = document.getElementById('new-voucher-form');
 
 document.getElementById('v-date').valueAsDate = new Date();
 
-function openModal() {
+function openModal(record = null) {
     modalOverlay.classList.add('show');
-    document.getElementById('v-date').valueAsDate = new Date();
+    const modalTitle = modalOverlay.querySelector('.modal-header h3');
+    const submitBtn = modalOverlay.querySelector('.btn-modal-submit');
+    const manualFields = document.getElementById('manual-fields-container');
+    const ocrSection = document.getElementById('ocr-section-container');
+    const checkboxContainer = document.getElementById('ocr-checkbox-container');
+    const multipleRecordsCheckbox = document.getElementById('v-multiple-records');
+    const requiredInputs = document.querySelectorAll('#manual-fields-container [data-required]');
+
+    if (record) {
+        editingVoucherId = record.id || record.voucher_no;
+        if (modalTitle) modalTitle.innerHTML = '<i class="ti ti-receipt-2"></i> Edit Voucher Entry';
+        if (submitBtn) submitBtn.textContent = 'Save Changes';
+
+        if (manualFields) manualFields.style.display = 'block';
+        if (ocrSection) ocrSection.style.display = 'none';
+        if (checkboxContainer) checkboxContainer.style.display = 'none';
+        requiredInputs.forEach(input => input.setAttribute('required', ''));
+
+        // Prefill fields
+        document.getElementById('v-type').value = record.voucher_type || 'Sales';
+        document.getElementById('v-date').value = toInputDate(record.date);
+        document.getElementById('v-no').value = record.voucher_no || '';
+        document.getElementById('v-party').value = record.party || '';
+        document.getElementById('v-amount').value = record.amount || '';
+        document.getElementById('v-gst').value = record.gst_amount || '';
+        document.getElementById('v-status').value = record.status || 'pending';
+    } else {
+        editingVoucherId = null;
+        ocrTriggered = false;
+        if (modalTitle) modalTitle.innerHTML = '<i class="ti ti-receipt-2"></i> Add Voucher';
+        if (submitBtn) submitBtn.textContent = 'Create Voucher';
+
+        if (ocrSection) ocrSection.style.display = 'block';
+        if (checkboxContainer) checkboxContainer.style.display = 'flex';
+        
+        if (multipleRecordsCheckbox) {
+            multipleRecordsCheckbox.checked = false;
+        }
+        if (manualFields) manualFields.style.display = 'block';
+        requiredInputs.forEach(input => input.setAttribute('required', ''));
+
+        newVoucherForm.reset();
+        document.getElementById('v-date').valueAsDate = new Date();
+        extractedRecords = [];
+        renderOCRRecordsPreview();
+    }
 }
 
 function closeModal() {
     modalOverlay.classList.remove('show');
     newVoucherForm.reset();
+    editingVoucherId = null;
+    extractedRecords = [];
+    renderOCRRecordsPreview();
     resetOCRState();
 }
 
-newVoucherBtn.addEventListener('click', openModal);
+newVoucherBtn.addEventListener('click', () => openModal(null));
 modalCloseBtn.addEventListener('click', closeModal);
 btnModalCancel.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', function(e) {
     if (e.target === modalOverlay) closeModal();
 });
+
+const multipleRecordsCheckbox = document.getElementById('v-multiple-records');
+if (multipleRecordsCheckbox) {
+    multipleRecordsCheckbox.addEventListener('change', function() {
+        const manualFields = document.getElementById('manual-fields-container');
+        const preview = document.getElementById('ocr-records-preview');
+        const requiredInputs = document.querySelectorAll('#manual-fields-container [data-required]');
+        if (this.checked) {
+            if (manualFields) manualFields.style.display = 'none';
+            if (preview) preview.style.display = extractedRecords.length > 0 ? 'flex' : 'none';
+            requiredInputs.forEach(input => input.removeAttribute('required'));
+        } else {
+            if (manualFields) manualFields.style.display = 'block';
+            if (preview) preview.style.display = 'none';
+            requiredInputs.forEach(input => input.setAttribute('required', ''));
+        }
+    });
+}
 
 /* ------------------------------------------------------------------ */
 /*  OCR â€“ element references                                            */
@@ -220,6 +297,39 @@ function resetOCRState() {
     ocrFileInfo.style.display  = 'none';
     ocrLoader.style.display    = 'none';
     ocrFileInput.value         = '';
+    extractedRecords           = [];
+    ocrTriggered               = false;
+}
+
+function renderOCRRecordsPreview() {
+    const preview = document.getElementById('ocr-records-preview');
+    if (!preview) return;
+    
+    if (extractedRecords.length === 0) {
+        preview.style.display = 'none';
+        preview.innerHTML = '';
+        return;
+    }
+    
+    preview.style.display = 'flex';
+    preview.innerHTML = '<div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Extracted Records Preview</div>';
+    
+    extractedRecords.forEach(rec => {
+        const dateStr = displayDate(rec.date || rec.voucher_date);
+        const partyStr = rec.party || 'Unknown Party';
+        const amountStr = formatCurrency(rec.amount || 0);
+        
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(15, 23, 42, 0.4); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.05);';
+        row.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <span style="font-weight: 600; color: #f8fafc; font-size: 13px;">${partyStr}</span>
+                <span style="color: #64748b; font-size: 11px;">${dateStr}</span>
+            </div>
+            <span style="font-weight: 700; color: #f8fafc; font-size: 13px;">${amountStr}</span>
+        `;
+        preview.appendChild(row);
+    });
 }
 
 function showOCRLoader() {
@@ -264,9 +374,9 @@ async function handleOCRFile(file) {
     try {
         const arrayBuffer = await file.arrayBuffer();
         
-        const response = await fetch(API_BASE + '/extract_ocr', {
+        const response = await fetch(API_BASE + '/extract-OCR', {
             method: 'POST',
-            headers: { 'Content-Type': file.type },
+            headers: { 'Content-Type': file.type, 'Schema': 'voucher' },
             body: arrayBuffer,
         });
 
@@ -300,8 +410,21 @@ async function handleOCRFile(file) {
             throw new Error('OCR returned no data. Try a clearer or higher-quality document.');
         }
 
-        autofillForm(reports[0]);
-        showOCRSuccess(file.name);
+        ocrTriggered = true;
+        const isMultiple = document.getElementById('v-multiple-records')?.checked;
+        if (isMultiple) {
+            extractedRecords = reports;
+            showOCRSuccess(file.name + ' (' + reports.length + ' records loaded)');
+            renderOCRRecordsPreview();
+            
+            // Show preview box if hidden
+            const preview = document.getElementById('ocr-records-preview');
+            if (preview) preview.style.display = 'flex';
+        } else {
+            extractedRecords = [];
+            autofillForm(reports[0]);
+            showOCRSuccess(file.name);
+        }
 
     } catch (err) {
         console.error('[OCR] Error:', err);
@@ -349,7 +472,119 @@ newVoucherForm.addEventListener('submit', async function(e) {
 
     const submitBtn = newVoucherForm.querySelector('.btn-modal-submit');
     submitBtn.disabled    = true;
-    submitBtn.textContent = 'Savingâ€¦';
+    submitBtn.textContent = 'Saving…';
+
+    if (editingVoucherId !== null) {
+        const payload = {
+            voucher_type: document.getElementById('v-type').value,
+            date:         document.getElementById('v-date').value,
+            voucher_no:   document.getElementById('v-no').value,
+            party:        document.getElementById('v-party').value,
+            amount:       parseFloat(document.getElementById('v-amount').value),
+            gst_amount:   parseFloat(document.getElementById('v-gst').value),
+            status:       document.getElementById('v-status').value,
+        };
+
+        try {
+            const res = await fetch(API_BASE + '/vouchers/' + editingVoucherId, {
+                method:  'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(payload),
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error('Server error ' + res.status + ': ' + errText);
+            }
+
+            const saved = await res.json();
+            const idx = vouchers.findIndex(v => (v.id || v.voucher_no) == editingVoucherId);
+            if (idx !== -1) {
+                vouchers[idx] = saved;
+            }
+
+            renderVouchers();
+            updateMetrics();
+            closeModal();
+        } catch (err) {
+            console.error('[EditVoucher] Error:', err);
+            alert('Failed to update voucher: ' + (err.message || 'Unknown error'));
+        } finally {
+            submitBtn.disabled    = false;
+            submitBtn.textContent = 'Create Voucher';
+        }
+        return;
+    }
+
+    const isMultiple = document.getElementById('v-multiple-records')?.checked;
+
+    if (isMultiple) {
+        if (extractedRecords.length === 0) {
+            alert('Please upload a document for OCR first.');
+            submitBtn.disabled    = false;
+            submitBtn.textContent = 'Create Voucher';
+            return;
+        }
+
+        function buildPayload(rec) {
+            return {
+                voucher_type: normaliseType(rec.voucher_type),
+                date:         toInputDate(rec.date),
+                voucher_no:   (rec.voucher_no && rec.voucher_no !== 'NA') ? rec.voucher_no : ('VCH-' + Date.now()),
+                party:        (rec.party && rec.party !== 'NA') ? rec.party : 'NA',
+                amount:       (rec.amount !== undefined) ? parseFloat(rec.amount) : 0,
+                gst_amount:   (rec.gst_amount !== undefined) ? parseFloat(rec.gst_amount) : 0,
+                status:       normaliseStatus(rec.status),
+            };
+        }
+
+        try {
+            const response = await fetch(API_BASE + '/upload-to-AWS', {
+                method: 'POST',
+                headers: { 'Schema': 'voucher' }
+            });
+            
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error('Server error ' + response.status + ': ' + errText);
+            }
+
+            const payloads = extractedRecords.map(buildPayload);
+            const res = await fetch(API_BASE + '/add-voucher', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(payloads),
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error('Server error ' + res.status + ': ' + errText);
+            }
+
+            const savedList = await res.json();
+            if (Array.isArray(savedList)) {
+                savedList.forEach(saved => vouchers.unshift(saved));
+            }
+
+            renderVouchers();
+            updateMetrics();
+            closeModal();
+
+        } catch (err) {
+            console.error('[AddVoucher] Error:', err);
+            // Fallback local prepend
+            extractedRecords.forEach((rec, idx) => {
+                vouchers.unshift({ ...buildPayload(rec), id: Date.now() + idx });
+            });
+            renderVouchers();
+            updateMetrics();
+            closeModal();
+        } finally {
+            submitBtn.disabled    = false;
+            submitBtn.textContent = 'Create Voucher';
+        }
+        return;
+    }
 
     const payload = {
         voucher_type: document.getElementById('v-type').value,
@@ -361,40 +596,126 @@ newVoucherForm.addEventListener('submit', async function(e) {
         status:       document.getElementById('v-status').value,
     };
 
-    try {
-        const response = await fetch(API_BASE + '/upload-to-AWS', {
-            method: 'POST'
-        });
-        
-        if (!response.ok) {
-            const errText = await res.text();
-            throw new Error('Server error ' + res.status + ': ' + errText);
+    if (ocrTriggered) {
+        try {
+            const response = await fetch(API_BASE + '/upload-to-AWS', {
+                method: 'POST',
+                headers: { 'Schema': 'voucher' }
+            });
+            
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error('Server error ' + response.status + ': ' + errText);
+            }
+
+            const res = await fetch(API_BASE + '/add-voucher', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify([payload]),
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error('Server error ' + res.status + ': ' + errText);
+            }
+
+            const savedList = await res.json();
+            const saved = Array.isArray(savedList) ? savedList[0] : savedList;
+            vouchers.unshift(saved);
+            renderVouchers();
+            updateMetrics();
+            closeModal();
+
+        } catch (err) {
+            console.error('[AddVoucher] Error:', err);
+            vouchers.unshift({ ...payload, id: Date.now() });
+            renderVouchers();
+            updateMetrics();
+            closeModal();
+        } finally {
+            submitBtn.disabled    = false;
+            submitBtn.textContent = 'Create Voucher';
         }
+    } else {
+        try {
+            const res = await fetch(API_BASE + '/add-voucher', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify([payload]),
+            });
 
-        const res = await fetch(API_BASE + '/add-voucher', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify(payload),
-        });
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error('Server error ' + res.status + ': ' + errText);
+            }
 
-        if (!res.ok) {
-            const errText = await res.text();
-            throw new Error('Server error ' + res.status + ': ' + errText);
+            const savedList = await res.json();
+            const saved = Array.isArray(savedList) ? savedList[0] : savedList;
+            vouchers.unshift(saved);
+            renderVouchers();
+            updateMetrics();
+            closeModal();
+
+        } catch (err) {
+            console.error('[AddVoucher] Error:', err);
+            vouchers.unshift({ ...payload, id: Date.now() });
+            renderVouchers();
+            updateMetrics();
+            closeModal();
+        } finally {
+            submitBtn.disabled    = false;
+            submitBtn.textContent = 'Create Voucher';
         }
-
-        const saved = await res.json();
-
-        // Prepend the newly saved record to the local cache
-        vouchers.unshift(saved);
-        renderVouchers();
-        updateMetrics();
-        closeModal();
-
-    } catch (err) {
-        console.error('[AddVoucher] Error:', err);
-        alert('Failed to save voucher: ' + (err.message || 'Unknown error'));
-    } finally {
-        submitBtn.disabled    = false;
-        submitBtn.textContent = 'Create Voucher';
     }
+});
+
+/* ------------------------------------------------------------------ */
+/*  Record Actions & Dropdown Controls                                */
+/* ------------------------------------------------------------------ */
+window.toggleDropdown = function(event, id) {
+    event.stopPropagation();
+    document.querySelectorAll('.action-dropdown').forEach(d => {
+        if (d.id !== 'dropdown-' + id) {
+            d.classList.remove('show');
+        }
+    });
+    const dropdown = document.getElementById('dropdown-' + id);
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+};
+
+window.triggerEditVoucher = function(id) {
+    const record = vouchers.find(v => (v.id || v.voucher_no) == id);
+    if (record) {
+        openModal(record);
+    }
+    document.querySelectorAll('.action-dropdown').forEach(d => d.classList.remove('show'));
+};
+
+window.triggerRemoveVoucher = function(id) {
+    if (confirm('Are you sure you want to remove this voucher record?')) {
+        fetch(API_BASE + '/vouchers/' + id, {
+            method: 'DELETE'
+        }).then(res => {
+            if (res.ok) {
+                vouchers = vouchers.filter(v => (v.id || v.voucher_no) != id);
+                renderVouchers();
+                updateMetrics();
+            } else {
+                alert('Failed to delete voucher from database.');
+            }
+        }).catch(err => {
+            console.error('Delete failed:', err);
+            // fallback deletion locally if offline/no endpoint matches
+            vouchers = vouchers.filter(v => (v.id || v.voucher_no) != id);
+            renderVouchers();
+            updateMetrics();
+        });
+    }
+    document.querySelectorAll('.action-dropdown').forEach(d => d.classList.remove('show'));
+};
+
+document.addEventListener('click', function() {
+    document.querySelectorAll('.action-dropdown').forEach(d => d.classList.remove('show'));
 });

@@ -508,7 +508,7 @@ newVoucherForm.addEventListener('submit', async function(e) {
             closeModal();
         } catch (err) {
             console.error('[EditVoucher] Error:', err);
-            alert('Failed to update voucher: ' + (err.message || 'Unknown error'));
+            notify('Failed to update voucher: ' + (err.message || 'Unknown error'), 'error');
         } finally {
             submitBtn.disabled    = false;
             submitBtn.textContent = 'Create Voucher';
@@ -520,7 +520,7 @@ newVoucherForm.addEventListener('submit', async function(e) {
 
     if (isMultiple) {
         if (extractedRecords.length === 0) {
-            alert('Please upload a document for OCR first.');
+            showToast('Please upload a document for OCR first.', 'warning');
             submitBtn.disabled    = false;
             submitBtn.textContent = 'Create Voucher';
             return;
@@ -703,7 +703,7 @@ window.triggerRemoveVoucher = function(id) {
                 renderVouchers();
                 updateMetrics();
             } else {
-                alert('Failed to delete voucher from database.');
+                notify('Failed to delete voucher from database.', 'error');
             }
         }).catch(err => {
             console.error('Delete failed:', err);

@@ -271,7 +271,7 @@ function initDOMEvents() {
     });
 
     fileSubmitBtn.addEventListener("click", () => {
-        alert("GSTR-3B filed successfully! Reference Number: GST3B-981248912");
+        notify("GSTR-3B filed successfully! Reference Number: GST3B-981248912", "success");
         toggleFilingModal(false);
         // Add filing success alert to alerts sidebar
         alerts.unshift({

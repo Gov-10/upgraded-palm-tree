@@ -1,8 +1,11 @@
+import stat
 from fastapi import FastAPI, HTTPException, Depends, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import os, boto3, hashlib
 from datetime import datetime, timedelta
+import copy
+from sympy import det
 from utils.otp_gen import otp_generator
 from utils.send_email import email_send
 from dotenv import load_dotenv
@@ -21,8 +24,8 @@ from argon2.exceptions import VerifyMismatchError
 from typing import Any, List
 from utils.direct_ocr_extractor import ocr_extraction
 from botocore.exceptions import ClientError
-from schemas import VoucherSchema, BankStatementInputSchema, BRSInputSchema
-from database import Vouchers, BankStatements, BRS
+from schemas import VoucherSchema, BankStatementInputSchema, BRSInputSchema, GodownSchema, UnitSchema, StockSchema, NotificationLogSchema
+from database import Vouchers, BankStatements, BRS, godown, units, stock, notificationLogs
 
 ph = PasswordHasher()
 s3= boto3.client('s3', region_name=os.getenv("S3_REGION"), aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"), config=Config(signature_version="s3v4", s3={'addressing_style': 'virtual'}))
@@ -465,3 +468,323 @@ def delete_BRS(brs_id: int, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     return {"message": "BRS record deleted and related records reverted to pending"}
+
+def _godown_to_dict(g):
+    return {
+        "id": g.id,
+        "godown_name": g.godown_name,
+        "location": g.location,
+        "items": g.items
+    }
+
+@app.post("/godown")
+def add_godown(payload: GodownSchema, db: Session = Depends(get_db)):
+    new_godown = godown(
+        godown_name = payload.godown_name,
+        location = payload.location,
+        items = payload.items or []
+    )
+    db.add(new_godown)
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    db.refresh(new_godown)
+    return new_godown
+
+@app.get("/godown")
+def get_godown(db: Session = Depends(get_db)):
+    rows = db.query(godown).order_by(godown.id.desc()).all()
+    return [_godown_to_dict(r) for r in rows]
+
+def _units_to_dict(u):
+    return {
+        "id": u.id,
+        "symbol": u.symbol,
+        "name": u.name,
+        "conversion": u.conversion,
+        "decimals": u.decimals,
+        "type": u.type,
+        "used": u.used
+    }
+
+@app.put("/godown/{godown_name}")
+def update_godown(godown_name:str, payload:GodownSchema, db:Session=Depends(get_db)):
+    stock_item: Any
+    row = db.query(godown).filter(godown.godown_name == godown_name).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Godown not found")
+    old_items = copy.deepcopy(row.items) or []
+    new_items = payload.items or []
+
+    item_names = list({(item.get('name') or item.get('itemName')) for item in old_items + new_items if (item.get('name') or item.get('itemName'))})
+
+    stock_rows = db.query(stock).filter(stock.item.in_(item_names)).all()
+    stock_map = {s.item: s for s in stock_rows}
+    
+    # Update stock item quantities. If a stock item isn't created yet, we do not throw 400.
+    for item in old_items:
+        it_name = item.get('name') or item.get('itemName')
+        if not it_name:
+            continue
+        stock_item = stock_map.get(it_name)
+        if stock_item:
+            stock_item.quantity = max(0, stock_item.quantity - item.get('quantity', 0))
+            current_godowns = dict(stock_item.godowns or {})
+            current_godowns[godown_name] = max(0, current_godowns.get(godown_name, 0) - item.get('quantity', 0))
+            stock_item.godowns = current_godowns
+
+    for item in new_items:
+        it_name = item.get('name') or item.get('itemName')
+        if not it_name:
+            continue
+        stock_item = stock_map.get(it_name)
+        if stock_item:
+            stock_item.quantity += item.get('quantity', 0)
+            current_godowns = dict(stock_item.godowns or {})
+            current_godowns[godown_name] = current_godowns.get(godown_name, 0) + item.get('quantity', 0)
+            stock_item.godowns = current_godowns
+    
+    row.godown_name = payload.godown_name
+    row.location = payload.location
+    row.items = payload.items or []
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    db.refresh(row)
+    return row
+
+@app.get("/godown/{godown_name}")
+def get_single_godown(godown_name: str, db: Session = Depends(get_db)):
+    row = db.query(godown).filter(godown.godown_name == godown_name).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Godown not found")
+    return _godown_to_dict(row)
+
+@app.delete("/godown/{godown_name}")
+def delete_godown(godown_name: str, db: Session = Depends(get_db)):
+    row = db.query(godown).filter(godown.godown_name == godown_name).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Godown not found")
+
+    # For each item stored in this godown, deduct its quantity from stock
+    # and remove this godown from the stock's godowns dict
+    for item_entry in (row.items or []):
+        item_name = item_entry.get("itemName") or item_entry.get("name") or ""
+        item_qty = item_entry.get("quantity", 0)
+        if not item_name:
+            continue
+        stock_row = db.query(stock).filter(stock.item == item_name).first()
+        if stock_row:
+            stock_row.quantity = max(0, (stock_row.quantity or 0) - item_qty)
+            current_godowns = dict(stock_row.godowns or {})
+            current_godowns.pop(godown_name, None)
+            stock_row.godowns = current_godowns
+
+    try:
+        db.delete(row)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+    return {"message": f"Godown '{godown_name}' deleted successfully"}
+
+@app.put("/stock/{item_name}")
+def update_stock(item_name: str, payload: StockSchema, db: Session = Depends(get_db)):
+    row = db.query(stock).filter(stock.item == item_name).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Stock item not found")
+
+    old_godowns: dict = dict(row.godowns or {})
+    new_godowns: dict = dict(payload.godowns or {})
+
+    # Adjust all affected godown records
+    all_godown_names = set(old_godowns.keys()) | set(new_godowns.keys())
+    for gd_name in all_godown_names:
+        gd_row = db.query(godown).filter(godown.godown_name == gd_name).first()
+        if not gd_row:
+            continue
+        items_list: list = list(gd_row.items or [])
+        # Remove old entry for this stock item
+        items_list = [i for i in items_list if (i.get("itemName") or i.get("name")) != item_name]
+        # Add updated entry if quantity > 0 in new payload
+        new_qty = new_godowns.get(gd_name, 0)
+        if new_qty > 0:
+            items_list.append({
+                "itemName": payload.item,
+                "quantity": new_qty,
+                "unit": payload.unit
+            })
+        gd_row.items = items_list
+
+    row.item = payload.item
+    row.quantity = payload.quantity
+    row.unit = payload.unit
+    row.rate = payload.rate
+    row.godowns = payload.godowns
+    row.gst_rate = payload.gst_rate
+    row.hsn_code = payload.hsn_code
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    db.refresh(row)
+    return _items_to_dict(row)
+
+@app.delete("/stock/{item_name}")
+def delete_stock(item_name: str, db: Session = Depends(get_db)):
+    row = db.query(stock).filter(stock.item == item_name).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Stock item not found")
+
+    # Remove this stock item from every godown it belongs to
+    for gd_name, gd_qty in (row.godowns or {}).items():
+        gd_row = db.query(godown).filter(godown.godown_name == gd_name).first()
+        if gd_row:
+            items_list = [
+                i for i in (gd_row.items or [])
+                if (i.get("itemName") or i.get("name")) != item_name
+            ]
+            gd_row.items = items_list
+
+    try:
+        db.delete(row)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+    return {"message": f"Stock item '{item_name}' deleted successfully"}
+
+@app.post("/units")
+def add_unit(payload: UnitSchema, db: Session = Depends(get_db)):
+    new_unit = units(
+        symbol = payload.symbol,
+        name = payload.name,
+        conversion = payload.conversion,
+        decimals = payload.decimals,
+        type = payload.type,
+        used = 0
+    )
+    db.add(new_unit)
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    db.refresh(new_unit)
+    return new_unit
+
+@app.get("/units")
+def get_units(db: Session = Depends(get_db)):
+    rows = db.query(units).order_by(units.id.desc()).all()
+    return [_units_to_dict(r) for r in rows]
+
+@app.get("/units/{unit_symbol}")
+def get_conversion(unit_symbol: str, db: Session = Depends(get_db)):
+    row = db.query(units).filter(units.symbol == unit_symbol).first()
+    try:
+        if row is not None:
+            return row.conversion
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    
+@app.delete("/units/{unit_symbol}")
+def delete_unit(unit_symbol: str, db: Session = Depends(get_db)):
+    row = db.query(units).filter(units.symbol == unit_symbol).first()
+    try:
+        if row is not None:
+            if row.type == 'simple' and row.used > 0:
+                return {"status": "Unsuccesful operation", "detail": "Simple units can't be deleted unless completely unused. You are using this unit to count some stock items. Kindly check and retry."}
+            else:
+                db.delete(row)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    
+def _items_to_dict(i):
+    return {
+        "id": i.id,
+        "item": i.item,
+        "quantity": i.quantity,
+        "unit": i.unit,
+        "rate": i.rate,
+        "godowns": i.godowns,
+        "gst_rate": i.gst_rate,
+        "hsn_code": i.hsn_code
+    }
+
+@app.post("/stock")
+def add_stock(payload: StockSchema, db: Session = Depends(get_db)):
+    new_stock = stock(
+        item = payload.item,
+        quantity = payload.quantity,
+        unit = payload.unit,
+        rate = payload.rate,
+        godowns = payload.godowns,
+        gst_rate = payload.gst_rate,
+        hsn_code = payload.hsn_code
+    )
+    db.add(new_stock)
+
+    # Sync: For every godown specified in the stock item payload, add the item to that godown's items list
+    for gd_name, gd_qty in (payload.godowns or {}).items():
+        gd_row = db.query(godown).filter(godown.godown_name == gd_name).first()
+        if gd_row:
+            items_list = list(gd_row.items or [])
+            # Filter out existing entries for safety
+            items_list = [i for i in items_list if (i.get("itemName") or i.get("name")) != payload.item]
+            if gd_qty > 0:
+                items_list.append({
+                    "itemName": payload.item,
+                    "quantity": gd_qty,
+                    "unit": payload.unit
+                })
+            gd_row.items = items_list
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    db.refresh(new_stock)
+    return new_stock
+    
+@app.get("/stock")
+def get_stock(db: Session = Depends(get_db)):
+    rows = db.query(stock).order_by(stock.id.desc()).all()
+    return [_items_to_dict(r) for r in rows]
+
+def _log_to_dict(l):
+    return {
+        "id": l.id,
+        "created_at": l.created_at,
+        "detail": l.detail,
+    }
+
+@app.post("/notification-log")
+def add_log(payload: NotificationLogSchema, db: Session = Depends(get_db)):
+    new_log = notificationLogs(
+        detail = payload.detail
+        
+    )
+    db.add(new_log)
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    db.refresh(new_log)
+    return new_log
+
+@app.get("/notification-log")
+def get_log(db: Session = Depends(get_db)):
+    rows = db.query(notificationLogs).order_by(notificationLogs.id.desc()).all()
+    return [_log_to_dict(r) for r in rows]

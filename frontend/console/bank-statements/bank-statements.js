@@ -634,7 +634,7 @@ newStatementForm.addEventListener('submit', async function(e) {
     }
 
     if (extractedRecords.length === 0) {
-        alert('Please upload a bank statement first.');
+        showToast('Please upload a bank statement first.', 'warning');
         submitBtn.disabled  = false;
         submitBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Statement';
         return;
@@ -737,7 +737,7 @@ window.triggerRemoveStatement = function(id) {
                 renderStatements();
                 updateMetrics();
             } else {
-                alert('Failed to delete from database.');
+                notify('Failed to delete statement from database.', 'error');
             }
         }).catch(err => {
             console.error('Delete failed:', err);

@@ -1,5 +1,7 @@
+from unittest.mock import Base
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Any, Optional, List, Dict
+
 class InputSchema(BaseModel):
     file_name: str
     content_type: Optional[str] = Field(description="pdf")
@@ -74,3 +76,27 @@ class BRSInputSchema(BaseModel):
     amount: float
     gst_amount: float
 
+class GodownSchema(BaseModel):
+    godown_name: str
+    location: str
+    items: Optional[List[Dict[str, Any]]] = None
+
+class UnitSchema(BaseModel):
+    symbol: str
+    name: str
+    conversion: Dict[str, Any]
+    decimals: int
+    type: str
+    used: int
+
+class StockSchema(BaseModel):
+    item: str
+    quantity: float
+    unit: str
+    rate: float
+    godowns: Dict[str, Any]
+    gst_rate: float
+    hsn_code: int
+
+class NotificationLogSchema(BaseModel):
+    detail: str

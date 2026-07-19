@@ -100,3 +100,30 @@ class StockSchema(BaseModel):
 
 class NotificationLogSchema(BaseModel):
     detail: str
+
+class IssuedToSchema(BaseModel):
+    name: str
+    address: List[str]
+    phone: str
+    email: str
+
+class InvoiceItemSchema(BaseModel):
+    desc: str
+    qty: int
+    price: float
+
+class PaymentDetailsSchema(BaseModel):
+    bank: str
+    account_no: str
+    account_name: str
+
+class InvoiceGenerationSchema(BaseModel):
+    invoice_no: str
+    company_name: str
+    issued_to: IssuedToSchema
+    issued_date: str
+    due_date: str
+    items: List[InvoiceItemSchema]
+    tax_rate: Optional[float] = 0.10
+    payment_details: PaymentDetailsSchema
+

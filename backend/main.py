@@ -24,8 +24,10 @@ from argon2.exceptions import VerifyMismatchError
 from typing import Any, List
 from utils.direct_ocr_extractor import ocr_extraction
 from botocore.exceptions import ClientError
-from schemas import VoucherSchema, BankStatementInputSchema, BRSInputSchema, GodownSchema, UnitSchema, StockSchema, NotificationLogSchema
+from schemas import VoucherSchema, BankStatementInputSchema, BRSInputSchema, GodownSchema, UnitSchema, StockSchema, NotificationLogSchema, InvoiceGenerationSchema
 from database import Vouchers, BankStatements, BRS, godown, units, stock, notificationLogs
+from utils.invoice_gen import generate_invoice, clear
+
 
 ph = PasswordHasher()
 s3= boto3.client('s3', region_name=os.getenv("S3_REGION"), aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"), config=Config(signature_version="s3v4", s3={'addressing_style': 'virtual'}))
@@ -788,3 +790,54 @@ def add_log(payload: NotificationLogSchema, db: Session = Depends(get_db)):
 def get_log(db: Session = Depends(get_db)):
     rows = db.query(notificationLogs).order_by(notificationLogs.id.desc()).all()
     return [_log_to_dict(r) for r in rows]
+
+@app.post("/generate-invoice")
+def gen_invoice(payload: InvoiceGenerationSchema):
+    data = {
+        "invoice_no": payload.invoice_no,
+        "company_name": payload.company_name,
+        "issued_to": {
+            "name": payload.issued_to.name,
+            "address": payload.issued_to.address,
+            "phone": payload.issued_to.phone,
+            "email": payload.issued_to.email,
+        },
+        "items": [
+            {"desc": item.desc, "qty": item.qty, "price": item.price}
+            for item in payload.items
+        ],
+        "tax_rate": payload.tax_rate,
+        "payment_details": {
+            "bank": payload.payment_details.bank,
+            "account_no": payload.payment_details.account_no,
+            "account_name": payload.payment_details.account_name,
+        }
+    }
+
+    for key in ["issued_date", "due_date"]:
+        date_str = getattr(payload, key)
+        parsed = None
+        for fmt in ("%Y-%m-%d", "%d %B %Y", "%d-%m-%Y"):
+            try:
+                parsed = datetime.strptime(date_str, fmt)
+                break
+            except ValueError:
+                continue
+        if parsed:
+            data[key] = parsed
+        else:
+            data[key] = date_str
+
+    from utils.invoice_gen import _DEFAULT_PDF
+    generate_invoice(output_path=_DEFAULT_PDF, data=data)
+
+    if not os.path.exists(_DEFAULT_PDF):
+        raise HTTPException(status_code=500, detail="Failed to generate invoice PDF")
+
+    with open(_DEFAULT_PDF, "rb") as f:
+        pdf_bytes = f.read()
+
+    clear()
+
+    return Response(content=pdf_bytes, media_type="application/pdf")
+

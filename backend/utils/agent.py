@@ -1,5 +1,5 @@
 from langgraph.graph import StateGraph, END
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, SecretStr, Field
 from typing import Optional
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
@@ -15,7 +15,7 @@ llm=ChatGroq(model='qwen/qwen3-32b', temperature=0, max_tokens=None, reasoning_f
 import boto3
 load_dotenv()
 llm = ChatGroq(
-    model="qwen/qwen3-32b",
+    model="openai/gpt-oss-120b",
     temperature=0,
     max_tokens=None,
     reasoning_format="hidden",
@@ -37,23 +37,46 @@ class State(BaseModel):
     key: Optional[str] = ""
 SCHEMA = """
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "supplier": {
-    "name": ""
-  },
-  "buyer": {
-    "name": ""
-  },
-  "totals": {
-    "grand_total": ""
-  },
-  "receiver_name": "",
-  "place_of_supply": "",
-  "supply_type": "",
+   "invoice_number": "",
+   "invoice_date": "",
+   "invoice_type": "",
+   "supplier_gstin": "",
+   "supplier_name": "",
+   "place_of_supply": "",
+   "hsn_sac_code" : "",
+   "item_description": "",
+   "quantity": "",
+   "unit_price": "",
+   "taxable_value": "",
+   "gst_rate" : "",
+   "cgst_amount": "",
+   "sgst_amount": "",
+   "igst_amount": "",
+   "cess_amount": "",
+   "total_invoice_value": "",
+   "reverse_charge": ""
 }
 """
 
+class LLMSchema(BaseModel):
+    invoice_number: str = Field(default="NA")
+    invoice_date: str = Field(default="NA")
+    invoice_type: str = Field(default="NA")
+    supplier_gstin: str = Field(default="NA")
+    supplier_name: str = Field(default="NA")
+    place_of_supply: str = Field(default="NA")
+    hsn_sac_code: str = Field(default="NA")
+    item_description: str = Field(default="NA")
+    quantity: str = Field(default="NA")
+    unit_price: str = Field(default="NA")
+    taxable_value: str = Field(default="NA")
+    gst_rate: str = Field(default="NA")
+    cgst_amount: str = Field(default="NA")
+    sgst_amount: str = Field(default="NA")
+    igst_amount: str = Field(default="NA")
+    cess_amount: str = Field(default="NA")
+    total_invoice_value: str = Field(default="NA")
+    reverse_charge: str = Field(default="NA")
 
 def clean_json_response(text: str) -> str:
     text = text.strip()
@@ -71,34 +94,24 @@ def clean_json_response(text: str) -> str:
     return text
 
 def normal_node(state: State):
-    prompt = f"""
-You are an invoice extraction system.
-Extract invoice information and return ONLY VALID JSON.
-Schema:
-{SCHEMA}
+    prompt = f"""You are an invoice extraction system. 
+Extract invoice information according to the requested format.
 Invoice Text:
-{state.content}
-If any field has missing data, assign 'NA' to that field ONLY
-"""
+{state.content}"""
 
-    resp = llm.invoke(prompt)
-    content = resp.content
-    print("LLM Output bhaiyya....->")
-    print(repr(content))
-    print()
-    if not isinstance(content, str):
-        content = str(content)
-
-    cleaned = clean_json_response(content)
+    # Bind the structured output schema directly to your LLM execution
+    structured_llm = llm.with_structured_output(LLMSchema)
+    
     try:
-        normal_data = json.loads(cleaned)
+        # This will return a parsed Pydantic object automatically!
+        structured_resp = structured_llm.invoke(prompt)
+        # Convert to standard Python dict for your State
+        normal_data = structured_resp.model_dump()
     except Exception as e:
-        print("JSON failed ji...")
-        print(cleaned)
-        print()
-        raise ValueError(f"Invalid JSON returned by LLM: {str(e)}")
-    return {"normal": normal_data}
+        print("Structured extraction failed:", e)
+        raise ValueError(f"LLM failed to provide valid data: {str(e)}")
 
+    return {"normal": normal_data}
 
 def final_node(state: State):
     data = state.normal

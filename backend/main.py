@@ -153,6 +153,7 @@ def upl(payload: InputSchema):
 
 @app.post("/extract")
 def extr(payload: ExtractSchema):
+    key = None
     combined_text= ""
     for file_key in payload.file_keys:
         response = s3.get_object(
@@ -164,8 +165,12 @@ def extr(payload: ExtractSchema):
         if len(text.strip()) < 100:
             text = extract_ocr(file_bytes)
         combined_text += "\n\n" + text
+    dt = redis_client.get(key1)
+    if dt["text"] == hash_text(combined_text):
+        return {"normal": dt["ai_result"]}
     result = lang_app.invoke(State(content=combined_text))
     text_hash = hash_text(combined_text) #isko caching mein use karenge
+    redis_client.setex(key, {"text": text_hash, "ai_result": result["normal"]}, 86400)
     return {"csv_file": result["fin"], "normal": result["normal"]}
 
 

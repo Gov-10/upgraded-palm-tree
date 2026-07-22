@@ -37,10 +37,12 @@ class Vouchers(Base):
     date: Mapped[str] = mapped_column(String)
     voucher_no: Mapped[str] = mapped_column(String, unique=True, index=True)
     party: Mapped[str] = mapped_column(String)
+    items: Mapped[List[Dict[str, Any]]] = mapped_column(JSONB, nullable=False, default=list)
     amount: Mapped[float] = mapped_column(Float)
     gst_amount: Mapped[float] = mapped_column(Float)
+    discount: Mapped[float] = mapped_column(Float)
     status: Mapped[str] = mapped_column(String, default="pending")
-    file_key: Mapped[str] = mapped_column(String, unique=True)
+    file_key: Mapped[str] = mapped_column(String, nullable=True)
 
 class History(Base):
     __tablename__ = "histories"

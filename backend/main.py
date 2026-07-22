@@ -230,8 +230,10 @@ def add_voucher(payload: List[VoucherSchema], db: Session = Depends(get_db)):
             date=item.date,
             voucher_no=item.voucher_no,
             party=item.party,
+            items=item.items,
             amount=item.amount,
             gst_amount=item.gst_amount,
+            discount=item.discount,
             status=item.status,
             file_key=file_key
         )
@@ -240,6 +242,7 @@ def add_voucher(payload: List[VoucherSchema], db: Session = Depends(get_db)):
     
     try:
         db.commit()
+        redis_client.delete("file_key")
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
@@ -254,8 +257,10 @@ def add_voucher(payload: List[VoucherSchema], db: Session = Depends(get_db)):
             "date": v.date,
             "voucher_no": v.voucher_no,
             "party": v.party,
+            "items": v.items,
             "amount": v.amount,
             "gst_amount": v.gst_amount,
+            "discount": v.discount,
             "status": v.status
         }
         for v in vouchers_added
@@ -271,8 +276,10 @@ def get_vouchers(db: Session = Depends(get_db)):
             "date": v.date,
             "voucher_no": v.voucher_no,
             "party": v.party,
+            "items": v.items,
             "amount": v.amount,
             "gst_amount": v.gst_amount,
+            "discount": v.discount,
             "status": v.status
         }
         for v in rows
@@ -287,8 +294,10 @@ def update_voucher(voucher_id: int, payload: VoucherSchema, db: Session = Depend
     voucher.date = payload.date
     voucher.voucher_no = payload.voucher_no
     voucher.party = payload.party
+    voucher.items = payload.items
     voucher.amount = payload.amount
     voucher.gst_amount = payload.gst_amount
+    voucher.discount = payload.discount
     voucher.status = payload.status
     try:
         db.commit()
@@ -302,8 +311,10 @@ def update_voucher(voucher_id: int, payload: VoucherSchema, db: Session = Depend
         "date": voucher.date,
         "voucher_no": voucher.voucher_no,
         "party": voucher.party,
+        "items": voucher.items,
         "amount": voucher.amount,
         "gst_amount": voucher.gst_amount,
+        "discount": voucher.discount,
         "status": voucher.status
     }
 

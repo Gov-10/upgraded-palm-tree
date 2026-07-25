@@ -126,9 +126,13 @@ function renderVouchers() {
                 const itemName = item.item_name || item.name || item.itemName || 'Item';
                 const qty = item.qty !== undefined ? item.qty : (item.quantity || 1);
                 const rate = item.rate !== undefined ? item.rate : (item.price || 0);
+                const godownCell = item.godown
+                    ? `<td style="color:#60a5fa;padding:8px 12px;text-align:left;">${item.godown}</td>`
+                    : `<td style="color:#64748b;padding:8px 12px;text-align:left;">—</td>`;
                 return `
                     <tr>
                         <td style="color:#cbd5e1;padding:8px 12px;text-align:left;">${itemName}</td>
+                        ${godownCell}
                         <td style="color:#94a3b8;padding:8px 12px;text-align:right;">${qty}</td>
                         <td style="color:#94a3b8;padding:8px 12px;text-align:right;">${formatCurrency(rate)}</td>
                         <td style="color:#f8fafc;padding:8px 12px;text-align:right;font-weight:600;">${formatCurrency(qty * rate)}</td>
@@ -151,6 +155,7 @@ function renderVouchers() {
                             <thead>
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left;">
                                     <th style="text-align:left;color:#64748b;padding:6px 12px;font-size:11px;">Item Description</th>
+                                    <th style="text-align:left;color:#64748b;padding:6px 12px;font-size:11px;">Godown</th>
                                     <th style="text-align:right;color:#64748b;padding:6px 12px;font-size:11px;width:80px;">Qty</th>
                                     <th style="text-align:right;color:#64748b;padding:6px 12px;font-size:11px;width:120px;">Rate</th>
                                     <th style="text-align:right;color:#64748b;padding:6px 12px;font-size:11px;width:120px;">Total</th>

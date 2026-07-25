@@ -195,13 +195,27 @@ body {
 
 .item-row {
     display: grid;
-    grid-template-columns: 2.2fr 1fr auto;
+    grid-template-columns: 2.2fr 1.5fr 90px auto;
     gap: 12px;
     align-items: flex-end;
     background: rgba(255, 255, 255, 0.015);
     padding: 12px;
     border-radius: 10px;
     border: 1px dashed var(--border);
+}
+
+/* Godown input disabled / enabled states */
+.form-group input[disabled].godown-input {
+    opacity: 0.38;
+    cursor: not-allowed;
+    background: rgba(255,255,255,0.015);
+}
+.godown-input:not([disabled]) {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px !important;
 }
 
 .btn {
@@ -320,6 +334,149 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Invoice List Styles */
+.invoice-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+}
+.invoice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+.invoice-item-card {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+}
+.invoice-item-card:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--border-strong);
+}
+.invoice-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.invoice-party-name {
+    font-weight: 600;
+    color: var(--text-hi);
+    font-size: 14px;
+}
+.invoice-item-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-mid);
+}
+.invoice-total-amt {
+    font-weight: 700;
+    color: var(--blue-light);
+}
+.invoice-date {
+    color: var(--text-lo);
+}
+.btn-revert {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-revert:hover {
+    background: var(--red);
+    color: #fff;
+    border-color: transparent;
+}
+.invoice-details-collapse {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+.invoice-details-content {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 10px;
+    margin-top: 6px;
+}
+.invoice-details-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    color: var(--text-mid);
+}
+.invoice-details-table th {
+    text-align: left;
+    color: var(--text-lo);
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.invoice-details-table td {
+    padding: 6px 0;
+}
+.invoice-details-table td.qty-col {
+    text-align: right;
+    width: 60px;
+}
+
+/* Modal Overlay confirmation dialog */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(8, 12, 24, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.modal-overlay.show {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+.modal-overlay .confirm-card {
+    width: 400px;
+    max-width: 90%;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(30, 41, 59, 0.9);
+}
+.modal-overlay.show .confirm-card {
+    transform: scale(1) !important;
+}
 </style>
 </head>
 <body>
@@ -395,77 +552,100 @@ body {
         </div>
 
         <div class="console-content">
-            <div class="glass-card" style="max-width:900px; margin:0 auto;">
-                <div class="glass-card-header">
-                    <h3><i class="ti ti-file-text"></i> Invoice Details</h3>
+            <div class="two-col" style="max-width:1300px; margin:0 auto; width:100%;">
+                <!-- Left: Form -->
+                <div class="glass-card">
+                    <div class="glass-card-header">
+                        <h3><i class="ti ti-file-text"></i> Invoice Details</h3>
+                    </div>
+                    <div id="invoice-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="invoice_no">Invoice Number</label>
+                                <input type="text" id="invoice_no" placeholder="e.g. 16910" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="company_name">Seller Company Name</label>
+                                <input type="text" id="company_name" placeholder="e.g. LICERIA &amp; CO." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="issued_date">Date of Issue</label>
+                                <input type="date" id="issued_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="due_date">Due Date</label>
+                                <input type="date" id="due_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cust_name">Customer Name</label>
+                                <input type="text" id="cust_name" placeholder="e.g. Jimmy Anderson" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cust_company">Customer Company Name</label>
+                                <input type="text" id="cust_company" placeholder="e.g. Apex Corp">
+                            </div>
+                            <div class="form-group">
+                                <label for="cust_phone">Customer Phone Number</label>
+                                <input type="text" id="cust_phone" placeholder="e.g. +123 456 7890">
+                            </div>
+                            <div class="form-group">
+                                <label for="cust_email">Customer Email</label>
+                                <input type="email" id="cust_email" placeholder="e.g. client@example.com">
+                            </div>
+                            <div class="form-group full">
+                                <label for="cust_address">Customer Address</label>
+                                <textarea id="cust_address" placeholder="e.g. 123 Anywhere St., Any City" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="bank_name">Customer Bank Name</label>
+                                <input type="text" id="bank_name" placeholder="e.g. Borcelle Bank">
+                            </div>
+                            <div class="form-group">
+                                <label for="account_number">Account Number</label>
+                                <input type="text" id="account_number" placeholder="e.g. 0123 4567 8901">
+                            </div>
+                            <div class="form-group full">
+                                <label for="account_name">Account Name</label>
+                                <input type="text" id="account_name" placeholder="e.g. Marcella Fontana">
+                            </div>
+                        </div>
+
+                        <div class="glass-card-header" style="border-top:1px solid var(--border); border-bottom:none;">
+                            <h3><i class="ti ti-package"></i> Invoice Items</h3>
+                        </div>
+                        <div class="item-rows-container" id="item-rows-container"></div>
+
+                        <div style="padding:0 20px 20px;">
+                            <button type="button" id="add-item-btn" class="btn btn-secondary">
+                                <i class="ti ti-plus"></i> Add Item
+                            </button>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="generate-btn" class="btn btn-primary" style="width:100%;">
+                                <i class="ti ti-file-invoice"></i> Generate &amp; Download Invoice
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div id="invoice-form">
-                    <div class="form-grid">
+
+                <!-- Right: List -->
+                <div class="glass-card">
+                    <div class="glass-card-header">
+                        <h3><i class="ti ti-list"></i> Generated Invoices</h3>
+                    </div>
+                    <div class="invoice-filters">
                         <div class="form-group">
-                            <label for="invoice_no">Invoice Number</label>
-                            <input type="text" id="invoice_no" placeholder="e.g. 16910" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="company_name">Seller Company Name</label>
-                            <input type="text" id="company_name" placeholder="e.g. LICERIA &amp; CO." required>
-                        </div>
-                        <div class="form-group">
-                            <label for="issued_date">Date of Issue</label>
-                            <input type="date" id="issued_date" required>
+                            <label for="filter-start-date">Start Date</label>
+                            <input type="date" id="filter-start-date">
                         </div>
                         <div class="form-group">
-                            <label for="due_date">Due Date</label>
-                            <input type="date" id="due_date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="cust_name">Customer Name</label>
-                            <input type="text" id="cust_name" placeholder="e.g. Jimmy Anderson" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="cust_company">Customer Company Name</label>
-                            <input type="text" id="cust_company" placeholder="e.g. Apex Corp">
-                        </div>
-                        <div class="form-group">
-                            <label for="cust_phone">Customer Phone Number</label>
-                            <input type="text" id="cust_phone" placeholder="e.g. +123 456 7890">
-                        </div>
-                        <div class="form-group">
-                            <label for="cust_email">Customer Email</label>
-                            <input type="email" id="cust_email" placeholder="e.g. client@example.com">
-                        </div>
-                        <div class="form-group full">
-                            <label for="cust_address">Customer Address</label>
-                            <textarea id="cust_address" placeholder="e.g. 123 Anywhere St., Any City" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="bank_name">Customer Bank Name</label>
-                            <input type="text" id="bank_name" placeholder="e.g. Borcelle Bank">
-                        </div>
-                        <div class="form-group">
-                            <label for="account_number">Account Number</label>
-                            <input type="text" id="account_number" placeholder="e.g. 0123 4567 8901">
-                        </div>
-                        <div class="form-group full">
-                            <label for="account_name">Account Name</label>
-                            <input type="text" id="account_name" placeholder="e.g. Marcella Fontana">
+                            <label for="filter-end-date">End Date</label>
+                            <input type="date" id="filter-end-date">
                         </div>
                     </div>
-
-                    <div class="glass-card-header" style="border-top:1px solid var(--border); border-bottom:none;">
-                        <h3><i class="ti ti-package"></i> Invoice Items</h3>
-                    </div>
-                    <div class="item-rows-container" id="item-rows-container"></div>
-
-                    <div style="padding:0 20px 20px;">
-                        <button type="button" id="add-item-btn" class="btn btn-secondary">
-                            <i class="ti ti-plus"></i> Add Item
-                        </button>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" id="generate-btn" class="btn btn-primary" style="width:100%;">
-                            <i class="ti ti-file-invoice"></i> Generate &amp; Download Invoice
-                        </button>
+                    <div class="invoice-list" id="invoice-list-container">
+                        <!-- Items populated via JS -->
                     </div>
                 </div>
             </div>
@@ -473,8 +653,21 @@ body {
 
 
 
+<!-- Custom Confirmation Modal Overlay -->
+<div class="modal-overlay" id="confirm-modal">
+    <div class="glass-card confirm-card">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-hi); display:flex; align-items:center; gap:8px;"><i class="ti ti-alert-triangle" style="color:var(--red);"></i> Revert Sales Invoice</h3>
+        <p style="font-size:13px; color:var(--text-mid); line-height:1.5;">Are you sure you want to revert this sales invoice? This will permanently delete the voucher entry from the ledger and <strong style="color:var(--amber);">restore the inventory quantities</strong> to their pre-invoice state.</p>
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:8px;">
+            <button type="button" id="confirm-cancel-btn" class="btn btn-secondary" style="padding:8px 16px; font-size:13px;">No, Cancel</button>
+            <button type="button" id="confirm-yes-btn" class="btn btn-primary" style="background:linear-gradient(135deg, var(--red), #f87171); border-color:transparent; padding:8px 16px; font-size:13px;">Yes, Revert</button>
+        </div>
+    </div>
+</div>
+
 <script src="../shared/notifications.js"></script>
 <script src="../shared/sidebar.js"></script>
 <script src="billing.js"></script>
+
 </body>
 </html>

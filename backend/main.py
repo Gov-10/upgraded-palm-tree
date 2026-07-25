@@ -24,7 +24,7 @@ from argon2.exceptions import VerifyMismatchError
 from typing import Any, List
 from utils.direct_ocr_extractor import ocr_extraction
 from botocore.exceptions import ClientError
-from schemas import VoucherSchema, BankStatementInputSchema, BRSInputSchema, GodownSchema, UnitSchema, StockSchema, NotificationLogSchema, InvoiceGenerationSchema
+from schemas import VoucherSchema, BankStatementInputSchema, BRSInputSchema, GodownSchema, UnitSchema, StockSchema, NotificationLogSchema, InvoiceGenerationSchema, InvoiceSyncSchema, InvoiceSyncItemSchema
 from database import Vouchers, BankStatements, BRS, godown, units, stock, notificationLogs
 from utils.invoice_gen import generate_invoice, clear
 
@@ -305,6 +305,24 @@ def update_voucher(voucher_id: int, payload: VoucherSchema, db: Session = Depend
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     db.refresh(voucher)
+    return {
+        "id": voucher.id,
+        "voucher_type": voucher.voucher_type,
+        "date": voucher.date,
+        "voucher_no": voucher.voucher_no,
+        "party": voucher.party,
+        "items": voucher.items,
+        "amount": voucher.amount,
+        "gst_amount": voucher.gst_amount,
+        "discount": voucher.discount,
+        "status": voucher.status
+    }
+
+@app.get("/vouchers/{voucher_id}")
+def get_single_voucher(voucher_id: int, db: Session = Depends(get_db)):
+    voucher = db.query(Vouchers).filter(Vouchers.id == voucher_id).first()
+    if not voucher:
+        raise HTTPException(status_code=404, detail="Voucher not found")
     return {
         "id": voucher.id,
         "voucher_type": voucher.voucher_type,
@@ -851,4 +869,72 @@ def gen_invoice(payload: InvoiceGenerationSchema):
     clear()
 
     return Response(content=pdf_bytes, media_type="application/pdf")
+
+@app.post("/sync-invoice-stock")
+def sync_invoice_stock(payload: InvoiceSyncSchema, db: Session = Depends(get_db)):
+    """
+    Deduct (revert=False) or restore (revert=True) stock and godown quantities
+    based on the items listed in an invoice.  Each item specifies an exact godown.
+    """
+    warnings_list = []
+    for entry in payload.items:
+        item_name   = entry.item_name
+        qty         = entry.qty
+        godown_name = entry.godown  # may be None for legacy vouchers without a godown field
+
+        stock_row = db.query(stock).filter(stock.item == item_name).first()
+        if not stock_row:
+            warnings_list.append(f"Stock item '{item_name}' not found – skipped.")
+            continue
+
+        # ── Adjust total stock quantity ────────────────────────────────────────
+        if payload.revert:
+            stock_row.quantity = (stock_row.quantity or 0) + qty
+        else:
+            stock_row.quantity = max(0, (stock_row.quantity or 0) - qty)
+
+        # ── Adjust the specific godown quantity ────────────────────────────────
+        if godown_name:
+            current_godowns = dict(stock_row.godowns or {})
+            if payload.revert:
+                current_godowns[godown_name] = current_godowns.get(godown_name, 0) + qty
+            else:
+                current_godowns[godown_name] = max(0, current_godowns.get(godown_name, 0) - qty)
+            stock_row.godowns = current_godowns
+
+            # Sync the godown table record (items list inside each godown)
+            gd_row = db.query(godown).filter(godown.godown_name == godown_name).first()
+            if gd_row:
+                items_list = list(gd_row.items or [])
+                updated    = False
+                new_items  = []
+                for gd_item in items_list:
+                    e_name = gd_item.get('itemName') or gd_item.get('name') or ''
+                    if e_name == item_name:
+                        new_qty = gd_item.get('quantity', 0)
+                        new_qty = (new_qty + qty) if payload.revert else max(0, new_qty - qty)
+                        gd_item = dict(gd_item)
+                        gd_item['quantity'] = new_qty
+                        updated = True
+                    new_items.append(gd_item)
+
+                # If reverting and item wasn't found in godown's list, add it back
+                if not updated and payload.revert:
+                    new_items.append({
+                        'itemName': item_name,
+                        'quantity': qty,
+                        'unit':     stock_row.unit
+                    })
+                gd_row.items = new_items
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+    result: dict = {"message": "Inventory synced successfully"}
+    if warnings_list:
+        result["warnings"] = warnings_list
+    return result
 

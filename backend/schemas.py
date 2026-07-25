@@ -136,3 +136,11 @@ class InvoiceGenerationSchema(BaseModel):
     tax_rate: Optional[float] = 0.10
     payment_details: PaymentDetailsSchema
 
+class InvoiceSyncItemSchema(BaseModel):
+    item_name: str
+    qty: float
+    godown: Optional[str] = None
+
+class InvoiceSyncSchema(BaseModel):
+    items: List[InvoiceSyncItemSchema]
+    revert: bool = False

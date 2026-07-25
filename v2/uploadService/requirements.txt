@@ -5,3 +5,4 @@ sqlalchemy
 psycopg2-binary
 boto3
 python-dotenv
+Twilio

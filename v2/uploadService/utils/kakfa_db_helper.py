@@ -13,6 +13,6 @@ def helper(username, file_name, file_key, source, db, Docs):
         db.rollback()
         raise Exception
     db.refresh(db_note)
-    event = {"event_id": event_id, "file_key": file_key, "file_name": file_name}
+    event = {"event_id": event_id, "file_key": file_key, "file_name": file_name, "source": source}
     producer.send("doc-submit", key=event_id.encode(), value=event}
     producer.flush()

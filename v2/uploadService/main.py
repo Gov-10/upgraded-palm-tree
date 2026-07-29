@@ -64,7 +64,7 @@ async def twilio_wwb(request: Request, From: str= Form(...), NumMedia:int=Form(0
     if NumMedia==0 or not MediaUrl0:
         return Response(content="<Response></Response>", media_type="application/xml")
     sender_phone = From.replace("whatsapp:", "").strip()
-    username = f"wa_{sender_phone}"
+    username = f"{sender_phone}"
     try:
         auth = (os.getenv("TWILIO_ACCOUNT_SID"), os.getenv("TWILIO_AUTH_TOKEN")) if os.getenv("TWILIO_ACCOUNT_SID") else None
         file_res = requests.get(MediaUrl0, auth=auth, stream=True)

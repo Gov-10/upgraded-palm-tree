@@ -39,7 +39,7 @@ app.add_middleware(CORSMiddleware,
 def get_db():
     db=sessionLocal()
     try:
-        yield db 
+        yield db
     finally:
         db.close()
 
@@ -122,18 +122,18 @@ def logi(payload: LoginSchema, response: Response, db:Session=Depends(get_db)):
             raise HTTPException(status_code=401, detail="passwords do not match")
     else:
         raise HTTPException(status_code=401, detail="verify your email")
-           
+
 @app.post("/upload")
 def upl(payload: InputSchema):
     file_id=str(uuid.uuid4())
     key=f"docs/{file_id}-{payload.file_name}"
     pres=s3.generate_presigned_url(
-        ClientMethod = 'put_object', 
+        ClientMethod = 'put_object',
         Params = {
-            'Bucket': bucket, 
-            "Key" : key, 
+            'Bucket': bucket,
+            "Key" : key,
             "ContentType": payload.content_type
-        }, 
+        },
         ExpiresIn = 600
     )
     status="uploaded"

@@ -106,11 +106,11 @@ async function triggerRemoveBRS(id) {
             renderMetrics();
         } else {
             const txt = await res.text();
-            alert('Failed to delete reconciliation: ' + txt);
+            notify('Failed to delete reconciliation: ' + txt, 'error');
         }
     } catch (err) {
         console.error('[BRS] Delete failed:', err);
-        alert('Network error while deleting reconciliation.');
+        notify('Network error while deleting reconciliation.', 'error');
     }
 }
 

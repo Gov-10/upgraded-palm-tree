@@ -26,5 +26,3 @@ for msg in consumer:
     if source == "web_frontend":
         producer.send("extract-web", key=data["event_id"].encode(), value=event}
         producer.flush()
-
-

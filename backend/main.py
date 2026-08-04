@@ -26,7 +26,7 @@ from utils.direct_ocr_extractor import ocr_extraction
 from botocore.exceptions import ClientError
 from schemas import VoucherSchema, BankStatementInputSchema, BRSInputSchema, GodownSchema, UnitSchema, StockSchema, NotificationLogSchema, InvoiceGenerationSchema, InvoiceSyncSchema, InvoiceSyncItemSchema
 from database import Vouchers, BankStatements, BRS, godown, units, stock, notificationLogs
-from utils.invoice_gen import generate_invoice, clear
+from utils.invoice_gen import generate_invoice, generate_voucher_pdf, clear
 
 
 ph = PasswordHasher()
@@ -240,7 +240,9 @@ def add_voucher(payload: List[VoucherSchema], db: Session = Depends(get_db)):
             gst_amount=item.gst_amount,
             discount=item.discount,
             status=item.status,
-            file_key=file_key
+            file_key=file_key,
+            meta_type=item.meta_type,
+            meta=item.meta,
         )
         db.add(voucher)
         vouchers_added.append(voucher)
@@ -266,7 +268,9 @@ def add_voucher(payload: List[VoucherSchema], db: Session = Depends(get_db)):
             "amount": v.amount,
             "gst_amount": v.gst_amount,
             "discount": v.discount,
-            "status": v.status
+            "status": v.status,
+            "meta_type": v.meta_type,
+            "meta": v.meta,
         }
         for v in vouchers_added
     ]
@@ -285,7 +289,9 @@ def get_vouchers(db: Session = Depends(get_db)):
             "amount": v.amount,
             "gst_amount": v.gst_amount,
             "discount": v.discount,
-            "status": v.status
+            "status": v.status,
+            "meta_type": v.meta_type,
+            "meta": v.meta,
         }
         for v in rows
     ]
@@ -827,53 +833,66 @@ def get_log(db: Session = Depends(get_db)):
 
 @app.post("/generate-invoice")
 def gen_invoice(payload: InvoiceGenerationSchema):
-    data = {
-        "invoice_no": payload.invoice_no,
-        "company_name": payload.company_name,
-        "issued_to": {
-            "name": payload.issued_to.name,
-            "address": payload.issued_to.address,
-            "phone": payload.issued_to.phone,
-            "email": payload.issued_to.email,
-        },
-        "items": [
-            {"desc": item.desc, "qty": item.qty, "price": item.price}
-            for item in payload.items
-        ],
-        "tax_rate": payload.tax_rate,
-        "payment_details": {
-            "bank": payload.payment_details.bank,
-            "account_no": payload.payment_details.account_no,
-            "account_name": payload.payment_details.account_name,
-        }
-    }
-
-    for key in ["issued_date", "due_date"]:
-        date_str = getattr(payload, key)
-        parsed = None
-        for fmt in ("%Y-%m-%d", "%d %B %Y", "%d-%m-%Y"):
-            try:
-                parsed = datetime.strptime(date_str, fmt)
-                break
-            except ValueError:
-                continue
-        if parsed:
-            data[key] = parsed
-        else:
-            data[key] = date_str
-
     from utils.invoice_gen import _DEFAULT_PDF
-    generate_invoice(output_path=_DEFAULT_PDF, data=data)
+
+    voucher_type = payload.voucher_type or "Sales"
+
+    # ── Sales (and legacy) path: build the classic data dict ──────────────────
+    if voucher_type == "Sales" and payload.invoice_no and payload.issued_to and payload.items:
+        data = {
+            "invoice_no":   payload.invoice_no,
+            "company_name": payload.company_name,
+            "issued_to": {
+                "name":    payload.issued_to.name,
+                "address": payload.issued_to.address,
+                "phone":   payload.issued_to.phone,
+                "email":   payload.issued_to.email,
+            },
+            "items": [
+                {"desc": item.desc, "qty": item.qty, "price": item.price}
+                for item in payload.items
+            ],
+            "tax_rate":        payload.tax_rate,
+            "payment_details": {
+                "bank":         payload.payment_details.bank        if payload.payment_details else "",
+                "account_no":   payload.payment_details.account_no  if payload.payment_details else "",
+                "account_name": payload.payment_details.account_name if payload.payment_details else "",
+            },
+        }
+        for key in ["issued_date", "due_date"]:
+            date_str = getattr(payload, key)
+            if not date_str:
+                data[key] = date_str
+                continue
+            parsed = None
+            for fmt in ("%Y-%m-%d", "%d %B %Y", "%d-%m-%Y"):
+                try:
+                    parsed = datetime.strptime(date_str, fmt)
+                    break
+                except ValueError:
+                    continue
+            data[key] = parsed or date_str
+        generate_invoice(output_path=_DEFAULT_PDF, data=data)
+
+    # ── All other voucher types: pass meta dict to the type-aware dispatcher ──
+    else:
+        meta = payload.meta or {}
+        # Merge top-level convenience fields into meta for the PDF generator
+        meta["voucher_type"]  = voucher_type
+        meta["company_name"]  = payload.company_name or meta.get("company_name", "")
+        meta["invoice_no"]    = payload.invoice_no   or meta.get("voucher_number", "")
+        meta["issued_date"]   = payload.issued_date  or meta.get("date", "")
+        generate_voucher_pdf(voucher_type=voucher_type, output_path=_DEFAULT_PDF, data=meta)
 
     if not os.path.exists(_DEFAULT_PDF):
-        raise HTTPException(status_code=500, detail="Failed to generate invoice PDF")
+        raise HTTPException(status_code=500, detail="Failed to generate voucher PDF")
 
     with open(_DEFAULT_PDF, "rb") as f:
         pdf_bytes = f.read()
 
     clear()
-
     return Response(content=pdf_bytes, media_type="application/pdf")
+
 
 @app.post("/sync-invoice-stock")
 def sync_invoice_stock(payload: InvoiceSyncSchema, db: Session = Depends(get_db)):

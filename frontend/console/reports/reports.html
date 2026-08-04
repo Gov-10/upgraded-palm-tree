@@ -2,21 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports – GST Ledger Hub</title>
+    <title>Reports – VYOM+</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../shared/sidebar.css">
+    <!-- Theme: apply before paint to prevent flash -->
+    <script>
+        (function() {
+            var t = localStorage.getItem("gst_theme") || "dark";
+            if (t === "light") document.documentElement.classList.add("light-mode");
+        })();
+    </script>
 </head>
 <body>
 <canvas id="bg-canvas"></canvas>
 <div class="console-shell">
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
-            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+            <div class="sidebar-logo-icon"><img src="../../favicon.ico" alt="VYOM+"></div>
+            <div class="sidebar-brand-text"><h2>VYOM+</h2><p>Financial Analytics Suite</p></div>
         </div>
         <div class="sidebar-nav">
             <div class="nav-section-label">Account</div>
@@ -59,58 +67,97 @@
         </div>
 
         <div class="console-content">
-
             <!-- Report Cards Grid -->
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
 
                 <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
                     <div style="width:44px;height:44px;background:rgba(37,99,235,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-file-text" style="color:#2563EB;font-size:22px;"></i></div>
-                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">GSTR-3B Summary</div>
-                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Monthly consolidated GST liability return with ITC reconciliation and tax payment breakdowns.</div>
+                    <div style="font-size:16px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">GSTR-3B Summary</div>
+                    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;">Monthly consolidated GST liability return with ITC reconciliation and tax payment breakdowns.</div>
                     <div style="margin-top:16px;font-size:12px;color:#2563EB;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
                 </div>
 
                 <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
                     <div style="width:44px;height:44px;background:rgba(16,185,129,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-trending-up" style="color:#10B981;font-size:22px;"></i></div>
-                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">Profit &amp; Loss Statement</div>
-                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Detailed income and expense report with gross profit, operating expenses, and net margins.</div>
+                    <div style="font-size:16px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">Profit &amp; Loss Statement</div>
+                    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;">Detailed income and expense report with gross profit, operating expenses, and net margins.</div>
                     <div style="margin-top:16px;font-size:12px;color:#10B981;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
                 </div>
 
                 <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
                     <div style="width:44px;height:44px;background:rgba(245,158,11,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-packages" style="color:#F59E0B;font-size:22px;"></i></div>
-                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">Inventory Valuation Report</div>
-                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Stock-wise valuation with GST rate mapping, closing stock value, and reorder recommendations.</div>
+                    <div style="font-size:16px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">Inventory Valuation Report</div>
+                    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;">Stock-wise valuation with GST rate mapping, closing stock value, and reorder recommendations.</div>
                     <div style="margin-top:16px;font-size:12px;color:#F59E0B;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
                 </div>
 
                 <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
                     <div style="width:44px;height:44px;background:rgba(37,99,235,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-receipt" style="color:#2563EB;font-size:22px;"></i></div>
-                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">Outward Supplies (GSTR-1)</div>
-                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Monthly details of all B2B and B2C sales with HSN summary and tax invoice register.</div>
+                    <div style="font-size:16px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">Outward Supplies (GSTR-1)</div>
+                    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;">Monthly details of all B2B and B2C sales with HSN summary and tax invoice register.</div>
                     <div style="margin-top:16px;font-size:12px;color:#2563EB;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
                 </div>
 
-                <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
+                <div class="glass-card" onclick="location.href='./ITC/ITC.html'" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
                     <div style="width:44px;height:44px;background:rgba(16,185,129,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-arrows-exchange" style="color:#10B981;font-size:22px;"></i></div>
-                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">ITC Ledger Report</div>
-                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Detailed Input Tax Credit availability, utilization, and balance for each tax head (CGST/SGST/IGST).</div>
-                    <div style="margin-top:16px;font-size:12px;color:#10B981;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
+                    <div style="font-size:16px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">ITC Ledger</div>
+                    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:12px;">Detailed Input Tax Credit availability, utilization, and balance reconciled from purchase vouchers.</div>
+                    <div id="itc-card-stats" style="font-size:11px;color:var(--color-text-secondary);display:flex;flex-direction:column;gap:6px;margin-bottom:12px;background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);">
+                        <div style="display:flex;justify-content:space-between;"><span>Claimable ITC:</span><span style="font-weight:600;">Loading...</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span>Claimed ITC:</span><span style="font-weight:600;">Loading...</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span>ITC Remaining:</span><span style="font-weight:600;">Loading...</span></div>
+                    </div>
+                    <div style="font-size:12px;color:#10B981;font-weight:600;display:flex;align-items:center;gap:6px;">View ITC Details <i class="ti ti-arrow-right"></i></div>
                 </div>
 
                 <div class="glass-card" style="padding:24px;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='rgba(255,255,255,.18)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(255,255,255,.09)';this.style.transform=''">
                     <div style="width:44px;height:44px;background:rgba(239,68,68,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;"><i class="ti ti-file-certificate" style="color:#EF4444;font-size:22px;"></i></div>
-                    <div style="font-size:16px;font-weight:700;color:#f8fafc;margin-bottom:6px;">Annual Return (GSTR-9)</div>
-                    <div style="font-size:13px;color:#94a3b8;line-height:1.5;">Consolidated annual GST return compiling all monthly filings, eligible ITC, and tax paid summary.</div>
+                    <div style="font-size:16px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">Annual Return (GSTR-9)</div>
+                    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;">Consolidated annual GST return compiling all monthly filings, eligible ITC, and tax paid summary.</div>
                     <div style="margin-top:16px;font-size:12px;color:#EF4444;font-weight:600;display:flex;align-items:center;gap:6px;">Generate <i class="ti ti-arrow-right"></i></div>
                 </div>
 
             </div>
-
         </div>
     </div>
 </div>
+<script src="../shared/theme.js"></script>
 <script src="../shared/sidebar.js"></script>
 <script src="../shared/notifications.js"></script>
+<script>
+    async function loadITCCardStats() {
+        const statsEl = document.getElementById('itc-card-stats');
+        if (!statsEl) return;
+        try {
+            const res = await fetch('http://127.0.0.1:8000/vouchers');
+            if (!res.ok) throw new Error();
+            const vouchers = await res.json();
+            const purchases = vouchers.filter(v => v.voucher_type && v.voucher_type.toLowerCase() === 'purchase');
+            
+            let totalClaimable = 0;
+            let totalClaimed = 0;
+            
+            purchases.forEach(v => {
+                const gst = parseFloat(v.gst_amount) || 0;
+                totalClaimable += gst;
+                if (v.status && v.status.toLowerCase() === 'cleared') {
+                    totalClaimed += gst;
+                }
+            });
+            const totalRemaining = totalClaimable - totalClaimed;
+            
+            const fmt = (num) => '₹' + Number(num).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            statsEl.innerHTML = `
+                <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span>Claimable ITC:</span><span style="font-weight:600;color:var(--color-text-primary);">${fmt(totalClaimable)}</span></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span>Claimed ITC:</span><span style="font-weight:600;color:#10B981;;">${fmt(totalClaimed)}</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>ITC Remaining:</span><span style="font-weight:600;color:#F59E0B;">${fmt(totalRemaining)}</span></div>
+            `;
+        } catch (e) {
+            statsEl.innerHTML = '<span style="color:#EF4444;text-align:center;display:block;">Failed to load ITC stats</span>';
+        }
+    }
+    document.addEventListener('DOMContentLoaded', loadITCCardStats);
+</script>
 </body>
 </html>

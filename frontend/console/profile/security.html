@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security & Password – GST Ledger Hub</title>
+    <title>Security & Password – VYOM+</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,8 +15,8 @@
         .security-item:last-child { border-bottom:none; }
         .security-item-left { display:flex; align-items:center; gap:16px; }
         .sec-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
-        .security-item h4 { font-size:14px; font-weight:600; color:#f8fafc; }
-        .security-item p { font-size:12px; color:#64748b; margin-top:2px; }
+        .security-item h4 { font-size:14px; font-weight:600; color:var(--color-text-primary); }
+        .security-item p { font-size:12px; color:var(--color-text-muted); margin-top:2px; }
         .sec-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:6px; }
         .sec-enabled { background:rgba(16,185,129,.1); color:#10B981; }
         .sec-disabled { background:rgba(239,68,68,.1); color:#EF4444; }
@@ -23,21 +24,28 @@
         .sec-toggle:hover { background:var(--color-primary-hover); }
         .form-section { display:flex; flex-direction:column; gap:20px; }
         .form-group { display:flex; flex-direction:column; gap:8px; }
-        .form-label { font-size:12px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em; }
-        .form-input { background:rgba(15,23,42,.8); border:1px solid rgba(255,255,255,.09); border-radius:10px; padding:12px 16px; font-size:14px; color:#f8fafc; font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
+        .form-label { font-size:12px; font-weight:600; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:.04em; }
+        .form-input { background:rgba(15,23,42,.8); border:1px solid var(--color-border); border-radius:10px; padding:12px 16px; font-size:14px; color:var(--color-text-primary); font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
         .form-input:focus { border-color:rgba(37,99,235,.5); box-shadow:0 0 0 3px rgba(37,99,235,.08); }
         .form-actions { display:flex; justify-content:flex-end; margin-top:8px; }
         .btn-save { background:#2563EB; color:white; border:none; border-radius:10px; padding:12px 28px; font-size:14px; font-weight:600; cursor:pointer; }
         .btn-save:hover { background:#1D4ED8; }
     </style>
+    <!-- Theme: apply before paint to prevent flash -->
+    <script>
+        (function() {
+            var t = localStorage.getItem("gst_theme") || "dark";
+            if (t === "light") document.documentElement.classList.add("light-mode");
+        })();
+    </script>
 </head>
 <body>
 <canvas id="bg-canvas"></canvas>
 <div class="console-shell">
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
-            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+            <div class="sidebar-logo-icon"><img src="../../favicon.ico" alt="VYOM+"></div>
+            <div class="sidebar-brand-text"><h2>VYOM+</h2><p>Financial Analytics Suite</p></div>
         </div>
         <div class="sidebar-nav">
             <div class="nav-section-label">Account</div>
@@ -73,7 +81,7 @@
                 <div class="topbar-page-title">Security &amp; Password</div>
                 <div class="topbar-breadcrumb">
                     <span>Account</span><i class="ti ti-chevron-right" style="font-size:11px;"></i>
-                    <a href="profile.html" style="color:#94a3b8;text-decoration:none;">Profile</a>
+                    <a href="profile.html" style="color:var(--color-text-secondary);text-decoration:none;">Profile</a>
                     <i class="ti ti-chevron-right" style="font-size:11px;"></i><span>Security</span>
                 </div>
             </div>
@@ -97,7 +105,7 @@
                         </div>
                         <div style="display:flex;align-items:center;gap:12px;">
                             <span class="sec-badge sec-enabled">Enabled</span>
-                            <button class="sec-toggle" style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.09);">Disable</button>
+                            <button class="sec-toggle" style="background:rgba(255,255,255,.06);color:var(--color-text-secondary);border:1px solid var(--color-border);">Disable</button>
                         </div>
                     </div>
                     <div class="security-item">
@@ -152,6 +160,7 @@
         </div>
     </div>
 </div>
+<script src="../shared/theme.js"></script>
 <script src="../shared/sidebar.js"></script>
 <script src="../shared/notifications.js"></script>
 </body>

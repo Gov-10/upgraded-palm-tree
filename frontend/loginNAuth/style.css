@@ -16,12 +16,32 @@
     --color-text-primary: #f8fafc;
     --color-text-secondary: #94a3b8;
     --color-text-muted: #64748b;
+    --color-canvas-bg-1: #0c152b;
+    --color-canvas-bg-2: #060913;
     
     /* Layout Variables */
     --border-radius-sm: 8px;
     --border-radius-md: 12px;
     --border-radius-lg: 18px;
     --transition-speed: 0.3s;
+}
+
+/* ============================================
+   LIGHT MODE OVERRIDES
+   ============================================ */
+
+html.light-mode {
+    --color-bg-deep: #F7FBFC;
+    --color-bg-surface: rgba(214, 230, 242, 0.85); /* #D6E6F2 */
+    --color-bg-card: rgba(185, 215, 234, 0.65);    /* #B9D7EA */
+    --color-border: rgba(118, 159, 205, 0.25);    /* #769FCD */
+    --color-text-primary: #1e293b;
+    --color-text-secondary: #334155;
+    --color-text-muted: #475569;
+    --color-canvas-bg-1: #D6E6F2;
+    --color-canvas-bg-2: #F7FBFC;
+    --color-primary: #769FCD;
+    --color-primary-hover: #5d87b3;
 }
 
 * {
@@ -41,6 +61,7 @@ body {
     padding: 20px;
     overflow-x: hidden;
     position: relative;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Background Canvas */
@@ -127,6 +148,11 @@ input {
     transition: all var(--transition-speed) ease;
 }
 
+html.light-mode input {
+    background: rgba(37, 99, 235, 0.03);
+    color: var(--color-text-primary);
+}
+
 input:focus {
     outline: none;
     border-color: var(--color-primary);
@@ -206,7 +232,7 @@ button {
 }
 
 .auth-footer-link a:hover {
-    color: #60a5fa;
+    color: #2563EB;
     text-decoration: underline;
 }
 
@@ -248,4 +274,49 @@ button {
         padding: 10px 15px;
         font-size: 14px;
     }
+}
+
+/* ============================================
+   FLOATING THEME TOGGLE (auth pages)
+   ============================================ */
+
+.floating-theme-toggle {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    background: var(--color-bg-surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-border);
+    border-radius: 50px;
+    color: var(--color-text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.floating-theme-toggle:hover {
+    background: rgba(37, 99, 235, 0.12);
+    border-color: rgba(37, 99, 235, 0.35);
+    color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(37, 99, 235, 0.22);
+}
+
+.floating-theme-toggle i {
+    font-size: 16px;
+    color: var(--color-primary);
+    transition: transform 0.4s ease;
+}
+
+.floating-theme-toggle:hover i {
+    transform: rotate(20deg);
 }

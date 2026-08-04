@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings – GST Ledger Hub</title>
+    <title>Settings – VYOM+</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,24 +16,31 @@
         .settings-row:last-child { border-bottom:none; }
         .settings-row-left { display:flex; align-items:center; gap:16px; }
         .settings-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
-        .settings-row h4 { font-size:14px; font-weight:600; color:#f8fafc; }
-        .settings-row p { font-size:12px; color:#64748b; margin-top:2px; }
+        .settings-row h4 { font-size:14px; font-weight:600; color:var(--color-text-primary); }
+        .settings-row p { font-size:12px; color:var(--color-text-muted); margin-top:2px; }
         /* Toggle Switch */
         .toggle { position:relative; width:44px; height:24px; flex-shrink:0; }
         .toggle input { opacity:0; width:0; height:0; }
-        .toggle-slider { position:absolute; cursor:pointer; inset:0; background:#1e293b; border:1px solid rgba(255,255,255,.09); border-radius:20px; transition:.3s; }
+        .toggle-slider { position:absolute; cursor:pointer; inset:0; background:#1e293b; border:1px solid var(--color-border); border-radius:20px; transition:.3s; }
         .toggle-slider:before { content:''; position:absolute; height:16px; width:16px; left:3px; bottom:3px; background:#64748b; border-radius:50%; transition:.3s; }
         .toggle input:checked + .toggle-slider { background:rgba(37,99,235,.3); border-color:rgba(37,99,235,.4); }
         .toggle input:checked + .toggle-slider:before { transform:translateX(20px); background:#2563EB; }
     </style>
+    <!-- Theme: apply before paint to prevent flash -->
+    <script>
+        (function() {
+            var t = localStorage.getItem("gst_theme") || "dark";
+            if (t === "light") document.documentElement.classList.add("light-mode");
+        })();
+    </script>
 </head>
 <body>
 <canvas id="bg-canvas"></canvas>
 <div class="console-shell">
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
-            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+            <div class="sidebar-logo-icon"><img src="../../favicon.ico" alt="VYOM+"></div>
+            <div class="sidebar-brand-text"><h2>VYOM+</h2><p>Financial Analytics Suite</p></div>
         </div>
         <div class="sidebar-nav">
             <div class="nav-section-label">Account</div>
@@ -101,7 +109,7 @@
                     </div>
                     <div class="settings-row">
                         <div class="settings-row-left">
-                            <div class="settings-icon" style="background:rgba(100,116,139,.1);"><i class="ti ti-device-desktop" style="color:#64748b;"></i></div>
+                            <div class="settings-icon" style="background:rgba(100,116,139,.1);"><i class="ti ti-device-desktop" style="color:var(--color-text-muted);"></i></div>
                             <div><h4>Browser Push Notifications</h4><p>Real-time alerts in browser</p></div>
                         </div>
                         <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
@@ -134,6 +142,7 @@
         </div>
     </div>
 </div>
+<script src="../shared/theme.js"></script>
 <script src="../shared/sidebar.js"></script>
 <script src="../shared/notifications.js"></script>
 </body>

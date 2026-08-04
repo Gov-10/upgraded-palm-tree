@@ -1,6 +1,7 @@
 /* ==============================================
    GST Ledger Hub - Shared Sidebar JS
-   Handles: toggle, active state, background anim
+   Handles: toggle, active state, background anim,
+            theme toggle injection
    ============================================== */
 
 (function () {
@@ -34,6 +35,26 @@
             applyCollapsedState(newState);
             localStorage.setItem(COLLAPSED_KEY, String(newState));
         });
+    }
+
+    // Inject theme toggle button into topbar-right or top-right corner
+    const topbarRight = document.querySelector('.console-topbar .topbar-right');
+    const currentTheme = localStorage.getItem('gst_theme') || 'dark';
+    
+    const themeBtn = document.createElement('button');
+    themeBtn.className = 'topbar-theme-toggle-btn theme-toggle-btn';
+    themeBtn.id = 'topbar-theme-toggle';
+    themeBtn.innerHTML = `<i class="${currentTheme === 'light' ? 'ti ti-moon' : 'ti ti-sun'}"></i>`;
+    themeBtn.title = currentTheme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+    // Click event is handled globally via delegation in theme.js
+
+    if (topbarRight) {
+        // Insert as first item in topbar actions
+        topbarRight.insertBefore(themeBtn, topbarRight.firstChild);
+    } else {
+        // Fallback to top-right floating corner if topbar doesn't exist
+        themeBtn.classList.add('floating-theme-toggle');
+        document.body.appendChild(themeBtn);
     }
 
     // Mobile overlay toggle
@@ -103,9 +124,15 @@
 
         function animate() {
             ctx.clearRect(0, 0, w, h);
+
+            // Get computed theme colors from CSS variables
+            const style = getComputedStyle(document.documentElement);
+            const bg1 = style.getPropertyValue('--color-canvas-bg-1').trim() || '#0c152b';
+            const bg2 = style.getPropertyValue('--color-canvas-bg-2').trim() || '#060913';
+
             let gradient = ctx.createRadialGradient(mouseX, mouseY, 50, w / 2, h / 2, Math.max(w, h));
-            gradient.addColorStop(0, '#0c152b');
-            gradient.addColorStop(1, '#060913');
+            gradient.addColorStop(0, bg1);
+            gradient.addColorStop(1, bg2);
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, w, h);
 

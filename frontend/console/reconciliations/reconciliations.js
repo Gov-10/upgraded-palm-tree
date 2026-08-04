@@ -49,7 +49,7 @@ function getStatusBadge(status) {
     if (clean === 'cleared' || clean === 'matched' || clean === 'reconciled') { color = '#10B981'; text = '\u2713 ' + status; }
     else if (clean === 'outstanding' || clean === 'mismatch' || clean === 'unreconciled' || clean === 'pending') { color = '#F59E0B'; text = '\u26a0 ' + status; }
     else if (clean === 'adjustment required' || clean === 'missing in books' || clean === 'ineligible') { color = '#EF4444'; text = '\u2717 ' + status; }
-    else if (clean === 'in transit' || clean === 'only in 2b' || clean === 'only in gstr-2b') { color = '#60A5FA'; text = '\u{1F552} ' + status; }
+    else if (clean === 'in transit' || clean === 'only in 2b' || clean === 'only in gstr-2b') { color = '#2563EB'; text = '\u{1F552} ' + status; }
     else if (clean === 'only in books' || clean === 'books only' || clean === 'reversed') { color = '#F97316'; text = '\u{1F4D6} ' + status; }
     return '<span style="color:' + color + '; font-weight:600; font-size:12px;">' + text + '</span>';
 }
@@ -77,7 +77,7 @@ window.toggleBRSDropdown = toggleBRSDropdown;
 /* ------------------------------------------------------------------ */
 async function loadBRS() {
     const tbody = document.getElementById('recon-table-tbody');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="padding:28px;text-align:center;color:#64748b;">Loading BRS records&hellip;</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="padding:28px;text-align:center;color:var(--color-text-muted);">Loading BRS records&hellip;</td></tr>';
     try {
         const res = await fetch(API_BASE + '/BRS');
         if (!res.ok) throw new Error('Server returned ' + res.status);
@@ -95,23 +95,100 @@ async function loadBRS() {
 /* ------------------------------------------------------------------ */
 /*  Delete BRS record (cascades revert)                                 */
 /* ------------------------------------------------------------------ */
+function showReconciliationConfirm(message, onConfirm) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: rgba(8, 12, 24, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    `;
+    
+    const card = document.createElement('div');
+    card.style.cssText = `
+        background: var(--color-bg-card, rgba(30, 41, 59, 0.55));
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+        width: 420px;
+        max-width: 90%;
+        padding: 24px;
+        color: var(--color-text-primary, #f8fafc);
+        transform: scale(0.92) translateY(10px);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    `;
+    
+    card.innerHTML = `
+        <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary, #f8fafc); margin: 0;">
+            <i class="ti ti-alert-triangle" style="color: #EF4444; font-size: 20px;"></i> Remove Reconciliation
+        </h3>
+        <p style="font-size: 13px; color: var(--color-text-secondary, #94a3b8); line-height: 1.5; margin: 0;">
+            ${message}
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+            <button id="cancel-recon-btn" style="padding: 8px 16px; font-size: 13px; cursor: pointer; border-radius: 8px; font-weight: 600; background: transparent; border: 1px solid rgba(255,255,255,0.15); color: var(--color-text-secondary);">Cancel</button>
+            <button id="confirm-recon-btn" style="padding: 8px 16px; font-size: 13px; cursor: pointer; border-radius: 8px; font-weight: 600; background: #EF4444; border: none; color: #fff;">Remove Reconciliation</button>
+        </div>
+    `;
+    
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    
+    requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        card.style.transform = 'scale(1) translateY(0)';
+    });
+    
+    const close = () => {
+        overlay.style.opacity = '0';
+        card.style.transform = 'scale(0.92) translateY(10px)';
+        setTimeout(() => overlay.remove(), 250);
+    };
+    
+    overlay.querySelector('#cancel-recon-btn').addEventListener('click', close);
+    overlay.querySelector('#confirm-recon-btn').addEventListener('click', () => {
+        close();
+        onConfirm();
+    });
+}
+
 async function triggerRemoveBRS(id) {
-    if (!confirm('Remove this reconciliation? The linked bank statement and voucher will be reverted to Pending.')) return;
-    document.querySelectorAll('.brs-dropdown').forEach(function(d) { d.classList.remove('show'); });
-    try {
-        const res = await fetch(API_BASE + '/BRS/' + id, { method: 'DELETE' });
-        if (res.ok) {
-            brsRecords = brsRecords.filter(function(r) { return r.id !== id; });
-            renderTable();
-            renderMetrics();
-        } else {
-            const txt = await res.text();
-            notify('Failed to delete reconciliation: ' + txt, 'error');
+    const deleteAction = async () => {
+        document.querySelectorAll('.brs-dropdown').forEach(function(d) { d.classList.remove('show'); });
+        try {
+            const res = await fetch(API_BASE + '/BRS/' + id, { method: 'DELETE' });
+            if (res.ok) {
+                brsRecords = brsRecords.filter(function(r) { return r.id !== id; });
+                renderTable();
+                renderMetrics();
+                if (typeof showToast === 'function') {
+                    showToast('Reconciliation record removed and sources reverted successfully', 'success');
+                }
+            } else {
+                const txt = await res.text();
+                notify('Failed to delete reconciliation: ' + txt, 'error');
+            }
+        } catch (err) {
+            console.error('[BRS] Delete failed:', err);
+            notify('Network error while deleting reconciliation.', 'error');
         }
-    } catch (err) {
-        console.error('[BRS] Delete failed:', err);
-        notify('Network error while deleting reconciliation.', 'error');
-    }
+    };
+
+    showReconciliationConfirm(
+        'Are you sure you want to remove this reconciliation? The linked bank statement and voucher will be reverted to Pending.',
+        deleteAction
+    );
 }
 
 window.triggerRemoveBRS = triggerRemoveBRS;
@@ -139,8 +216,8 @@ function renderMetrics() {
         const count       = brsRecords.length;
         leftTitle.textContent = 'Cleared Statement Amount'; leftValue.textContent = formatCurrency(totalAmt); leftValue.style.color = '#10B981';
         leftDesc.textContent  = count + ' reconciled transaction' + (count !== 1 ? 's' : ''); leftIcon.className = 'ti ti-checkbox'; leftIcon.style.color = '#10B981';
-        midTitle.textContent  = 'Total GST Cleared'; midValue.textContent = formatCurrency(totalGst); midValue.style.color = '#60a5fa';
-        midDesc.textContent   = 'GST component of reconciled vouchers'; midIcon.className = 'ti ti-receipt-tax'; midIcon.style.color = '#60a5fa';
+        midTitle.textContent  = 'Total GST Cleared'; midValue.textContent = formatCurrency(totalGst); midValue.style.color = '#2563EB';
+        midDesc.textContent   = 'GST component of reconciled vouchers'; midIcon.className = 'ti ti-receipt-tax'; midIcon.style.color = '#2563EB';
         rightTitle.textContent = 'Total BRS Entries'; rightValue.textContent = count.toString(); rightValue.style.color = '#f8fafc';
         rightDesc.textContent  = 'Bank reconciliation records'; rightIcon.className = 'ti ti-database'; rightIcon.style.color = '#2563EB';
 
@@ -183,9 +260,9 @@ function renderMetrics() {
         const varianceSum   = list.filter(function(i) { return i.status !== 'Reconciled'; }).reduce(function(s, i) { return s + Math.abs(Number(i.gl_bal) - Number(i.sl_bal)); }, 0);
         leftTitle.textContent = 'Control Accounts Matching'; leftValue.textContent = formatCurrency(reconciledSum); leftValue.style.color = '#10B981';
         leftDesc.textContent = 'General ledger in alignment'; leftIcon.className = 'ti ti-scale'; leftIcon.style.color = '#10B981';
-        midTitle.textContent = 'Subledger Variance'; midValue.textContent = formatCurrency(varianceSum); midValue.style.color = varianceSum > 0 ? '#F59E0B' : '#f8fafc';
-        midDesc.textContent = 'Journal adjustment requirements'; midIcon.className = 'ti ti-git-compare'; midIcon.style.color = varianceSum > 0 ? '#F59E0B' : '#64748b';
-        rightTitle.textContent = 'Subledgers Reconciled'; rightValue.textContent = list.length.toString(); rightValue.style.color = '#f8fafc';
+        midTitle.textContent = 'Subledger Variance'; midValue.textContent = formatCurrency(varianceSum); midValue.style.color = varianceSum > 0 ? '#F59E0B' : 'var(--color-text-primary)';
+        midDesc.textContent = 'Journal adjustment requirements'; midIcon.className = 'ti ti-git-compare'; midIcon.style.color = varianceSum > 0 ? '#F59E0B' : 'var(--color-text-muted)';
+        rightTitle.textContent = 'Subledgers Reconciled'; rightValue.textContent = list.length.toString(); rightValue.style.color = 'var(--color-text-primary)';
         rightDesc.textContent = 'Control subledgers audited'; rightIcon.className = 'ti ti-layers-difference'; rightIcon.style.color = '#2563EB';
     }
 }
@@ -193,8 +270,8 @@ function renderMetrics() {
 /* ------------------------------------------------------------------ */
 /*  Table rendering                                                     */
 /* ------------------------------------------------------------------ */
-var TH_S  = 'padding:14px 20px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;';
-var THR_S = 'padding:14px 20px;text-align:right;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;';
+var TH_S  = 'padding:14px 20px;text-align:left;font-weight:600;color:var(--color-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;';
+var THR_S = 'padding:14px 20px;text-align:right;font-weight:600;color:var(--color-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;';
 var TD_S  = 'padding:14px 20px;';
 
 function renderTable() {
@@ -207,7 +284,7 @@ function renderTable() {
     /* -- BRS tab: live DB data -- */
     if (activeTab === 'bank') {
         titleEl.innerHTML = '<i class="ti ti-building-bank"></i> Bank Reconciliation Statement (BRS) \u2013 Cleared Transactions';
-        thead.innerHTML = '<tr style="border-bottom:1px solid rgba(255,255,255,0.09);">' +
+        thead.innerHTML = '<tr style="border-bottom:1px solid var(--color-border);">' +
             '<th style="' + TH_S + '">Txn ID</th>' +
             '<th style="' + TH_S + '">Voucher No.</th>' +
             '<th style="' + TH_S + '">Description</th>' +
@@ -219,27 +296,27 @@ function renderTable() {
             '</tr>';
 
         if (brsRecords.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="padding:28px;text-align:center;color:#64748b;">No BRS records yet. Reconcile a bank statement with a voucher to create entries automatically.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="padding:28px;text-align:center;color:var(--color-text-muted);">No BRS records yet. Reconcile a bank statement with a voucher to create entries automatically.</td></tr>';
             return;
         }
 
         brsRecords.forEach(function(r) {
             const total = Number(r.amount || 0) + Number(r.gst_amount || 0);
             const tr = document.createElement('tr');
-            tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.05);transition:background .2s;';
-            tr.onmouseenter = function() { tr.style.background = 'rgba(255,255,255,0.03)'; };
+            tr.style.cssText = 'border-bottom:1px solid var(--color-border);transition:background .2s;';
+            tr.onmouseenter = function() { tr.style.background = 'rgba(118,159,205,0.07)'; };
             tr.onmouseleave = function() { tr.style.background = ''; };
             tr.innerHTML =
                 '<td style="' + TD_S + 'color:#38bdf8;font-family:monospace;font-weight:600;">#' + r.transaction_id + '</td>' +
                 '<td style="' + TD_S + 'color:#a78bfa;font-family:monospace;font-weight:600;">' + (r.voucher_no || '\u2014') + '</td>' +
-                '<td style="' + TD_S + 'color:#cbd5e1;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (r.description || '') + '">' + (r.description || '\u2014') + '</td>' +
-                '<td style="' + TD_S + 'text-align:right;color:#f8fafc;">' + formatCurrency(r.amount) + '</td>' +
-                '<td style="' + TD_S + 'text-align:right;color:#60a5fa;">' + formatCurrency(r.gst_amount) + '</td>' +
+                '<td style="' + TD_S + 'color:var(--color-text-secondary);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (r.description || '') + '">' + (r.description || '\u2014') + '</td>' +
+                '<td style="' + TD_S + 'text-align:right;color:var(--color-text-primary);">' + formatCurrency(r.amount) + '</td>' +
+                '<td style="' + TD_S + 'text-align:right;color:#2563EB;">' + formatCurrency(r.gst_amount) + '</td>' +
                 '<td style="' + TD_S + 'text-align:right;font-weight:700;color:#10B981;">' + formatCurrency(total) + '</td>' +
                 '<td style="' + TD_S + '">' + getStatusBadge('Cleared') + '</td>' +
                 '<td style="' + TD_S + 'text-align:right;position:relative;">' +
                     '<button onclick="event.stopPropagation(); toggleBRSDropdown(event,' + r.id + ')" ' +
-                        'style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:16px;padding:4px;border-radius:4px;">' +
+                        'style="background:none;border:none;color:var(--color-text-secondary);cursor:pointer;font-size:16px;padding:4px;border-radius:4px;">' +
                         '<i class="ti ti-dots-vertical"></i></button>' +
                     '<div class="brs-dropdown" id="brs-dd-' + r.id + '" ' +
                         'style="position:absolute;right:16px;top:100%;z-index:200;background:rgba(17,27,48,0.98);' +
@@ -270,17 +347,17 @@ function renderTable() {
             const diff = Number(item.stmt_amt) - Number(item.ledger_amt);
             const diffColor = diff === 0 ? '#10B981' : '#F59E0B';
             const tr = document.createElement('tr');
-            tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.05);transition:background .2s;';
-            tr.onmouseenter = function() { tr.style.background = 'rgba(255,255,255,0.03)'; };
+            tr.style.cssText = 'border-bottom:1px solid var(--color-border);transition:background .2s;';
+            tr.onmouseenter = function() { tr.style.background = 'rgba(118,159,205,0.07)'; };
             tr.onmouseleave = function() { tr.style.background = ''; };
-            tr.innerHTML = '<td style="' + TD_S + 'color:#f8fafc;font-weight:500;">' + item.vendor_name + '</td>' +
-                '<td style="' + TD_S + 'font-family:monospace;color:#60a5fa;font-weight:600;">' + item.invoice_no + '</td>' +
-                '<td style="' + TD_S + 'color:#94a3b8;">' + displayDate(item.date) + '</td>' +
-                '<td style="' + TD_S + 'text-align:right;color:#f8fafc;">' + formatCurrency(item.stmt_amt) + '</td>' +
-                '<td style="' + TD_S + 'text-align:right;color:#f8fafc;">' + formatCurrency(item.ledger_amt) + '</td>' +
+            tr.innerHTML = '<td style="' + TD_S + 'color:var(--color-text-primary);font-weight:500;">' + item.vendor_name + '</td>' +
+                '<td style="' + TD_S + 'font-family:monospace;color:#2563EB;font-weight:600;">' + item.invoice_no + '</td>' +
+                '<td style="' + TD_S + 'color:var(--color-text-secondary);">' + displayDate(item.date) + '</td>' +
+                '<td style="' + TD_S + 'text-align:right;color:var(--color-text-primary);">' + formatCurrency(item.stmt_amt) + '</td>' +
+                '<td style="' + TD_S + 'text-align:right;color:var(--color-text-primary);">' + formatCurrency(item.ledger_amt) + '</td>' +
                 '<td style="' + TD_S + 'text-align:right;font-weight:700;color:' + diffColor + ';">' + formatCurrency(diff) + '</td>' +
                 '<td style="' + TD_S + '">' + getStatusBadge(item.status) + '</td>' +
-                '<td style="' + TD_S + 'color:#94a3b8;">' + (item.remarks || '\u2014') + '</td>';
+                '<td style="' + TD_S + 'color:var(--color-text-secondary);">' + (item.remarks || '\u2014') + '</td>';
             tbody.appendChild(tr);
         });
 
@@ -295,17 +372,17 @@ function renderTable() {
             const diff = Number(item.stmt_bal) - Number(item.ledger_bal);
             const diffColor = diff === 0 ? '#10B981' : '#F59E0B';
             const tr = document.createElement('tr');
-            tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.05);transition:background .2s;';
-            tr.onmouseenter = function() { tr.style.background = 'rgba(255,255,255,0.03)'; };
+            tr.style.cssText = 'border-bottom:1px solid var(--color-border);transition:background .2s;';
+            tr.onmouseenter = function() { tr.style.background = 'rgba(118,159,205,0.07)'; };
             tr.onmouseleave = function() { tr.style.background = ''; };
-            tr.innerHTML = '<td style="' + TD_S + 'color:#f8fafc;font-weight:500;">' + item.customer_name + '</td>' +
-                '<td style="' + TD_S + 'font-family:monospace;color:#60a5fa;font-weight:600;">' + item.document_ref + '</td>' +
-                '<td style="' + TD_S + 'color:#94a3b8;">' + displayDate(item.date) + '</td>' +
-                '<td style="' + TD_S + 'text-align:right;color:#f8fafc;">' + formatCurrency(item.stmt_bal) + '</td>' +
-                '<td style="' + TD_S + 'text-align:right;color:#f8fafc;">' + formatCurrency(item.ledger_bal) + '</td>' +
+            tr.innerHTML = '<td style="' + TD_S + 'color:var(--color-text-primary);font-weight:500;">' + item.customer_name + '</td>' +
+                '<td style="' + TD_S + 'font-family:monospace;color:#2563EB;font-weight:600;">' + item.document_ref + '</td>' +
+                '<td style="' + TD_S + 'color:var(--color-text-secondary);">' + displayDate(item.date) + '</td>' +
+                '<td style="' + TD_S + 'text-align:right;color:var(--color-text-primary);">' + formatCurrency(item.stmt_bal) + '</td>' +
+                '<td style="' + TD_S + 'text-align:right;color:var(--color-text-primary);">' + formatCurrency(item.ledger_bal) + '</td>' +
                 '<td style="' + TD_S + 'text-align:right;font-weight:700;color:' + diffColor + ';">' + formatCurrency(diff) + '</td>' +
                 '<td style="' + TD_S + '">' + getStatusBadge(item.status) + '</td>' +
-                '<td style="' + TD_S + 'color:#94a3b8;">' + (item.remarks || '\u2014') + '</td>';
+                '<td style="' + TD_S + 'color:var(--color-text-secondary);">' + (item.remarks || '\u2014') + '</td>';
             tbody.appendChild(tr);
         });
 
@@ -320,13 +397,13 @@ function renderTable() {
             const diff = Number(item.portal_itc) - Number(item.books_itc);
             const diffColor = diff === 0 ? '#10B981' : '#F59E0B';
             const tr = document.createElement('tr');
-            tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.05);transition:background .2s;';
-            tr.onmouseenter = function() { tr.style.background = 'rgba(255,255,255,0.03)'; };
+            tr.style.cssText = 'border-bottom:1px solid var(--color-border);transition:background .2s;';
+            tr.onmouseenter = function() { tr.style.background = 'rgba(118,159,205,0.07)'; };
             tr.onmouseleave = function() { tr.style.background = ''; };
-            tr.innerHTML = '<td style="' + TD_S + 'font-family:monospace;color:#60a5fa;">' + item.gstin + '</td>' +
-                '<td style="' + TD_S + 'color:#f8fafc;font-weight:500;">' + item.supplier_name + '</td>' +
-                '<td style="' + TD_S + 'text-align:right;color:#f8fafc;">' + formatCurrency(item.portal_itc) + '</td>' +
-                '<td style="' + TD_S + 'text-align:right;color:#f8fafc;">' + formatCurrency(item.books_itc) + '</td>' +
+            tr.innerHTML = '<td style="' + TD_S + 'font-family:monospace;color:#2563EB;">' + item.gstin + '</td>' +
+                '<td style="' + TD_S + 'color:var(--color-text-primary);font-weight:500;">' + item.supplier_name + '</td>' +
+                '<td style="' + TD_S + 'text-align:right;color:var(--color-text-primary);">' + formatCurrency(item.portal_itc) + '</td>' +
+                '<td style="' + TD_S + 'text-align:right;color:var(--color-text-primary);">' + formatCurrency(item.books_itc) + '</td>' +
                 '<td style="' + TD_S + 'text-align:right;font-weight:700;color:' + diffColor + ';">' + formatCurrency(diff) + '</td>' +
                 '<td style="' + TD_S + '">' + getStatusBadge(item.status) + '</td>' +
                 '<td style="' + TD_S + '">' + getStatusBadge(item.eligibility) + '</td>';
@@ -344,17 +421,17 @@ function renderTable() {
             const diff = Number(item.gl_bal) - Number(item.sl_bal);
             const diffColor = diff === 0 ? '#10B981' : '#F59E0B';
             const tr = document.createElement('tr');
-            tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.05);transition:background .2s;';
-            tr.onmouseenter = function() { tr.style.background = 'rgba(255,255,255,0.03)'; };
+            tr.style.cssText = 'border-bottom:1px solid var(--color-border);transition:background .2s;';
+            tr.onmouseenter = function() { tr.style.background = 'rgba(118,159,205,0.07)'; };
             tr.onmouseleave = function() { tr.style.background = ''; };
-            tr.innerHTML = '<td style="' + TD_S + 'color:#f8fafc;font-weight:500;">' + item.ledger_name + '</td>' +
-                '<td style="' + TD_S + 'font-family:monospace;color:#60a5fa;font-weight:600;">' + item.reference + '</td>' +
-                '<td style="' + TD_S + 'color:#94a3b8;">' + displayDate(item.date) + '</td>' +
-                '<td style="' + TD_S + 'text-align:right;color:#f8fafc;">' + formatCurrency(item.gl_bal) + '</td>' +
-                '<td style="' + TD_S + 'text-align:right;color:#f8fafc;">' + formatCurrency(item.sl_bal) + '</td>' +
+            tr.innerHTML = '<td style="' + TD_S + 'color:var(--color-text-primary);font-weight:500;">' + item.ledger_name + '</td>' +
+                '<td style="' + TD_S + 'font-family:monospace;color:#2563EB;font-weight:600;">' + item.reference + '</td>' +
+                '<td style="' + TD_S + 'color:var(--color-text-secondary);">' + displayDate(item.date) + '</td>' +
+                '<td style="' + TD_S + 'text-align:right;color:var(--color-text-primary);">' + formatCurrency(item.gl_bal) + '</td>' +
+                '<td style="' + TD_S + 'text-align:right;color:var(--color-text-primary);">' + formatCurrency(item.sl_bal) + '</td>' +
                 '<td style="' + TD_S + 'text-align:right;font-weight:700;color:' + diffColor + ';">' + formatCurrency(diff) + '</td>' +
                 '<td style="' + TD_S + '">' + getStatusBadge(item.status) + '</td>' +
-                '<td style="' + TD_S + 'color:#94a3b8;">' + (item.remarks || '\u2014') + '</td>';
+                '<td style="' + TD_S + 'color:var(--color-text-secondary);">' + (item.remarks || '\u2014') + '</td>';
             tbody.appendChild(tr);
         });
     }

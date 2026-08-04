@@ -2,7 +2,7 @@
 <style>
 body,.page{
 background:#0f172a !important;
-color:#e2e8f0 !important;
+color:var(--color-text-primary) !important;
 }
 .card{
 background:#111827 !important;
@@ -12,14 +12,14 @@ background:#111827 !important;
 }
 .stat-card,.file-row,.result-box,.drop-zone{
 background:#1e293b !important;
-color:#e2e8f0 !important;
+color:var(--color-text-primary) !important;
 border-color:#334155 !important;
 }
 .file-name,.result-title,.card-title,.dz-title{
-color:#f8fafc !important;
+color:var(--color-text-primary) !important;
 }
 .file-meta,.dz-hint,.card-sub{
-color:#94a3b8 !important;
+color:var(--color-text-secondary) !important;
 }
 .add-btn{
 display:flex !important;
@@ -166,8 +166,8 @@ border-radius:16px;
 padding:18px;
 box-shadow:0 4px 15px rgba(0,0,0,.05);
 }
-.stat-card span{font-size:12px;color:#64748b;}
-.stat-card h3{margin-top:8px;font-size:24px;color:#0f172a;}
+.stat-card span{font-size:12px;color:var(--color-text-muted);}
+.stat-card h3{margin-top:8px;font-size:24px;color:var(--color-text-primary);}
 @media(max-width:768px){
 .stats-grid{grid-template-columns:repeat(2,1fr);}
 }

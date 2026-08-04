@@ -333,9 +333,10 @@ export default function Home() {
 
         setUploadedFiles(prev => prev.map(f => f.id === uf.id ? { ...f, progress: 40 } : f));
 
+        const contentType = uf.file.type || "application/pdf";
         const s3Upload = await fetch(uploadData.upload_url, {
           method: "PUT",
-          headers: { "Content-Type": uf.file.type },
+          headers: { "Content-Type": contentType },
           body: uf.file,
         });
         if (!s3Upload.ok) throw new Error(`S3 upload failed for ${uf.file.name}`);

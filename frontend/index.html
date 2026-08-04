@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GST Ledger Hub - Real-time GST & Financial Analytics</title>
+    <title>VYOM+ - Real-time GST & Financial Analytics</title>
     <!-- Tabler Icons CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <!-- Google Fonts: Inter -->
@@ -11,6 +12,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="index.css">
+    <!-- Theme: apply before paint to prevent flash -->
+    <script>
+        (function() {
+            var t = localStorage.getItem('gst_theme') || 'dark';
+            if (t === 'light') {
+                document.documentElement.classList.add('light-mode');
+            }
+        })();
+    </script>
 </head>
 <body>
     <!-- Dynamic Indian-style Geometric Background Canvas -->
@@ -20,12 +30,12 @@
         <!-- Top Navigation Header -->
         <header class="app-header">
             <div class="header-left">
-                <div class="logo-icon">
-                    <i class="ti ti-chart-pie-filled"></i>
+                <div class="logo-icon"><img src="favicon.ico" alt="VYOM+">
+                    
                 </div>
                 <div class="header-title-group">
-                    <h1>GST Ledger Hub</h1>
-                    <p class="subtitle">Real-time GST, Inventory & Financial Analytics</p>
+                    <h1>VYOM+</h1>
+                    <p class="subtitle">Real-time GST, Inventory &amp; Financial Analytics</p>
                 </div>
             </div>
             <div class="header-right">
@@ -85,7 +95,7 @@
             <div class="bento-card testimonial-card">
                 <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=600" alt="Corporate Team Working" class="bento-card-bg">
                 <div class="bento-card-content">
-                    <p class="testimonial-text">"GST Ledger Hub completely transformed how we prepare GSTR returns. Reconciliations are done in minutes rather than days."</p>
+                    <p class="testimonial-text">"VYOM+ completely transformed how we prepare GSTR returns. Reconciliations are done in minutes rather than days."</p>
                     <div>
                         <p class="testimonial-author">Priya Sharma</p>
                         <p class="testimonial-company">CFO, Apex Enterprises</p>
@@ -140,6 +150,14 @@
         </div>
     </div>
 
+    <!-- Floating Theme Toggle -->
+    <button class="floating-theme-toggle theme-toggle-btn" id="landing-theme-toggle" title="Switch Theme">
+        <i class="ti ti-sun"></i>
+    </button>
+
+    <!-- Theme Script -->
+    <script src="console/shared/theme.js"></script>
+
     <!-- Background Animation Script -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -187,10 +205,14 @@
 
             function animate() {
                 ctx.clearRect(0, 0, w, h);
+
+                const style = getComputedStyle(document.documentElement);
+                const bg1 = style.getPropertyValue('--color-canvas-bg-1').trim() || '#0c152b';
+                const bg2 = style.getPropertyValue('--color-canvas-bg-2').trim() || '#060913';
                 
                 let gradient = ctx.createRadialGradient(mouseX, mouseY, 50, w/2, h/2, Math.max(w, h));
-                gradient.addColorStop(0, "#0c152b");
-                gradient.addColorStop(1, "#060913");
+                gradient.addColorStop(0, bg1);
+                gradient.addColorStop(1, bg2);
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, w, h);
 

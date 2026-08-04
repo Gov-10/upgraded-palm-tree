@@ -174,7 +174,7 @@ function renderStatements() {
     });
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="padding:28px;text-align:center;color:#64748b;">No statement entries found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="padding:28px;text-align:center;color:var(--color-text-muted);">No statement entries found.</td></tr>';
         return;
     }
 
@@ -187,22 +187,22 @@ function renderStatements() {
         const recordId = s.id || s.referrence_no;
 
         const tr = document.createElement('tr');
-        tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.05);transition:background .2s;';
-        tr.onmouseenter = function() { tr.style.background = 'rgba(255,255,255,0.03)'; };
+        tr.style.cssText = 'border-bottom:1px solid var(--color-border);transition:background .2s;';
+        tr.onmouseenter = function() { tr.style.background = 'rgba(118,159,205,0.07)'; };
         tr.onmouseleave = function() { tr.style.background = ''; };
         tr.innerHTML =
             '<td style="padding:14px 16px;color:#38bdf8;font-weight:600;font-family:monospace;">' + (s.referrence_no || '\u2014') + '</td>' +
-            '<td style="padding:14px 16px;color:#94a3b8;">' + displayDate(s.transaction_date) + '</td>' +
+            '<td style="padding:14px 16px;color:var(--color-text-secondary);">' + displayDate(s.transaction_date) + '</td>' +
             '<td style="padding:14px 16px;">' +
-                '<div style="color:#f8fafc;font-weight:600;">' + (s.bank_name || '\u2014') + '</div>' +
-                '<div style="font-size:11px;color:#64748b;margin-top:2px;">' + maskAccount(s.account_number) + '</div>' +
+                '<div style="color:var(--color-text-primary);font-weight:600;">' + (s.bank_name || '\u2014') + '</div>' +
+                '<div style="font-size:11px;color:var(--color-text-muted);margin-top:2px;">' + maskAccount(s.account_number) + '</div>' +
             '</td>' +
-            '<td style="padding:14px 16px;color:#cbd5e1;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (s.description || '') + '">' + (s.description || '\u2014') + '</td>' +
+            '<td style="padding:14px 16px;color:var(--color-text-secondary);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (s.description || '') + '">' + (s.description || '\u2014') + '</td>' +
             '<td style="padding:14px 16px;"><span style="background:' + typeChipBg + ';color:' + typeChipCol + ';border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;">' + (s.transaction_type || '\u2014') + '</span></td>' +
             '<td style="padding:14px 16px;text-align:right;font-weight:700;color:' + amountColor + ';">' + (isCredit ? '+' : '-') + formatCurrency(s.amount) + '</td>' +
             '<td style="padding:14px 16px;"><span style="background:' + sc.bg + ';color:' + sc.color + ';border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;">' + sc.label + '</span></td>' +
             '<td style="padding:14px 16px;text-align:right;position:relative;">' +
-                '<button class="action-btn" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:16px;padding:4px;" onclick="event.stopPropagation(); toggleDropdown(event, \'' + recordId + '\')"><i class="ti ti-dots-vertical"></i></button>' +
+                '<button class="action-btn" style="background:none;border:none;color:var(--color-text-secondary);cursor:pointer;font-size:16px;padding:4px;" onclick="event.stopPropagation(); toggleDropdown(event, \'' + recordId + '\')"><i class="ti ti-dots-vertical"></i></button>' +
                 '<div class="action-dropdown" id="dropdown-' + recordId + '">' +
                     '<div class="action-dropdown-item" onclick="event.stopPropagation(); triggerEditStatement(\'' + recordId + '\')" ><i class="ti ti-edit"></i> Edit</div>' +
                     '<div class="action-dropdown-item remove" onclick="event.stopPropagation(); triggerRemoveStatement(\'' + recordId + '\')" ><i class="ti ti-trash"></i> Remove</div>' +
@@ -216,7 +216,7 @@ function renderStatements() {
 /*  Fetch statements from the API on load                              */
 /* ------------------------------------------------------------------ */
 async function loadStatements() {
-    tbody.innerHTML = '<tr><td colspan="8" style="padding:28px;text-align:center;color:#64748b;">Loading statements&hellip;</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="padding:28px;text-align:center;color:var(--color-text-muted);">Loading statements&hellip;</td></tr>';
     try {
         const res = await fetch(API_BASE + '/bank-statements');
         if (!res.ok) throw new Error('Server returned ' + res.status);
@@ -382,7 +382,7 @@ function renderOCRRecordsPreview() {
     }
     
     preview.style.display = 'flex';
-    preview.innerHTML = '<div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Extracted Records Preview</div>';
+    preview.innerHTML = '<div style="font-size: 11px; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Extracted Records Preview</div>';
     
     extractedRecords.forEach(rec => {
         const isCredit = (rec.transaction_type || rec.type || '').toLowerCase() === 'credit';
@@ -395,8 +395,8 @@ function renderOCRRecordsPreview() {
         row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(15, 23, 42, 0.4); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.05);';
         row.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 2px;">
-                <span style="font-weight: 600; color: #f8fafc; font-size: 13px;">${partyStr}</span>
-                <span style="color: #64748b; font-size: 11px;">${dateStr}</span>
+                <span style="font-weight: 600; color: var(--color-text-primary); font-size: 13px;">${partyStr}</span>
+                <span style="color: var(--color-text-muted); font-size: 11px;">${dateStr}</span>
             </div>
             <span style="font-weight: 700; color: ${amountColor}; font-size: 13px;">${isCredit ? '+' : '-'}${amountStr}</span>
         `;
@@ -727,24 +727,133 @@ window.triggerEditStatement = function(id) {
     document.querySelectorAll('.action-dropdown').forEach(d => d.classList.remove('show'));
 };
 
-window.triggerRemoveStatement = function(id) {
-    if (confirm('Are you sure you want to remove this statement record?')) {
-        fetch(API_BASE + '/bank-statements/' + id, {
-            method: 'DELETE'
-        }).then(res => {
-            if (res.ok) {
+function showReconciliationConfirm(message, onConfirm) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: rgba(8, 12, 24, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    `;
+    
+    const card = document.createElement('div');
+    card.style.cssText = `
+        background: var(--color-bg-card, rgba(30, 41, 59, 0.55));
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+        width: 420px;
+        max-width: 90%;
+        padding: 24px;
+        color: var(--color-text-primary, #f8fafc);
+        transform: scale(0.92) translateY(10px);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    `;
+    
+    card.innerHTML = `
+        <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary, #f8fafc); margin: 0;">
+            <i class="ti ti-alert-triangle" style="color: #EF4444; font-size: 20px;"></i> Reconciled Record Deletion
+        </h3>
+        <p style="font-size: 13px; color: var(--color-text-secondary, #94a3b8); line-height: 1.5; margin: 0;">
+            ${message}
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+            <button id="cancel-recon-btn" style="padding: 8px 16px; font-size: 13px; cursor: pointer; border-radius: 8px; font-weight: 600; background: transparent; border: 1px solid rgba(255,255,255,0.15); color: var(--color-text-secondary);">Cancel</button>
+            <button id="confirm-recon-btn" style="padding: 8px 16px; font-size: 13px; cursor: pointer; border-radius: 8px; font-weight: 600; background: #EF4444; border: none; color: #fff;">Delete Reconciled Record</button>
+        </div>
+    `;
+    
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    
+    requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        card.style.transform = 'scale(1) translateY(0)';
+    });
+    
+    const close = () => {
+        overlay.style.opacity = '0';
+        card.style.transform = 'scale(0.92) translateY(10px)';
+        setTimeout(() => overlay.remove(), 250);
+    };
+    
+    overlay.querySelector('#cancel-recon-btn').addEventListener('click', close);
+    overlay.querySelector('#confirm-recon-btn').addEventListener('click', () => {
+        close();
+        onConfirm();
+    });
+}
+
+window.triggerRemoveStatement = async function(id) {
+    try {
+        const brsRes = await fetch(API_BASE + '/BRS');
+        let matchedBrs = null;
+        if (brsRes.ok) {
+            const brsRecords = await brsRes.json();
+            matchedBrs = brsRecords.find(r => String(r.transaction_id) === String(id));
+        }
+
+        const deleteAction = async () => {
+            if (matchedBrs) {
+                try {
+                    await fetch(API_BASE + '/BRS/' + matchedBrs.id, { method: 'DELETE' });
+                } catch (e) {
+                    console.error('Failed to delete BRS record:', e);
+                }
+            }
+            fetch(API_BASE + '/bank-statements/' + id, {
+                method: 'DELETE'
+            }).then(res => {
+                if (res.ok) {
+                    statements = statements.filter(s => s.id != id);
+                    renderStatements();
+                    updateMetrics();
+                    if (typeof showToast === 'function') {
+                        showToast('Bank statement and associated reconciliation deleted successfully', 'success');
+                    }
+                } else {
+                    notify('Failed to delete statement from database.', 'error');
+                }
+            }).catch(err => {
+                console.error('Delete failed:', err);
                 statements = statements.filter(s => s.id != id);
                 renderStatements();
                 updateMetrics();
-            } else {
-                notify('Failed to delete statement from database.', 'error');
+            });
+        };
+
+        if (matchedBrs) {
+            showReconciliationConfirm(
+                `This bank statement transaction is reconciled with voucher #${matchedBrs.voucher_no}. Deleting it will automatically delete the corresponding bank reconciliation. Do you want to proceed?`,
+                deleteAction
+            );
+        } else {
+            if (confirm('Are you sure you want to remove this statement record?')) {
+                deleteAction();
             }
-        }).catch(err => {
-            console.error('Delete failed:', err);
-            statements = statements.filter(s => s.id != id);
-            renderStatements();
-            updateMetrics();
-        });
+        }
+    } catch (err) {
+        console.error('Check BRS failed:', err);
+        if (confirm('Are you sure you want to remove this statement record?')) {
+            fetch(API_BASE + '/bank-statements/' + id, { method: 'DELETE' }).then(res => {
+                if (res.ok) {
+                    statements = statements.filter(s => s.id != id);
+                    renderStatements();
+                    updateMetrics();
+                }
+            });
+        }
     }
     document.querySelectorAll('.action-dropdown').forEach(d => d.classList.remove('show'));
 };

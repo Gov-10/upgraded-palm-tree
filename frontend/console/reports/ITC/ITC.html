@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="../../../favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Tax Credit (ITC) – VYOM+</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../shared/sidebar.css">
+    <!-- Theme: apply before paint to prevent flash -->
+    <script>
+        (function() {
+            var t = localStorage.getItem("gst_theme") || "dark";
+            if (t === "light") document.documentElement.classList.add("light-mode");
+        })();
+    </script>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="console-shell">
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><img src="../../../favicon.ico" alt="VYOM+"></div>
+            <div class="sidebar-brand-text"><h2>VYOM+</h2><p>Financial Analytics Suite</p></div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-section-label">Account</div>
+            <a href="../../profile/profile.html" class="nav-item" data-tooltip="My Profile"><i class="ti ti-user-circle nav-icon"></i><span class="nav-label">My Profile</span></a>
+            <div class="nav-sub-group">
+                <a href="../../profile/personal-info.html" class="nav-sub-item"><i class="ti ti-id-badge"></i> Personal Info</a>
+                <a href="../../profile/account-info.html" class="nav-sub-item"><i class="ti ti-building"></i> Account &amp; Business</a>
+                <a href="../../profile/security.html" class="nav-sub-item"><i class="ti ti-shield-lock"></i> Security &amp; Password</a>
+            </div>
+            <div class="nav-section-label" style="margin-top:8px;">Console</div>
+            <a href="../../overview/overview.html" class="nav-item" data-tooltip="Overview"><i class="ti ti-layout-dashboard nav-icon"></i><span class="nav-label">Overview</span></a>
+            <a href="../../vouchers/vouchers.html" class="nav-item" data-tooltip="Vouchers"><i class="ti ti-receipt-2 nav-icon"></i><span class="nav-label">Vouchers</span></a>
+            <a href="../../bank-statements/bank-statements.html" class="nav-item" data-tooltip="Bank Statements"><i class="ti ti-building-bank nav-icon"></i><span class="nav-label">Bank Statements</span></a>
+            <a href="../../inventory/inventory.html" class="nav-item" data-tooltip="Inventory"><i class="ti ti-package nav-icon"></i><span class="nav-label">Inventory</span></a>
+            <a href="../../billingNInvoicing/billing.html" class="nav-item" data-tooltip="Billing &amp; Invoicing"><i class="ti ti-file-invoice nav-icon"></i><span class="nav-label">Billing &amp; Invoicing</span></a>
+            <a href="../../reconciliations/reconciliations.html" class="nav-item" data-tooltip="Reconciliations"><i class="ti ti-arrows-exchange nav-icon"></i><span class="nav-label">Reconciliations</span></a>
+            <a href="../../reports/reports.html" class="nav-item active" data-tooltip="Reports"><i class="ti ti-chart-bar nav-icon"></i><span class="nav-label">Reports</span></a>
+            <div class="nav-section-label" style="margin-top:8px;">Tools</div>
+            <a href="../../../upload/preview.html" class="nav-item" data-tooltip="Upload Invoice"><i class="ti ti-cloud-upload nav-icon"></i><span class="nav-label">Upload Invoice</span></a>
+            <a href="../../settings/settings.html" class="nav-item" data-tooltip="Settings"><i class="ti ti-settings nav-icon"></i><span class="nav-label">Settings</span></a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="../../profile/profile.html" class="sidebar-user">
+                <div class="sidebar-avatar">JD</div>
+                <div class="sidebar-user-info"><div class="sidebar-user-name">Jane Doe</div><div class="sidebar-user-role">CFO · Apex Retailers</div></div>
+            </a>
+        </div>
+    </nav>
+    <button class="sidebar-toggle" id="sidebar-toggle"><i class="ti ti-chevron-left"></i></button>
+
+    <div class="console-main">
+        <div class="console-topbar">
+            <div class="topbar-left">
+                <div class="topbar-page-title">Input Tax Credit (ITC) Report</div>
+                <div class="topbar-breadcrumb">
+                    <a href="../reports.html" style="color: var(--color-text-secondary); text-decoration: none;">Reports</a>
+                    <i class="ti ti-chevron-right" style="font-size:11px; margin: 0 4px; color: var(--color-text-muted);"></i>
+                    <span>ITC Report</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <!-- Notifications built here by notifications.js -->
+            </div>
+        </div>
+
+        <div class="console-content">
+            <!-- Metric Cards Grid -->
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:24px;">
+                <div class="glass-card" style="padding:20px; display:flex; align-items:center; gap:16px;">
+                    <div style="width:48px; height:48px; background:rgba(37,99,235,0.12); border-radius:12px; display:flex; align-items:center; justify-content:center;"><i class="ti ti-file-text" style="color:#2563EB; font-size:24px;"></i></div>
+                    <div>
+                        <div style="font-size:12px; color:var(--color-text-secondary); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total Claimable ITC</div>
+                        <div id="stat-claimable" style="font-size:22px; font-weight:800; color:var(--color-text-primary);">₹0.00</div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding:20px; display:flex; align-items:center; gap:16px;">
+                    <div style="width:48px; height:48px; background:rgba(16,185,129,0.12); border-radius:12px; display:flex; align-items:center; justify-content:center;"><i class="ti ti-circle-check" style="color:#10B981; font-size:24px;"></i></div>
+                    <div>
+                        <div style="font-size:12px; color:var(--color-text-secondary); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total Claimed ITC</div>
+                        <div id="stat-claimed" style="font-size:22px; font-weight:800; color:#10B981;">₹0.00</div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding:20px; display:flex; align-items:center; gap:16px;">
+                    <div style="width:48px; height:48px; background:rgba(245,158,11,0.12); border-radius:12px; display:flex; align-items:center; justify-content:center;"><i class="ti ti-wallet" style="color:#F59E0B; font-size:24px;"></i></div>
+                    <div>
+                        <div style="font-size:12px; color:var(--color-text-secondary); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total ITC Remaining</div>
+                        <div id="stat-remaining" style="font-size:22px; font-weight:800; color:#F59E0B;">₹0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vouchers Section -->
+            <div class="glass-card" style="padding:24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+                    <h3 style="font-size:16px; font-weight:700; color:var(--color-text-primary); margin:0; display:flex; align-items:center; gap:8px;">
+                        <i class="ti ti-receipt" style="color:#2563EB;"></i> Purchase Vouchers Register
+                    </h3>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <div style="position:relative;">
+                            <i class="ti ti-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--color-text-muted); font-size:14px;"></i>
+                            <input type="text" id="search-input" placeholder="Search party, voucher no..." style="background:rgba(15,23,42,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 12px 8px 34px; font-size:13px; color:var(--color-text-primary); outline:none; width:220px; transition:border-color 0.2s;">
+                        </div>
+                        <select id="filter-status" style="background:rgba(15,23,42,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 12px; font-size:13px; color:var(--color-text-primary); outline:none; cursor:pointer;">
+                            <option value="all">All Reconciliation Statuses</option>
+                            <option value="cleared">Reconciled (Cleared)</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; min-width:600px;">
+                        <thead>
+                            <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
+                                <th style="padding:14px 20px; text-align:left; font-weight:600; color:var(--color-text-muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em;">Voucher No.</th>
+                                <th style="padding:14px 20px; text-align:left; font-weight:600; color:var(--color-text-muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em;">Date</th>
+                                <th style="padding:14px 20px; text-align:left; font-weight:600; color:var(--color-text-muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em;">Party Name</th>
+                                <th style="padding:14px 20px; text-align:right; font-weight:600; color:var(--color-text-muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em;">Total Amount</th>
+                                <th style="padding:14px 20px; text-align:right; font-weight:600; color:var(--color-text-muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em;">GST (Claimable ITC)</th>
+                                <th style="padding:14px 20px; text-align:left; font-weight:600; color:var(--color-text-muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em;">Reconciliation Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="voucher-tbody">
+                            <tr>
+                                <td colspan="6" style="padding:28px; text-align:center; color:var(--color-text-muted);">Loading vouchers...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../shared/theme.js"></script>
+<script src="../../shared/sidebar.js"></script>
+<script src="../../shared/notifications.js"></script>
+<script src="./ITC.js"></script>
+</body>
+</html>

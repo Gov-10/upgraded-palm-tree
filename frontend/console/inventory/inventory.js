@@ -297,7 +297,7 @@ function renderUnits(records) {
     if (!unitsTbody) return;
     unitsTbody.innerHTML = '';
     if (!records || records.length === 0) {
-        unitsTbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:#64748b;">No units found.</td></tr>';
+        unitsTbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--color-text-muted);">No units found.</td></tr>';
         return;
     }
 
@@ -459,7 +459,7 @@ async function renderStockItems(records) {
     if (!stockItemsTbody) return;
     stockItemsTbody.innerHTML = '';
     if (!records || records.length === 0) {
-        stockItemsTbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:#64748b;">No stock items found.</td></tr>';
+        stockItemsTbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--color-text-muted);">No stock items found.</td></tr>';
         return;
     }
 
@@ -591,7 +591,7 @@ async function renderGodowns(records) {
     if (!records || records.length === 0) {
         godownsTbody.innerHTML = '';
         const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="3" style="padding:24px;text-align:center;color:#64748b;">No godowns found.</td>';
+        tr.innerHTML = '<td colspan="3" style="padding:24px;text-align:center;color:var(--color-text-muted);">No godowns found.</td>';
         godownsTbody.appendChild(tr);
         return;
     }
@@ -640,7 +640,7 @@ async function renderGodowns(records) {
 async function fetchGodowns() {
     if (!godownsTbody) return;
     // show spinner row while we prepare the entire list
-    godownsTbody.innerHTML = '<tr class="loading-row"><td colspan="4" style="padding:24px;text-align:center;color:#64748b;"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;"><div class="spinner" aria-hidden="true"></div><div>Loading godowns...</div></div></td></tr>';
+    godownsTbody.innerHTML = '<tr class="loading-row"><td colspan="4" style="padding:24px;text-align:center;color:var(--color-text-muted);"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;"><div class="spinner" aria-hidden="true"></div><div>Loading godowns...</div></div></td></tr>';
     try {
         const response = await fetch(API_BASE + '/godown');
         if (!response.ok) {
@@ -651,7 +651,7 @@ async function fetchGodowns() {
         await renderGodowns(data);
     } catch (err) {
         console.error('[Inventory] Failed to load godowns', err);
-        godownsTbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:#64748b;">Unable to load godowns.</td></tr>';
+        godownsTbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--color-text-muted);">Unable to load godowns.</td></tr>';
     }
 }
 

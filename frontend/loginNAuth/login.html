@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - GST Ledger Hub</title>
+    <title>Login - VYOM+</title>
     <!-- Tabler Icons CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <!-- Google Fonts: Inter -->
@@ -11,6 +12,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Theme: apply before paint to prevent flash -->
+    <script>
+        (function() {
+            var t = localStorage.getItem("gst_theme") || "dark";
+            if (t === "light") document.documentElement.classList.add("light-mode");
+        })();
+    </script>
 </head>
 <body>
     <!-- Dynamic Background Canvas -->
@@ -23,7 +31,7 @@
 
     <div class="login-container">
         <h1>Welcome Back</h1>
-        <p class="auth-subtitle">Sign in to your GST Ledger Hub account</p>
+        <p class="auth-subtitle">Sign in to your VYOM+ account</p>
         
         <form id="loginForm">
             <div class="form-group">
@@ -58,6 +66,13 @@
         </div>
     </div>
 
+        <!-- Floating Theme Toggle -->
+    <button class="floating-theme-toggle theme-toggle-btn" id="auth-theme-toggle" title="Switch Theme">
+        <i class="ti ti-sun"></i>
+        
+    </button>
+
+    <script src="../console/shared/theme.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

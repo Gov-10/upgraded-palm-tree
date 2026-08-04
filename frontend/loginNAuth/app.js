@@ -180,9 +180,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function animate() {
         ctx.clearRect(0, 0, w, h);
         
+        const style = getComputedStyle(document.documentElement);
+        const bg1 = style.getPropertyValue('--color-canvas-bg-1').trim() || '#0c152b';
+        const bg2 = style.getPropertyValue('--color-canvas-bg-2').trim() || '#060913';
+
         let gradient = ctx.createRadialGradient(mouseX, mouseY, 50, w/2, h/2, Math.max(w, h));
-        gradient.addColorStop(0, "#0c152b");
-        gradient.addColorStop(1, "#060913");
+        gradient.addColorStop(0, bg1);
+        gradient.addColorStop(1, bg2);
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, w, h);
 

@@ -1,32 +1,6 @@
 /* Modern GST & Inventory Dashboard Stylesheet */
 
-:root {
-    /* Color Palette */
-    --color-primary: #2563EB;
-    --color-primary-hover: #1D4ED8;
-    --color-success: #10B981;
-    --color-success-hover: #059669;
-    --color-warning: #F59E0B;
-    --color-error: #EF4444;
-
-    /* Theme Neutral Palette (Dark Premium Glassmorphism Theme) */
-    --color-bg-deep: #090e1a;
-    --color-bg-surface: rgba(17, 24, 39, 0.75);
-    --color-bg-card: rgba(30, 41, 59, 0.55);
-    --color-bg-input: rgba(15, 23, 42, 0.8);
-    --color-border: rgba(255, 255, 255, 0.09);
-    --color-border-focus: rgba(37, 99, 235, 0.5);
-    --color-text-primary: #f8fafc;
-    --color-text-secondary: #94a3b8;
-    --color-text-muted: #64748b;
-    
-    /* Layout Variables */
-    --border-radius-sm: 8px;
-    --border-radius-md: 12px;
-    --border-radius-lg: 18px;
-    --transition-speed: 0.3s;
-    --max-width: 1440px;
-}
+/* Inherit variables from shared sidebar.css */
 
 /* Reset and Base Styles */
 * {

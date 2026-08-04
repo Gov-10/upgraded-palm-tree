@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Float, null, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import declarative_base, sessionmaker, Mapped, mapped_column
-from typing import List, Any, Dict
+from typing import List, Any, Dict, Optional
 import os
 from datetime import datetime
 from dotenv import load_dotenv
@@ -43,6 +43,9 @@ class Vouchers(Base):
     discount: Mapped[float] = mapped_column(Float)
     status: Mapped[str] = mapped_column(String, default="pending")
     file_key: Mapped[str] = mapped_column(String, nullable=True)
+    # NEW — voucher type tag + arbitrary type-specific data store
+    meta_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    meta: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
 
 class History(Base):
     __tablename__ = "histories"

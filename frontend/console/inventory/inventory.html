@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inventory &ndash; GST Ledger Hub</title>
+<title>Inventory &ndash; VYOM+</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,8 +14,17 @@
 :root{
     --bg-0:#0a0e17; --surface:rgba(255,255,255,0.035); --border:rgba(255,255,255,0.09);
     --border-strong:rgba(255,255,255,0.14); --text-hi:#f8fafc; --text-mid:#94a3b8; --text-lo:#64748b;
-    --green:#10B981; --amber:#F59E0B; --red:#EF4444; --blue:#2563EB; --blue-light:#60a5fa; --purple:#8b5cf6;
+    --green:#10B981; --amber:#F59E0B; --red:#EF4444; --blue:#2563EB; --blue-light:#2563EB; --purple:#8b5cf6;
     --radius:16px;
+}
+html.light-mode {
+    --bg-0: #F7FBFC;
+    --surface: rgba(214, 230, 242, 0.55);
+    --border: rgba(118, 159, 205, 0.28);
+    --border-strong: rgba(118, 159, 205, 0.5);
+    --text-hi: #1e293b;
+    --text-mid: #334155;
+    --text-lo: #475569;
 }
 * { box-sizing: border-box; margin:0; padding:0; }
 
@@ -42,9 +51,9 @@
 
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th{padding:12px 20px;text-align:left;font-weight:600;color:var(--text-lo);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
-td{padding:13px 20px;color:var(--text-hi);border-bottom:1px solid rgba(255,255,255,0.05);white-space:nowrap;}
+td{padding:13px 20px;color:var(--text-hi);border-bottom:1px solid var(--border);white-space:nowrap;}
 tbody tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:rgba(255,255,255,0.02);}
+tbody tr:hover{background:rgba(118,159,205,0.06);}
 
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
 .stat-card{padding:20px;}
@@ -60,7 +69,7 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
 .progress-track{height:7px;border-radius:20px;background:rgba(255,255,255,0.06);overflow:hidden;}
 .progress-fill{height:100%;border-radius:20px;}
 
-.row-item{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid rgba(255,255,255,0.05);gap:12px;}
+.row-item{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid var(--border);gap:12px;}
 .row-item:last-child{border-bottom:none;}
 .row-name{font-size:13.5px;font-weight:600;}
 .row-meta{font-size:11.5px;color:var(--text-lo);margin-top:2px;}
@@ -82,7 +91,7 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
 .godown-row:hover{background:rgba(255,255,255,0.04);}
 .godown-row td:first-child{display:flex;align-items:center;gap:10px;}
 .expand-toggle{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);color:var(--text-hi);font-weight:700;}
-.godown-details-row{background:rgba(255,255,255,0.02);}
+.godown-details-row{background:rgba(118,159,205,0.04);}
 .godown-details-row.hidden{display:none;}
 .godown-detail-panel{padding:14px 18px;}
 .detail-list{display:grid;gap:10px;}
@@ -97,8 +106,8 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
 .row-action-cell{position:relative;text-align:right;width:36px;}
 .row-dropdown{position:absolute;right:0;top:100%;margin-top:4px;background:rgba(30,41,59,0.97);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.45);z-index:200;display:none;min-width:130px;overflow:hidden;}
 .row-dropdown.show{display:block;}
-.row-dropdown-item{padding:9px 14px;color:#cbd5e1;cursor:pointer;font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:8px;transition:background .15s,color .15s;white-space:nowrap;}
-.row-dropdown-item:hover{background:rgba(255,255,255,0.05);color:#f8fafc;}
+.row-dropdown-item{padding:9px 14px;color:var(--color-text-secondary);cursor:pointer;font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:8px;transition:background .15s,color .15s;white-space:nowrap;}
+.row-dropdown-item:hover{background:rgba(255,255,255,0.05);color:var(--color-text-primary);}
 .row-dropdown-item.danger{color:#f87171;}
 .row-dropdown-item.danger:hover{background:rgba(248,113,113,0.08);color:#f87171;}
 
@@ -113,8 +122,8 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
     padding:10px 12px;color:var(--text-hi);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;
 }
 .form-group select {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: var(--color-bg-input);
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     cursor: pointer;
     appearance: none;
@@ -185,7 +194,7 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
 .tag-row{display:flex;flex-wrap:wrap;gap:8px;}
 .tag{background:transparent;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border-strong);color:var(--text-mid);cursor:pointer;font-family:inherit;transition:all 0.15s ease;}
 .tag:hover{color:var(--text-hi);border-color:var(--text-mid);}
-.tag.selected{background:rgba(37,99,235,0.15);color:#60a5fa;border-color:rgba(37,99,235,0.25);}
+.tag.selected{background:rgba(37,99,235,0.15);color:#2563EB;border-color:rgba(37,99,235,0.25);}
     .items-list{display:grid;gap:14px;margin-top:10px;}
     .item-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:flex-end;}
     .item-row .form-group{margin:0;}
@@ -263,6 +272,13 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
 }
 @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 </style>
+    <!-- Theme: apply before paint to prevent flash -->
+    <script>
+        (function() {
+            var t = localStorage.getItem("gst_theme") || "dark";
+            if (t === "light") document.documentElement.classList.add("light-mode");
+        })();
+    </script>
 </head>
 <body>
 <canvas id="bg-canvas"></canvas>
@@ -270,8 +286,8 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
     <!-- SIDEBAR -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
-            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+            <div class="sidebar-logo-icon"><img src="../../favicon.ico" alt="VYOM+"></div>
+            <div class="sidebar-brand-text"><h2>VYOM+</h2><p>Financial Analytics Suite</p></div>
         </div>
         <div class="sidebar-nav">
             <div class="nav-section-label">Account</div>
@@ -413,7 +429,7 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
                     <div style="overflow-x:auto;"><table>
                         <thead><tr><th>Item</th><th>Unit</th><th style="text-align:right;">Rate</th><th style="text-align:right;">On Hand</th><th>HSN</th><th></th></tr></thead>
                         <tbody id="stock-items-tbody">
-                            <tr><td colspan="6" style="padding:24px;text-align:center;color:#64748b;">Loading stock items...</td></tr>
+                            <tr><td colspan="6" style="padding:24px;text-align:center;color:var(--color-text-muted);">Loading stock items...</td></tr>
                         </tbody>
                     </table></div>
                 </div>
@@ -492,7 +508,7 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
                     <div style="overflow-x:auto;"><table>
                         <thead><tr><th>Symbol</th><th>Name</th><th>Type</th><th>Conversion</th><th>Decimals</th><th>Used</th></tr></thead>
                         <tbody id="units-tbody">
-                            <tr><td colspan="6" style="padding:24px;text-align:center;color:#64748b;">Loading units...</td></tr>
+                            <tr><td colspan="6" style="padding:24px;text-align:center;color:var(--color-text-muted);">Loading units...</td></tr>
                         </tbody>
                     </table></div>
                 </div>
@@ -539,7 +555,7 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
                     <div style="overflow-x:auto;"><table>
                         <thead><tr><th>Godown</th><th>Location</th><th>SKUs</th><th></th></tr></thead>
                         <tbody id="godowns-tbody">
-                            <tr><td colspan="4" style="padding:24px;text-align:center;color:#64748b;">Loading godowns...</td></tr>
+                            <tr><td colspan="4" style="padding:24px;text-align:center;color:var(--color-text-muted);">Loading godowns...</td></tr>
                         </tbody>
                     </table></div>
                 </div>
@@ -810,6 +826,7 @@ tbody tr:hover{background:rgba(255,255,255,0.02);}
     </div><!-- end console-main -->
 </div><!-- end console-shell -->
 
+<script src="../shared/theme.js"></script>
 <script src="../shared/sidebar.js"></script>
 <script src="../shared/notifications.js"></script>
 <script src="inventory.js"></script>

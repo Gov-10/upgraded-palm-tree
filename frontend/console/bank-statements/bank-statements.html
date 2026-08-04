@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank Statements – GST Ledger Hub</title>
+    <title>Bank Statements – VYOM+</title>
     <meta name="description" content="Manage and track your bank account statements, transactions, and reconciliation status in one place.">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,7 +29,7 @@
         }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-card {
-            background: rgba(30, 41, 59, 0.65);
+            background: var(--color-bg-card);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 16px;
             box-shadow: 0 24px 60px rgba(0,0,0,0.45);
@@ -38,7 +39,7 @@
             overflow-y: auto;
             transform: scale(0.92) translateY(20px);
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            color: #f8fafc;
+            color: var(--color-text-primary);
             display: flex;
             flex-direction: column;
         }
@@ -55,15 +56,15 @@
         }
         .modal-header h3 {
             font-size: 16px; font-weight: 700; margin: 0;
-            display: flex; align-items: center; gap: 8px; color: #f8fafc;
+            display: flex; align-items: center; gap: 8px; color: var(--color-text-primary);
         }
         .modal-header h3 i { color: #38bdf8; }
         .modal-close-btn {
-            background: transparent; border: none; color: #94a3b8; cursor: pointer;
+            background: transparent; border: none; color: var(--color-text-secondary); cursor: pointer;
             font-size: 20px; display: flex; align-items: center; justify-content: center;
             transition: color 0.2s; padding: 2px; border-radius: 6px;
         }
-        .modal-close-btn:hover { color: #f8fafc; background: rgba(255,255,255,0.05); }
+        .modal-close-btn:hover { color: var(--color-text-primary); background: rgba(255,255,255,0.05); }
 
         .modal-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
 
@@ -80,7 +81,7 @@
         .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
         .form-group { display: flex; flex-direction: column; gap: 4px; }
         .form-group label {
-            font-size: 10.5px; font-weight: 600; color: #94a3b8;
+            font-size: 10.5px; font-weight: 600; color: var(--color-text-secondary);
             text-transform: uppercase; letter-spacing: 0.05em;
         }
         .form-group input,
@@ -88,7 +89,7 @@
         .form-group textarea {
             background: rgba(15,23,42,0.8);
             border: 1px solid rgba(255,255,255,0.09);
-            border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #f8fafc;
+            border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--color-text-primary);
             outline: none; transition: border-color 0.2s, box-shadow 0.2s;
             font-family: 'Inter', sans-serif;
         }
@@ -100,7 +101,7 @@
             box-shadow: 0 0 0 2px rgba(56,189,248,0.18);
         }
         .form-group input::placeholder,
-        .form-group textarea::placeholder { color: #64748b; }
+        .form-group textarea::placeholder { color: var(--color-text-muted); }
         .form-group select option { background: #1e293b; }
 
         .ocr-drop-area {
@@ -112,10 +113,10 @@
         .ocr-drop-area:hover, .ocr-drop-area.dragover {
             border-color: #38bdf8; background: rgba(56,189,248,0.06);
         }
-        .ocr-icon { font-size: 32px; color: #64748b; transition: color 0.2s, transform 0.2s; }
+        .ocr-icon { font-size: 32px; color: var(--color-text-muted); transition: color 0.2s, transform 0.2s; }
         .ocr-drop-area:hover .ocr-icon, .ocr-drop-area.dragover .ocr-icon { color: #38bdf8; transform: translateY(-2px); }
-        .ocr-title { font-size: 13px; font-weight: 600; color: #e2e8f0; }
-        .ocr-desc { font-size: 11px; color: #64748b; line-height: 1.4; }
+        .ocr-title { font-size: 13px; font-weight: 600; color: var(--color-text-primary); }
+        .ocr-desc { font-size: 11px; color: var(--color-text-muted); line-height: 1.4; }
         .ocr-file-info {
             display: none; background: rgba(16,185,129,0.1);
             border: 1px solid rgba(16,185,129,0.2); border-radius: 8px;
@@ -130,23 +131,23 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .upload-btn-secondary {
-            background: rgba(255,255,255,0.05); color: #f8fafc;
+            background: rgba(255,255,255,0.05); color: var(--color-text-primary);
             border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
             padding: 8px 16px; font-size: 12px; font-weight: 600; cursor: pointer;
             display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; margin-top: 4px;
         }
-        .upload-btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: #64748b; }
+        .upload-btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--color-text-muted); }
 
         .modal-footer {
             padding: 12px 20px; border-top: 1px solid rgba(255,255,255,0.08);
             display: flex; justify-content: flex-end; gap: 12px;
         }
         .btn-modal-cancel {
-            background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8;
+            background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-secondary);
             padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
             cursor: pointer; transition: all 0.2s ease;
         }
-        .btn-modal-cancel:hover { background: rgba(255,255,255,0.05); color: #f8fafc; border-color: rgba(255,255,255,0.25); }
+        .btn-modal-cancel:hover { background: rgba(255,255,255,0.05); color: var(--color-text-primary); border-color: rgba(255,255,255,0.25); }
         .btn-modal-submit {
             background: linear-gradient(135deg, #0ea5e9, #2563EB); border: none; color: white;
             padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
@@ -158,7 +159,7 @@
             position: absolute;
             right: 16px;
             top: 36px;
-            background: rgba(30, 41, 59, 0.95);
+            background: var(--color-bg-card);
             backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 8px;
@@ -173,7 +174,7 @@
         }
         .action-dropdown-item {
             padding: 8px 12px;
-            color: #cbd5e1;
+            color: var(--color-text-secondary);
             cursor: pointer;
             font-size: 12px;
             text-align: left;
@@ -184,7 +185,7 @@
         }
         .action-dropdown-item:hover {
             background: rgba(255, 255, 255, 0.05);
-            color: #f8fafc;
+            color: var(--color-text-primary);
         }
         .action-dropdown-item.remove {
             color: #f87171;
@@ -194,6 +195,13 @@
             color: #f87171;
         }
     </style>
+    <!-- Theme: apply before paint to prevent flash -->
+    <script>
+        (function() {
+            var t = localStorage.getItem("gst_theme") || "dark";
+            if (t === "light") document.documentElement.classList.add("light-mode");
+        })();
+    </script>
 </head>
 <body>
 <canvas id="bg-canvas"></canvas>
@@ -202,8 +210,8 @@
     <!-- SIDEBAR -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-logo-icon"><i class="ti ti-chart-pie-filled"></i></div>
-            <div class="sidebar-brand-text"><h2>GST Ledger Hub</h2><p>Financial Analytics Suite</p></div>
+            <div class="sidebar-logo-icon"><img src="../../favicon.ico" alt="VYOM+"></div>
+            <div class="sidebar-brand-text"><h2>VYOM+</h2><p>Financial Analytics Suite</p></div>
         </div>
         <div class="sidebar-nav">
             <div class="nav-section-label">Account</div>
@@ -282,29 +290,29 @@
 
                 <div class="glass-card" style="padding:20px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                        <div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Total Transactions</div>
+                        <div style="font-size:11px;color:var(--color-text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Total Transactions</div>
                         <div style="background:rgba(56,189,248,0.12);border-radius:8px;padding:6px 8px;"><i class="ti ti-arrows-transfer-up" style="color:#38bdf8;font-size:16px;"></i></div>
                     </div>
-                    <div id="metric-total" style="font-size:28px;font-weight:800;color:#f8fafc;">0</div>
+                    <div id="metric-total" style="font-size:28px;font-weight:800;color:var(--color-text-primary);">0</div>
                     <div id="metric-total-sub" style="font-size:12px;color:#38bdf8;margin-top:4px;"><i class="ti ti-database"></i> All entries</div>
                 </div>
 
                 <div class="glass-card" style="padding:20px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                        <div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Total Credits</div>
+                        <div style="font-size:11px;color:var(--color-text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Total Credits</div>
                         <div style="background:rgba(16,185,129,0.12);border-radius:8px;padding:6px 8px;"><i class="ti ti-trending-up" style="color:#10B981;font-size:16px;"></i></div>
                     </div>
                     <div id="metric-credits" style="font-size:28px;font-weight:800;color:#10B981;">&#8377;0</div>
-                    <div id="metric-credits-count" style="font-size:12px;color:#94a3b8;margin-top:4px;">Inflow this period</div>
+                    <div id="metric-credits-count" style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">Inflow this period</div>
                 </div>
 
                 <div class="glass-card" style="padding:20px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                        <div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Total Debits</div>
+                        <div style="font-size:11px;color:var(--color-text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Total Debits</div>
                         <div style="background:rgba(248,113,113,0.12);border-radius:8px;padding:6px 8px;"><i class="ti ti-trending-down" style="color:#f87171;font-size:16px;"></i></div>
                     </div>
                     <div id="metric-debits" style="font-size:28px;font-weight:800;color:#f87171;">&#8377;0</div>
-                    <div id="metric-debits-count" style="font-size:12px;color:#94a3b8;margin-top:4px;">Outflow this period</div>
+                    <div id="metric-debits-count" style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">Outflow this period</div>
                 </div>
             </div>
 
@@ -314,15 +322,15 @@
                     <h3><i class="ti ti-building-bank"></i> Statement Ledger</h3>
                     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                         <input type="text" id="bs-search" placeholder="Search statements&hellip;"
-                               style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:8px 14px;font-size:13px;color:#f8fafc;outline:none;width:200px;">
+                               style="background:rgba(15,23,42,0.8);border:1px solid var(--color-border);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--color-text-primary);outline:none;width:200px;">
                         <select id="bs-filter-type"
-                                style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:8px 14px;font-size:13px;color:#94a3b8;outline:none;">
+                                style="background:rgba(15,23,42,0.8);border:1px solid var(--color-border);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--color-text-secondary);outline:none;">
                             <option>All Types</option>
                             <option>Credit</option>
                             <option>Debit</option>
                         </select>
                         <select id="bs-filter-status"
-                                style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:8px 14px;font-size:13px;color:#94a3b8;outline:none;">
+                                style="background:rgba(15,23,42,0.8);border:1px solid var(--color-border);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--color-text-secondary);outline:none;">
                             <option>All Statuses</option>
                             <option>Reconciled</option>
                             <option>Pending</option>
@@ -335,13 +343,13 @@
                     <table style="width:100%;border-collapse:collapse;font-size:13px;">
                         <thead>
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.09);">
-                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Ref No.</th>
-                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Date</th>
-                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Bank / Account</th>
-                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Description</th>
-                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Type</th>
-                                <th style="padding:14px 16px;text-align:right;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Amount</th>
-                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Status</th>
+                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:var(--color-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Ref No.</th>
+                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:var(--color-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Date</th>
+                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:var(--color-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Bank / Account</th>
+                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:var(--color-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Description</th>
+                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:var(--color-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Type</th>
+                                <th style="padding:14px 16px;text-align:right;font-weight:600;color:var(--color-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Amount</th>
+                                <th style="padding:14px 16px;text-align:left;font-weight:600;color:var(--color-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Status</th>
                                 <th style="padding:14px 16px;text-align:right;width:50px;"></th>
                             </tr>
                         </thead>
@@ -468,7 +476,7 @@
                     <div class="modal-section-label" style="margin-top:4px;"><i class="ti ti-scan"></i>Auto-fill from Statement (OCR)</div>
                     <div class="form-group" style="display:none; flex-direction:row; align-items:center; gap:8px; margin-bottom:8px;" id="ocr-checkbox-container">
                          <input type="checkbox" id="bs-multiple-records" style="width:16px; height:16px; cursor:pointer; accent-color:#38bdf8;">
-                         <label for="bs-multiple-records" style="cursor:pointer; text-transform:none; font-size:12px; font-weight:500; color:#cbd5e1;">Add multiple records</label>
+                         <label for="bs-multiple-records" style="cursor:pointer; text-transform:none; font-size:12px; font-weight:500; color:var(--color-text-secondary);">Add multiple records</label>
                     </div>
                     <!-- OCR Extracted Records Preview -->
                     <div id="ocr-records-preview" style="display: none; margin-bottom: 12px; max-height: 200px; overflow-y: auto; padding: 10px; background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; flex-direction: column; gap: 8px;"></div>
@@ -508,6 +516,7 @@
     </div>
 </div>
 
+<script src="../shared/theme.js"></script>
 <script src="../shared/sidebar.js"></script>
 <script src="../shared/notifications.js"></script>
 <script src="bank-statements.js"></script>

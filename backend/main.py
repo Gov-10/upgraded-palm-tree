@@ -45,10 +45,10 @@ binary_redis_client=Redis(
 )
 bucket=os.getenv("S3_BUCKET_NAME")
 
-origins = ['http://localhost:5503', 'http://127.0.0.1:5501', 'http://127.0.0.1:5502', 'http://127.0.0.1', '0.0.0.0']
+origins = ['http://localhost:5503', 'http://127.0.0.1:5501', 'http://127.0.0.1:5502', 'http://127.0.0.1', '0.0.0.0', 'http://localhost:3000']
 
 app.add_middleware(CORSMiddleware,
-                   allow_origins = ["*"],
+                   allow_origins = origins,
                    allow_credentials = True,
                    allow_methods = ['*'],
                    allow_headers = ['*'])
@@ -158,17 +158,23 @@ def upl(payload: InputSchema):
 
 @app.post("/extract")
 def extr(payload: ExtractSchema):
-    key = None
-    combined_text= ""
-    for file_key in payload.file_keys:
+    combined_text = ""
+    for idx, file_key in enumerate(payload.file_keys):
+        file_ext = "pdf"
+        if idx < len(payload.file_type) and payload.file_type[idx]:
+            file_ext = payload.file_type[idx].lower().strip(".")
+        else:
+            # Fallback extraction from file key name if payload.file_type is missing or incomplete
+            file_ext = file_key.split(".")[-1].lower()
+
         response = s3.get_object(
             Bucket=bucket,
             Key=file_key
         )
         file_bytes = response["Body"].read()
-        text = extract(file_bytes)
+        text = extract(file_bytes, file_ext)
         if len(text.strip()) < 100:
-            text = extract_ocr(file_bytes)
+            text = extract_ocr(file_bytes, file_ext)
         combined_text += "\n\n" + text
     dt = redis_client.get(key1)
     if dt["text"] == hash_text(combined_text):
@@ -177,6 +183,7 @@ def extr(payload: ExtractSchema):
     text_hash = hash_text(combined_text) #isko caching mein use karenge
     redis_client.setex(key, {"text": text_hash, "ai_result": result["normal"]}, 86400)
     return {"csv_file": result["fin"], "normal": result["normal"]}
+
 
 
 @app.post("/extract-OCR")

@@ -1,4 +1,5 @@
 from langgraph.graph import StateGraph, END
+from llama_cpp import Llama
 from pydantic import BaseModel, SecretStr, Field
 from typing import Optional
 from langchain_groq import ChatGroq
@@ -8,8 +9,11 @@ import json
 import uuid
 import pandas as pd
 from io import StringIO
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "Phi-3-mini-4k-instruct-q4.gguf"))
 import boto3
 load_dotenv()
+slm = Llama(model_path=MODEL_PATH, n_ctx=4096, n_threads=os.cpu_count(), verbose=False,)
 llm = ChatGroq(
     model="openai/gpt-oss-120b",
     temperature=0,
@@ -28,6 +32,7 @@ s3 = boto3.client(
 bucket = os.getenv("S3_BUCKET_NAME")
 class State(BaseModel):
     content: str
+    file_key:Optional[str]=None
     normal: Optional[dict] = None
     fin: Optional[str] = ""
     key: Optional[str] = ""
@@ -90,14 +95,14 @@ def clean_json_response(text: str) -> str:
     return text
 
 def normal_node(state: State):
-    prompt = f"""You are an invoice extraction system. 
+    prompt = f"""You are an invoice extraction system.
 Extract invoice information according to the requested format.
 Invoice Text:
 {state.content}"""
 
     # Bind the structured output schema directly to your LLM execution
     structured_llm = llm.with_structured_output(LLMSchema)
-    
+
     try:
         # This will return a parsed Pydantic object automatically!
         structured_resp = structured_llm.invoke(prompt)
@@ -154,16 +159,11 @@ def final_node(state: State):
         "key": s3_key
     }
 
-
 graph = StateGraph(State)
-
 graph.add_node("normal", normal_node)
 graph.add_node("final", final_node)
-
 graph.set_entry_point("normal")
-
 graph.add_edge("normal", "final")
 graph.add_edge("final", END)
-
 lang_app = graph.compile()
 

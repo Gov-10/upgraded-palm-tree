@@ -11,7 +11,7 @@ producer = KafkaProducer(bootstrap_servers=os.getenv("BOOTSTRAP_SERVER"), value_
 consumer = KafkaConsumer("doc-submit", bootstrap_servers=os.getenv("BOOTSTRAP_SERVER"), value_deserializer= lambda x: json.loads(x.decode()), group_id="doc-workers")
 for msg in consumer:
     data = msg.value
-    file_key, source = data["file_key"], data["source"]
+    file_key, source, username = data["file_key"], data["source"], data["username"]
     response = s3.get_object(Bucket=os.getenv("S3_BUCKET"), Key=file_key)
     file_bytes = response["Body"].read()
     text = extract(file_bytes)
@@ -19,7 +19,7 @@ for msg in consumer:
         text = extract_ocr(file_bytes)
     result = lang_app.invoke(State(content=text))
     text_hash = hash_text(text)
-    event = {"event_id" : data["event_id"], "normal" : result["normal"], "csv_file" : result["fin"], "source" : source}
+    event = {"event_id" : data["event_id"], "normal" : result["normal"], "csv_file" : result["fin"], "source" : source, "username": username}
     if source == "whatsapp":
         producer.send("extract-whatsapp", key=data["event_id"].encode(), value=event}
         producer.flush()
